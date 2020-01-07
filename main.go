@@ -25,7 +25,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 }
 
 func userHandler(c echo.Context) error {
-	return c.Render(http.StatusOK, "template.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "index.html", map[string]interface{}{
 		"name": "Ocki Bagus Pratama!",
 	})
 }
