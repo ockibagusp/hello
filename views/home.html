@@ -1,0 +1,15 @@
+{{ define "title" }}
+  {{ index . "name" }}
+{{ end }}
+
+{{ define "body" }}
+  <h1>Hello {{ index . "msg" }}</h1>
+	<p>{{ with $x := index . "reverse" }}
+		{{ call $x "home" }} &lt;-- this will call the $x with parameter "home"
+		{{ end }}
+	</p>
+	<p>{{ with $x := index . "reverse" }}
+		{{ call $x "about" }} &lt;-- this will call the $x with parameter "about"
+		{{ end }}
+	</p>
+{{ end }}
