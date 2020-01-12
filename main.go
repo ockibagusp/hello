@@ -42,6 +42,10 @@ func main() {
 		templates: templates,
 	}
 
+	// // Why bootstrap.min.css, bootstrap.min.js, jquery.min.js?
+	// http.Handle("/", http.FileServer(http.Dir("./assets/css")))
+	// http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+
 	// Route => handler
 	e.GET("/", handler.HomeHandler).Name = "home"
 	e.GET("/about", handler.AboutHandler).Name = "about"
