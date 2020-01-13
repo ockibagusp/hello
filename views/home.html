@@ -3,13 +3,22 @@
 {{end}}
 
 {{define "body"}}
-  <h1>Hello {{index . "msg"}}</h1>
-	<p>{{with $x := index . "reverse"}}
-		{{call $x "home"}} &lt;-- this will call the $x with parameter "home"
-		{{end}}
-	</p>
-	<p>{{with $x := index . "reverse"}}
-		{{call $x "about"}} &lt;-- this will call the $x with parameter "about"
-		{{end}}
-	</p>
+	<main role="main">
+		<div class="jumbotron jumbotron-fluid">
+			<div class="container">
+				<h1 class="display-4">Hello {{index . "msg"}}</h1>
+				<p class="lead">Test.</p>
+			</div>
+		</div>
+		<div class="container" id="containers">
+			<h2 class="mt-4">Nav</h2>
+			<div class="container themed-container">{{with $x := index . "reverse"}}
+				{{call $x "home"}} &lt;-- this will call the $x with parameter "home" {{end}}
+			</div>
+			<div class="container themed-container">{{with $x := index . "reverse"}}
+				{{call $x "about"}} &lt;-- this will call the $x with parameter "about"
+				{{end}}
+			</div>
+		</div>
+	</main>
 {{end}}
