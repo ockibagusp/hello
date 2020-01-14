@@ -12,6 +12,7 @@ func HomeHandler(c echo.Context) error {
 	// be equal to one of the keys in the TemplateRegistry array defined in main.go
 	return c.Render(http.StatusOK, "home.html", map[string]interface{}{
 		"name": "Home",
+		"nav":  "home", // (?)
 		"msg":  "Ocki Bagus Pratama!",
 	})
 }
