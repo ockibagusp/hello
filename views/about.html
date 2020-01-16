@@ -3,6 +3,10 @@
 {{end}}
 
 {{define "body"}}
-  <h1>{{index . "msg"}}</h1>
-  <h2>This is the about page.</h2>
+  <main role="main">
+    <div class="container"></div>
+      <h2 class="mt-4">{{index . "msg"}}</h2>
+      <div class="container themed-container">This is the about page.</div>
+    </div>
+  </main>
 {{end}}
