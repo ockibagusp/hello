@@ -12,9 +12,7 @@ func main() {
 	e := echo.New()
 
 	// Instantiate a template registry with an array of template set
-	e.Renderer = &t.TemplateRenderer{
-		Templates: t.Templates(),
-	}
+	e.Renderer = t.Templates()
 
 	// // Why bootstrap.min.css, bootstrap.min.js, jquery.min.js?
 	// http.Handle("/", http.FileServer(http.Dir("./assets/css")))

@@ -29,9 +29,12 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 }
 
 // Templates ?
-func Templates() map[string]*template.Template {
+func Templates() *TemplateRenderer {
 	t := make(map[string]*template.Template)
 	t["home.html"] = template.Must(template.ParseFiles("views/home.html", "views/base.html"))
 	t["about.html"] = template.Must(template.ParseFiles("views/about.html", "views/base.html"))
-	return t
+
+	return &TemplateRenderer{
+		Templates: t,
+	}
 }
