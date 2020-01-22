@@ -1,4 +1,4 @@
-package moder
+package model
 
 import "time"
 
