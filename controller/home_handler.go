@@ -1,4 +1,4 @@
-package handler
+package controller
 
 import (
 	"net/http"
@@ -6,8 +6,8 @@ import (
 	"github.com/labstack/echo"
 )
 
-// HomeHandler "home.html"
-func HomeHandler(c echo.Context) error {
+// HomeController "home.html"
+func HomeController(c echo.Context) error {
 	// Please note the the second parameter "home.html" is the template name and should
 	// be equal to one of the keys in the TemplateRegistry array defined in main.go
 	return c.Render(http.StatusOK, "home.html", map[string]interface{}{
