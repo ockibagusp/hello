@@ -1,9 +1,9 @@
 package controller
 
 import (
-	_ "github.com/OckiFals/hello/model"
-	"github.com/labstack/echo"
 	"net/http"
+
+	"github.com/labstack/echo"
 )
 
 // HomeController "home.html"

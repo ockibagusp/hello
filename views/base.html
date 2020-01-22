@@ -27,6 +27,10 @@
               <a class="nav-link" href="/about">About {{if or (eq .nav "about")}}<span class="sr-only">(current)</span>{{end}}</a>
             </li>
           </ul>
+          <!-- (?) -->
+          <form class="form-inline mt-2 mt-md-0">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign-in</button>
+          </form>
         </div>
       </nav>
       {{template "body" .}}

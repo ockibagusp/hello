@@ -12,3 +12,10 @@ type User struct {
 	City      uint
 	Photo     string
 }
+
+var (
+	// Users init
+	Users = map[int]*User{}
+	// Seq init
+	Seq = 1
+)
