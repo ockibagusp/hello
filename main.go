@@ -3,7 +3,7 @@ package main
 import (
 	t "github.com/OckiFals/hello/template"
 
-	"github.com/OckiFals/hello/handler"
+	"github.com/OckiFals/hello/controller"
 	"github.com/labstack/echo"
 )
 
@@ -18,9 +18,9 @@ func main() {
 	// http.Handle("/", http.FileServer(http.Dir("./assets/css")))
 	// http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 
-	// Route => handler
-	e.GET("/", handler.HomeHandler).Name = "home"
-	e.GET("/about", handler.AboutHandler).Name = "about"
+	// Route => controller
+	e.GET("/", controller.HomeController).Name = "home"
+	e.GET("/about", controller.AboutController).Name = "about"
 
 	// Start the Echo server
 	e.Start(":8000")
