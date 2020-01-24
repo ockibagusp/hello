@@ -21,6 +21,7 @@ func main() {
 	// Route => controller
 	e.GET("/", controller.HomeController).Name = "home"
 	e.GET("/about", controller.AboutController).Name = "about"
+	e.GET("/users", controller.CreateUser).Name = "users"
 
 	// Start the Echo server
 	e.Start(":8000")
