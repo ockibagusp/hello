@@ -38,6 +38,7 @@ func Templates() *TemplateRenderer {
 	t := make(map[string]*template.Template)
 	t["home.html"] = parseFiles("views/home.html")
 	t["about.html"] = parseFiles("views/about.html")
+	t["user-all.html"] = parseFiles("views/user-all.html")
 
 	return &TemplateRenderer{
 		Templates: t,
