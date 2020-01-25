@@ -6,8 +6,8 @@ import (
 	"github.com/labstack/echo"
 )
 
-// CreateUser ?
-func CreateUser(c echo.Context) error {
+// UserIndexController ?
+func UserIndexController(c echo.Context) error {
 	// if "POST" == c.Request().Method {
 	// 	u := &model.User{
 	// 		ID: model.Seq,
