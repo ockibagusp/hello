@@ -28,11 +28,18 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	return tmpl.ExecuteTemplate(w, "base.html", data)
 }
 
+func parseFiles(s string) *template.Template {
+	// "views/base.html"?
+	return template.Must(template.ParseFiles(s, "views/base.html"))
+}
+
 // Templates ?
 func Templates() *TemplateRenderer {
 	t := make(map[string]*template.Template)
-	t["home.html"] = template.Must(template.ParseFiles("views/home.html", "views/base.html"))
-	t["about.html"] = template.Must(template.ParseFiles("views/about.html", "views/base.html"))
+	t["home.html"] = parseFiles("views/home.html")
+	t["about.html"] = parseFiles("views/about.html")
+	t["user-all.html"] = parseFiles("views/user-all.html")
+	t["user-add.html"] = parseFiles("views/user-add.html")
 
 	return &TemplateRenderer{
 		Templates: t,
