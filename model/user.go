@@ -5,7 +5,7 @@ import "time"
 // User init
 type User struct {
 	ID        int
-	Username  string
+	Email     string
 	Password  string
 	Name      string
 	CreatedAt time.Time
