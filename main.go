@@ -22,7 +22,7 @@ func main() {
 	// // Why bootstrap.min.css, bootstrap.min.js, jquery.min.js?
 	// http.Handle("/", http.FileServer(http.Dir("./assets/css")))
 	// http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
-	e.Static("/", "assets")
+	// e.Static("/", "assets")
 
 	// Route => controller
 	e.GET("/", controller.Home).Name = "home"
