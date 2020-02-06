@@ -1,3 +1,6 @@
+### Visual Studio Code Extension: REST Client, Huachao Mao.
+
+### nice
 POST http://localhost:8000/user/add 
 content-type: application/json
 
@@ -7,5 +10,13 @@ content-type: application/json
     "name": "Ocki Bagus Pratama"
 }
 
+### (?)
 
-### Visual Studio Code Extension: REST Client, Huachao Mao.
+POST http://localhost:8000/user/add 
+Content-Type: application/x-www-form-urlencoded
+
+{
+    "email": "ocki.bagus.p@gmail.com",
+    "password": "admin123",
+    "name": "Ocki Bagus Pratama"
+}
