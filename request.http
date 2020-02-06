@@ -1,0 +1,11 @@
+POST http://localhost:8000/user/add 
+content-type: application/json
+
+{
+    "email": "ocki.bagus.p@gmail.com",
+    "password": "admin123",
+    "name": "Ocki Bagus Pratama"
+}
+
+
+### Visual Studio Code Extension: REST Client, Huachao Mao.
