@@ -1,45 +1,59 @@
-{{define "title"}}
-  {{index . "name"}}
-{{end}}
-
-{{define "body"}}
-	<main role="main">
-		<div class="container">
-			<div class="content body">
-				<div class="col-md-12">
-					<h2 class="mt-4">User Add</h2>
-					<form action="/user/add" method="post" enctype="multipart/form-data">
-						<div class="form-row">
-							<div class="form-group col-md-12">
-								<label for="name">Name</label>
-								<input type="text" class="form-control" id="name" value="Ocki Bagus Pratama" required>
-							</div>
-						  	<div class="form-group col-md-6">
-								<label for="email">Email</label>
-								<input type="email" class="form-control" id="email" value="ocki.bagus.p@gmail.com" required>
-						  	</div>
-						  	<div class="form-group col-md-6">
-								<label for="password">Password</label>
-								<input type="password" class="form-control" id="password" value="admin123" required>
-						 	</div>
-						</div>
-						<div class="form-row">
-						  	<div class="form-group col-md-6">
-								<label for="city">City</label>
-								<select id="city" class="form-control">
-									<option selected>-</option>
-									<option>Jawa Barat</option>
-								</select>
-						  	</div>
-						  	<div class="form-group col-md-6">
-								<label for="photo">Photo</label>
-								<input type="file" id="photo">
-						  	</div>
-						</div>
-						<button type="submit" class="btn btn-primary">Sign in</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	</main>
+{{define "title"}} {{index . "name"}} {{end}} {{define "body"}}
+<main role="main">
+  <div class="container">
+    <div class="content body">
+      <div class="col-md-12">
+        <h2 class="mt-4">User Add</h2>
+        <form action="/user/add" method="post" enctype="multipart/form-data">
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label for="name">Name</label>
+              <input
+                type="text"
+                class="form-control"
+                name="name"
+                value="Ocki Bagus Pratama"
+                required
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                name="email"
+                value="ocki.bagus.p@gmail.com"
+                required
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="password">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                name="password"
+                value="admin123"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="city">City</label>
+              <select name="city" class="form-control">
+                <option value="1" selected>-</option>
+                <option value="2">Jawa Barat</option>
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="photo">Photo</label>
+              <input type="file" name="photo" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Sign in</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
 {{end}}
