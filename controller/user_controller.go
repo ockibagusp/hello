@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -14,16 +13,12 @@ func Users(c echo.Context) error {
 	return c.Render(http.StatusOK, "user-all.html", map[string]interface{}{
 		"name": "Users",
 		"nav":  "users", // (?)
-		// "msg":  "hahaa!",
 	})
 }
 
 // CreateUser ?
 func CreateUser(c echo.Context) error {
-	//c.Request().Header.Add("Content-Type", "multipart/form-data")
 	if "POST" == c.Request().Method {
-		name := c.FormValue("name")
-		fmt.Println(name)
 		u := &model.User{
 			ID:       model.Seq,
 			Email:    c.FormValue("email"),
@@ -40,7 +35,6 @@ func CreateUser(c echo.Context) error {
 	return c.Render(http.StatusOK, "user-add.html", map[string]interface{}{
 		"name": "User Add",
 		"nav":  "user Add", // (?)
-		// "msg":  "hahaa!",
 	})
 }
 
