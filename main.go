@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/OckiFals/hello/db"
 	t "github.com/OckiFals/hello/template"
 
 	"github.com/OckiFals/hello/controller"
@@ -9,6 +10,8 @@ import (
 )
 
 func main() {
+	db.Init()
+
 	// Echo instance
 	e := echo.New()
 
