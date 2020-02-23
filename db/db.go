@@ -24,7 +24,8 @@ func Init() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	defer db.Close()
+	// (?)
+	// defer db.Close()
 
 	db.AutoMigrate(&models.User{})
 }

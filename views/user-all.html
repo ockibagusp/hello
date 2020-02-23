@@ -14,27 +14,39 @@
             <tbody>
               <tr>
                 <th style="width: 30px">ID</th>
-                <th>Username</th>
+                <th>Email</th>
                 <th>Name</th>
                 <th>Action</th>
               </tr>
               <tr>
+                {{range $user := .users}}
                 <td>
-                  1
+                  {{$user.Model.ID}}
                 </td>
                 <td>
-                  OckiFals
+                  {{$user.Email}}
                 </td>
                 <td>
-                  Ocki Bagus Pratama
+                  {{$user.Name}}
                 </td>
                 <td style="width: 195px">
-                  <a href="/user/read/1" class="btn btn-sm btn-success">Read</a>
-                  <a href="/user/view/1" class="btn btn-sm btn-warning">View</a>
-                  <a href="/user/delete/1" class="btn btn-sm btn-danger"
+                  <a
+                    href="/user/read/{{$user.Model.ID}}"
+                    class="btn btn-sm btn-success"
+                    >Read</a
+                  >
+                  <a
+                    href="/user/view/{{$user.Model.ID}}"
+                    class="btn btn-sm btn-warning"
+                    >View</a
+                  >
+                  <a
+                    href="/user/delete/{{$user.Model.ID}}"
+                    class="btn btn-sm btn-danger"
                     >Delete</a
                   >
                 </td>
+                {{end}}
               </tr>
             </tbody>
           </table>
