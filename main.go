@@ -4,7 +4,7 @@ import (
 	"github.com/OckiFals/hello/db"
 	t "github.com/OckiFals/hello/template"
 
-	"github.com/OckiFals/hello/controller"
+	"github.com/OckiFals/hello/controllers"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -28,11 +28,11 @@ func main() {
 	// e.Static("/", "assets")
 
 	// Route => controller
-	e.GET("/", controller.Home).Name = "home"
-	e.GET("/about", controller.About).Name = "about"
-	e.GET("/users", controller.Users).Name = "users"
-	e.GET("/user/add", controller.CreateUser).Name = "user/add get"
-	e.POST("/user/add", controller.CreateUser).Name = "user/add post"
+	e.GET("/", controllers.Home).Name = "home"
+	e.GET("/about", controllers.About).Name = "about"
+	e.GET("/users", controllers.Users).Name = "users"
+	e.GET("/user/add", controllers.CreateUser).Name = "user/add get"
+	e.POST("/user/add", controllers.CreateUser).Name = "user/add post"
 
 	// Start the Echo server
 	e.Start(":8000")
