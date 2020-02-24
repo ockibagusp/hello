@@ -24,8 +24,8 @@ func Users(c echo.Context) error {
 
 // CreateUser ?
 func CreateUser(c echo.Context) error {
+	db := db.DbManager()
 	if "POST" == c.Request().Method {
-		db := db.DbManager()
 		user := db.Create(&models.User{
 			Email:    c.FormValue("email"),
 			Password: c.FormValue("password"),
@@ -37,9 +37,13 @@ func CreateUser(c echo.Context) error {
 		db.FirstOrCreate(&user)
 		return c.JSON(http.StatusOK, user)
 	}
+	cities := []models.City{}
+	db.Find(&cities)
+
 	return c.Render(http.StatusOK, "user-add.html", map[string]interface{}{
-		"name": "User Add",
-		"nav":  "user Add", // (?)
+		"name":   "User Add",
+		"nav":    "user Add", // (?)
+		"cities": cities,
 	})
 }
 

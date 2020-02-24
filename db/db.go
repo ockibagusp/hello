@@ -28,6 +28,7 @@ func Init() {
 	// defer db.Close()
 
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.City{})
 }
 
 // DbManager (?)
