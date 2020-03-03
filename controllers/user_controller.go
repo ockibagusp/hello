@@ -46,8 +46,10 @@ func CreateUser(c echo.Context) error {
 			return err
 		}
 		db.FirstOrCreate(&user)
-		return c.JSON(http.StatusOK, user)
+
+		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
+
 	cities := []models.City{}
 	db.Find(&cities)
 
