@@ -28,12 +28,21 @@ func Users(c echo.Context) error {
 func CreateUser(c echo.Context) error {
 	db := db.DbManager()
 	if "POST" == c.Request().Method {
+		var err error
+		city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
+		if err != nil {
+			return err
+		}
+		city := uint(city64)
+
 		user := db.Create(&models.User{
 			Email:    c.FormValue("email"),
 			Password: c.FormValue("password"),
 			Name:     c.FormValue("name"),
+			City:     city,
+			Photo:    c.FormValue("photo"),
 		})
-		if err := c.Bind(user); err != nil {
+		if err = c.Bind(user); err != nil {
 			return err
 		}
 		db.FirstOrCreate(&user)
