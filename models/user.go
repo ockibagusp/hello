@@ -13,3 +13,9 @@ type User struct {
 	City     uint
 	Photo    string
 }
+
+// UserCity init
+type UserCity struct {
+	User
+	CityMassage string `gorm:"index:city_massage"`
+}

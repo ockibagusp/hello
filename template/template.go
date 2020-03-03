@@ -40,6 +40,7 @@ func Templates() *TemplateRenderer {
 	t["about.html"] = parseFiles("views/about.html")
 	t["user-all.html"] = parseFiles("views/user-all.html")
 	t["user-add.html"] = parseFiles("views/user-add.html")
+	t["user-read.html"] = parseFiles("views/user-read.html")
 
 	return &TemplateRenderer{
 		Templates: t,

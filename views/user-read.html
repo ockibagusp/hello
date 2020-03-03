@@ -1,0 +1,62 @@
+{{define "title"}} {{index . "name"}} {{end}} {{define "body"}}
+<main role="main">
+  <div class="container">
+    <div class="content body">
+      <div class="col-md-12">
+        <h2 class="mt-4">{{.name}}</h2>
+        <div class="form-row">
+          <div class="form-group col-md-12">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              class="form-control"
+              value="{{.user.Name}}"
+              required
+              disabled
+            />
+          </div>
+          <div class="form-group col-md-6">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              value="{{.user.Email}}"
+              required
+              disabled
+            />
+          </div>
+          <div class="form-group col-md-6">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              value="****"
+              required
+              disabled
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="city">City</label>
+            <select class="form-control" disabled>
+              <option>{{.user.CityMassage}}</option>
+            </select>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="photo">Photo</label>
+            <input type="file" disabled />
+          </div>
+        </div>
+        <a href="/users" class="btn btn-sm btn-primary">&lt;--</a>
+        <a href="/user/view/{{.user.ID}}" class="btn btn-sm btn-warning"
+          >View</a
+        >
+        <a href="/user/delete/{{.user.Model.ID}}" class="btn btn-sm btn-danger"
+          >Delete</a
+        >
+      </div>
+    </div>
+  </div>
+</main>
+{{end}}

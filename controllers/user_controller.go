@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,7 +13,8 @@ import (
 // Users ?
 func Users(c echo.Context) error {
 	db := db.DbManager()
-	users := []models.User{}
+
+	var users []models.User
 	db.Find(&users)
 
 	return c.Render(http.StatusOK, "user-all.html", map[string]interface{}{
@@ -31,7 +33,7 @@ func CreateUser(c echo.Context) error {
 			Password: c.FormValue("password"),
 			Name:     c.FormValue("name"),
 		})
-		if err := c.Bind(Users); err != nil {
+		if err := c.Bind(user); err != nil {
 			return err
 		}
 		db.FirstOrCreate(&user)
@@ -44,6 +46,24 @@ func CreateUser(c echo.Context) error {
 		"name":   "User Add",
 		"nav":    "user Add", // (?)
 		"cities": cities,
+	})
+}
+
+// ReadUser (?)
+func ReadUser(c echo.Context) error {
+	db := db.DbManager()
+	// (?)
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	var user models.UserCity
+	db.Table("users").Select("users.*, cities.id as city_id, cities.city as city_massage").
+		Joins("left join cities on users.city = cities.id").
+		First(&user, id)
+
+	return c.Render(http.StatusOK, "user-read.html", map[string]interface{}{
+		"name": fmt.Sprintf("User: %s", user.Name),
+		"nav":  fmt.Sprintf("User: %s", user.Name), // (?)
+		"user": user,
 	})
 }
 

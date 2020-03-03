@@ -33,6 +33,7 @@ func main() {
 	e.GET("/users", controllers.Users).Name = "users"
 	e.GET("/user/add", controllers.CreateUser).Name = "user/add get"
 	e.POST("/user/add", controllers.CreateUser).Name = "user/add post"
+	e.GET("/user/read/:id", controllers.ReadUser).Name = "user/read get"
 
 	// Start the Echo server
 	e.Start(":8000")
