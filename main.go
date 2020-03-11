@@ -31,9 +31,9 @@ func main() {
 	e.GET("/", controllers.Home).Name = "home"
 	e.GET("/about", controllers.About).Name = "about"
 	e.GET("/users", controllers.Users).Name = "users"
-	e.GET("/user/add", controllers.CreateUser).Name = "user/add get"
-	e.POST("/user/add", controllers.CreateUser).Name = "user/add post"
-	e.GET("/user/read/:id", controllers.ReadUser).Name = "user/read get"
+	e.GET("/users/add", controllers.CreateUser).Name = "user/add get"
+	e.POST("/users/add", controllers.CreateUser).Name = "user/add post"
+	e.GET("/users/read/:id", controllers.ReadUser).Name = "user/read get"
 
 	// Start the Echo server
 	e.Start(":8000")
