@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 
+	"github.com/OckiFals/hello/config"
 	"github.com/OckiFals/hello/models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -11,16 +12,11 @@ import (
 var db *gorm.DB
 var err error
 
-var (
-	DB_USERNAME = "root"
-	DB_PASSWORD = "AdminPassword"
-	DB_NAME     = "hello"
-)
-
 // Init (?)
 func Init() {
-	connect_string := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", DB_USERNAME, DB_PASSWORD, DB_NAME)
-	db, err = gorm.Open("mysql", connect_string)
+	configuration := config.GetConfig()
+	connectString := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", configuration.DB_USERNAME, configuration.DB_PASSWORD, configuration.DB_NAME)
+	db, err = gorm.Open("mysql", connectString)
 	if err != nil {
 		panic("failed to connect database")
 	}
