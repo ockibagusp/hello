@@ -47,8 +47,8 @@
               <label for="city">City</label>
               <select name="city" class="form-control">
                 <option value="0">-----</option>
-                <!-- .user.City? -->
                 {{range .cities}}
+                <!-- if eq .ID .user.City? -->
                 <option value="{{.ID}}" {{if eq .ID 2}}selected{{end}}
                   >{{.City}}</option
                 >
