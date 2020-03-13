@@ -78,6 +78,28 @@ func ReadUser(c echo.Context) error {
 	})
 }
 
+// UpdateUser (?)
+func UpdateUser(c echo.Context) error {
+	db := db.DbManager()
+	// (?)
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	var user models.UserCity
+	db.Table("users").Select("users.*, cities.id as city_id, cities.city as city_massage").
+		Joins("left join cities on users.city = cities.id").
+		First(&user, id)
+
+	cities := []models.City{}
+	db.Find(&cities)
+
+	return c.Render(http.StatusOK, "user-view.html", map[string]interface{}{
+		"name":   fmt.Sprintf("User: %s", user.Name),
+		"nav":    fmt.Sprintf("User: %s", user.Name), // (?)
+		"user":   user,
+		"cities": cities,
+	})
+}
+
 func getUser(c echo.Context) error {
 	var user models.User
 	db := db.DbManager()

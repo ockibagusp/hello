@@ -1,0 +1,75 @@
+{{define "title"}} {{index . "name"}} {{end}} {{define "body"}}
+<main role="main">
+  <div class="container">
+    <div class="content body">
+      <div class="col-md-12">
+        <h2 class="mt-4">{{.name}}</h2>
+        <form
+          action="/users/view/{{.user.Model.ID}}"
+          method="post"
+          enctype="multipart/form-data"
+        >
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label for="name">Name</label>
+              <input
+                type="text"
+                class="form-control"
+                name="name"
+                value="{{.user.Name}}"
+                required
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                name="email"
+                value="{{.user.Email}}"
+                required
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="password">Password</label>
+              <!-- Password (?) -->
+              <input
+                type="password"
+                class="form-control"
+                name="password"
+                value="{{.user.Password}}"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="city">City</label>
+              <select name="city" class="form-control">
+                <option value="0">-----</option>
+                <!-- .user.City? -->
+                {{range .cities}}
+                <option value="{{.ID}}" {{if eq .ID 2}}selected{{end}}
+                  >{{.City}}</option
+                >
+                {{end}}
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="photo">Photo</label>
+              <input type="file" name="photo" />
+            </div>
+          </div>
+          <a href="/users" class="btn btn-sm btn-primary">&lt;--</a>
+          <button type="submit" class="btn btn-sm btn-warning">View</button>
+          <a
+            href="/users/delete/{{.user.Model.ID}}"
+            class="btn btn-sm btn-danger"
+            >Delete</a
+          >
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+{{end}}
