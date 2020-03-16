@@ -2,7 +2,7 @@ package models
 
 // City init
 type City struct {
-	ID   int
+	ID   uint
 	City string
 }
 

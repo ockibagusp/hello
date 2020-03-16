@@ -47,10 +47,12 @@
               <label for="city">City</label>
               <select name="city" class="form-control">
                 <option value="0">-----</option>
-                {{range .cities}}
+                {{range $key, $value := .cities}}
                 <!-- if eq .ID .user.City? -->
-                <option value="{{.ID}}" {{if eq .ID 2}}selected{{end}}
-                  >{{.City}}</option
+                <option
+                  value="{{$value.ID}}"
+                  {{if eq $value.ID 2}}selected{{end}}
+                  >{{$value.City}}</option
                 >
                 {{end}}
               </select>
