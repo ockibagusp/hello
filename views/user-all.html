@@ -20,8 +20,8 @@
                 <th>Name</th>
                 <th>Action</th>
               </tr>
+              {{range $user := .users}}
               <tr>
-                {{range $user := .users}}
                 <td>
                   {{$user.Model.ID}}
                 </td>
@@ -48,8 +48,8 @@
                     >Delete</a
                   >
                 </td>
-                {{end}}
               </tr>
+              {{end}}
             </tbody>
           </table>
         </div>
