@@ -58,7 +58,7 @@ CREATE TABLE `users` (
   `photo` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_users_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,7 +67,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'2020-02-22 15:28:40','2020-02-22 15:28:40',NULL,'ocki.bagus.p@gmail.com','admin123','Ocki Bagus Pratama',2,'');
+INSERT INTO `users` VALUES (1,'2020-02-22 15:28:40','2020-02-22 15:28:40',NULL,'ocki.bagus.p@gmail.com','admin123','Ocki Bagus Pratama',2,''),(2,'2020-03-17 06:56:10','2020-03-17 06:56:10',NULL,'sugriwa@wanara.com','admin123','Sugriwa',0,''),(3,'2020-03-17 06:57:47','2020-03-17 06:57:47',NULL,'subali@wanara.com','admin123','Subali',0,'');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -80,4 +80,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-03-16 15:29:28
+-- Dump completed on 2020-03-17  7:03:14
