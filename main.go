@@ -35,6 +35,7 @@ func main() {
 	e.POST("/users/add", controllers.CreateUser).Name = "user/add post"
 	e.GET("/users/read/:id", controllers.ReadUser).Name = "user/read get"
 	e.GET("/users/view/:id", controllers.UpdateUser).Name = "user/view get"
+	e.GET("/users/delete/:id", controllers.DeleteUser).Name = "user/view delete"
 
 	// Start the Echo server
 	e.Start(":8000")

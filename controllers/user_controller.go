@@ -12,11 +12,9 @@ import (
 
 // Users ?
 func Users(c echo.Context) error {
-	db := db.DbManager()
-
 	var users []models.User
+	db := db.DbManager()
 	db.Find(&users)
-
 	return c.Render(http.StatusOK, "user-all.html", map[string]interface{}{
 		"name":  "Users",
 		"nav":   "users", // (?)
@@ -60,13 +58,12 @@ func CreateUser(c echo.Context) error {
 	})
 }
 
-// ReadUser (?)
+// ReadUser ?
 func ReadUser(c echo.Context) error {
-	db := db.DbManager()
-	// (?)
-	id, _ := strconv.Atoi(c.Param("id"))
-
 	var user models.UserCity
+	db := db.DbManager()
+	id, _ := strconv.Atoi(c.Param("id")) // (?)
+
 	db.Table("users").Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").
 		First(&user, id)
@@ -78,13 +75,12 @@ func ReadUser(c echo.Context) error {
 	})
 }
 
-// UpdateUser (?)
+// UpdateUser ?
 func UpdateUser(c echo.Context) error {
-	db := db.DbManager()
-	// (?)
-	id, _ := strconv.Atoi(c.Param("id"))
-
 	var user models.UserCity
+	db := db.DbManager()
+	id, _ := strconv.Atoi(c.Param("id")) // (?)
+
 	db.Table("users").Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").
 		First(&user, id)
@@ -100,29 +96,11 @@ func UpdateUser(c echo.Context) error {
 	})
 }
 
-func getUser(c echo.Context) error {
+// DeleteUser ?
+func DeleteUser(c echo.Context) error {
 	var user models.User
 	db := db.DbManager()
-	id, _ := strconv.Atoi(c.Param("id"))
-	return c.JSON(http.StatusOK, db.Find(&user, id))
-}
-
-func updateUser(c echo.Context) error {
-	var user models.User
-	db := db.DbManager()
-	id, _ := strconv.Atoi(c.Param("id"))
-	db.Find(&user, id)
-	if err := c.Bind(user); err != nil {
-		return err
-	}
-	db.Model(&user).Update("name", "hello")
-	return c.JSON(http.StatusOK, user)
-}
-
-func deleteUser(c echo.Context) error {
-	var user models.User
-	db := db.DbManager()
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, _ := strconv.Atoi(c.Param("id")) // (?)
 	db.Delete(&user, id)
-	return c.NoContent(http.StatusNoContent)
+	return c.Redirect(http.StatusMovedPermanently, "/users")
 }
