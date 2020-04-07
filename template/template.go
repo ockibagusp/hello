@@ -32,6 +32,8 @@ func parseFiles(s string, t ...string) *template.Template {
 	// t parseFiles, example "views/user-form.html"
 	if len(t) == 1 {
 		return template.Must(template.ParseFiles(s, t[0], "views/base.html"))
+	} else if len(t) >= 2 {
+		panic("t [1] parseFiles, example \"views/user-form.html\"")
 	}
 	// "views/base.html"?
 	return template.Must(template.ParseFiles(s, "views/base.html"))
