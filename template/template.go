@@ -33,7 +33,7 @@ func parseFiles(s string, t ...string) *template.Template {
 	if len(t) == 1 {
 		return template.Must(template.ParseFiles(s, t[0], "views/base.html"))
 	} else if len(t) >= 2 {
-		panic("t [1] parseFiles, example \"views/user-form.html\"")
+		panic("t [1] parseFiles, example \"views/users/user-form.html\"")
 	}
 	// "views/base.html"?
 	return template.Must(template.ParseFiles(s, "views/base.html"))
@@ -44,10 +44,10 @@ func Templates() *TemplateRenderer {
 	t := make(map[string]*template.Template)
 	t["home.html"] = parseFiles("views/home.html")
 	t["about.html"] = parseFiles("views/about.html")
-	t["user-all.html"] = parseFiles("views/user-all.html")
-	t["user-add.html"] = parseFiles("views/user-add.html", "views/user-form.html")
-	t["user-read.html"] = parseFiles("views/user-read.html")
-	t["user-view.html"] = parseFiles("views/user-view.html", "views/user-form.html")
+	t["users/user-all.html"] = parseFiles("views/users/user-all.html")
+	t["users/user-add.html"] = parseFiles("views/users/user-add.html", "views/users/user-form.html")
+	t["users/user-read.html"] = parseFiles("views/users/user-read.html")
+	t["users/user-view.html"] = parseFiles("views/users/user-view.html", "views/users/user-form.html")
 
 	return &TemplateRenderer{
 		Templates: t,

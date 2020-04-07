@@ -15,7 +15,7 @@ func Users(c echo.Context) error {
 	var users []models.User
 	db := db.DbManager()
 	db.Find(&users)
-	return c.Render(http.StatusOK, "user-all.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "users/user-all.html", map[string]interface{}{
 		"name":  "Users",
 		"nav":   "users", // (?)
 		"users": users,
@@ -51,7 +51,7 @@ func CreateUser(c echo.Context) error {
 	cities := []models.City{}
 	db.Find(&cities)
 
-	return c.Render(http.StatusOK, "user-add.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "users/user-add.html", map[string]interface{}{
 		"name":   "User Add",
 		"nav":    "user Add", // (?)
 		"cities": cities,
@@ -69,7 +69,7 @@ func ReadUser(c echo.Context) error {
 		Joins("left join cities on users.city = cities.id").
 		First(&user, id)
 
-	return c.Render(http.StatusOK, "user-read.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "users/user-read.html", map[string]interface{}{
 		"name": fmt.Sprintf("User: %s", user.Name),
 		"nav":  fmt.Sprintf("User: %s", user.Name), // (?)
 		"user": user,
@@ -89,7 +89,7 @@ func UpdateUser(c echo.Context) error {
 	cities := []models.City{}
 	db.Find(&cities)
 
-	return c.Render(http.StatusOK, "user-view.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "users/user-view.html", map[string]interface{}{
 		"name":   fmt.Sprintf("User: %s", user.Name),
 		"nav":    fmt.Sprintf("User: %s", user.Name), // (?)
 		"user":   user,
