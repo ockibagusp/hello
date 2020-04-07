@@ -55,6 +55,7 @@ func CreateUser(c echo.Context) error {
 		"name":   "User Add",
 		"nav":    "user Add", // (?)
 		"cities": cities,
+		"is_new": true,
 	})
 }
 
