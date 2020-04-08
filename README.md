@@ -1,6 +1,6 @@
 # Hello
 
-## Golang templates.
+## Golang Echo templates.
 
 ### Visual Studio Code
 
