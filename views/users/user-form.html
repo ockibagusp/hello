@@ -1,9 +1,11 @@
 {{define "users/user-form.html"}}
 <!-- &lcud;{ is_new ? 'New Node' : 'Edit Node' }&rcud; -->
+{{if not .is_read}}
 <form
   action="/users{{if .is_new}}/add{{else}}/view/{{.user.Model.ID}}{{end}}"
   method="post"
 >
+  {{end}}
   <div class="form-row">
     <div class="form-group col-md-12">
       <label for="name">Name</label>
@@ -14,6 +16,7 @@
         name="name"
         value="{{if .is_new}}Ocki Bagus Pratama{{else}}{{.user.Name}}{{end}}"
         required
+        {{if.is_read}}disabled{{end}}
       />
     </div>
     <div class="form-group col-md-6">
@@ -25,6 +28,7 @@
         name="email"
         value="{{if .is_new}}ocki.bagus.p@gmail.com{{else}}{{.user.Email}}{{end}}"
         required
+        {{if.is_read}}disabled{{end}}
       />
     </div>
     <div class="form-group col-md-6">
@@ -37,14 +41,15 @@
         name="password"
         value="{{if .is_new}}admin123{{else}}{{.user.Password}}{{end}}"
         required
+        {{if.is_read}}disabled{{end}}
       />
     </div>
   </div>
   <div class="form-row">
     <div class="form-group col-md-6">
       <label for="city">City</label>
-      <select name="city" class="form-control">
-        <option value="0" {{if .is_new}}selected{{end}}>-----</option>
+      <select name="city" class="form-control" {{if.is_read}}disabled{{end}}>
+        <option value="0" {{if.is_new}}selected{{end}}>-----</option>
         {{range $key, $value := .cities}}
         <!-- if eq .ID .user.City? -->
         <option value="{{$value.ID}}">{{$value.City}}</option>
@@ -53,20 +58,23 @@
     </div>
     <div class="form-group col-md-6">
       <label for="photo">Photo</label>
-      <input type="file" name="photo" />
+      <input type="file" name="photo" {{if.is_read}}disabled{{end}} />
     </div>
   </div>
   <a href="/users" class="btn btn-sm btn-primary">&lt;--</a>
+  {{if.is_read}}
+  <a href="/users/view/{{.user.ID}}" class="btn btn-sm btn-warning">View</a>
+  {{else}}
   <button
     type="submit"
     class="btn btn-sm {{if .is_new}}btn-primary{{else}}btn-warning{{end}}"
   >
     {{if .is_new}}Sign in{{else}}View{{end}}
   </button>
-  {{if not .is_new }}
+  {{end}} {{if not .is_new }}
   <a href="/users/delete/{{.user.Model.ID}}" class="btn btn-sm btn-danger"
     >Delete</a
   >
-  {{end}}
+  {{end}} {{if not .is_read}}
 </form>
-{{end}}
+{{end}} {{end}}
