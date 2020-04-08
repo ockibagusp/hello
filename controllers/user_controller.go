@@ -70,9 +70,10 @@ func ReadUser(c echo.Context) error {
 		First(&user, id)
 
 	return c.Render(http.StatusOK, "users/user-read.html", map[string]interface{}{
-		"name": fmt.Sprintf("User: %s", user.Name),
-		"nav":  fmt.Sprintf("User: %s", user.Name), // (?)
-		"user": user,
+		"name":    fmt.Sprintf("User: %s", user.Name),
+		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
+		"user":    user,
+		"is_read": true,
 	})
 }
 
