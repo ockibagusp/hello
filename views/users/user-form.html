@@ -1,4 +1,4 @@
-{{define "user-form.html"}}
+{{define "users/user-form.html"}}
 <!-- &lcud;{ is_new ? 'New Node' : 'Edit Node' }&rcud; -->
 <form
   action="/users{{if .is_new}}/add{{else}}/view/{{.user.Model.ID}}{{end}}"
