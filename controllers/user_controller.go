@@ -5,16 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/OckiFals/hello/db"
 	"github.com/OckiFals/hello/models"
 	"github.com/labstack/echo"
 )
 
 // Users ?
-func Users(c echo.Context) error {
+func (controller *Controller) Users(c echo.Context) error {
 	var users []models.User
-	db := db.DbManager()
-	db.Find(&users)
+	controller.DB.Find(&users)
 	return c.Render(http.StatusOK, "users/user-all.html", map[string]interface{}{
 		"name":  "Users",
 		"nav":   "users", // (?)
@@ -23,8 +21,7 @@ func Users(c echo.Context) error {
 }
 
 // CreateUser ?
-func CreateUser(c echo.Context) error {
-	db := db.DbManager()
+func (controller *Controller) CreateUser(c echo.Context) error {
 	if "POST" == c.Request().Method {
 		var err error
 		city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
@@ -33,7 +30,7 @@ func CreateUser(c echo.Context) error {
 		}
 		city := uint(city64)
 
-		user := db.Create(&models.User{
+		user := controller.DB.Create(&models.User{
 			Email:    c.FormValue("email"),
 			Password: c.FormValue("password"),
 			Name:     c.FormValue("name"),
@@ -43,13 +40,13 @@ func CreateUser(c echo.Context) error {
 		if err = c.Bind(user); err != nil {
 			return err
 		}
-		db.FirstOrCreate(&user)
+		controller.DB.FirstOrCreate(&user)
 
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
 
 	cities := []models.City{}
-	db.Find(&cities)
+	controller.DB.Find(&cities)
 
 	return c.Render(http.StatusOK, "users/user-add.html", map[string]interface{}{
 		"name":   "User Add",
@@ -60,12 +57,11 @@ func CreateUser(c echo.Context) error {
 }
 
 // ReadUser ?
-func ReadUser(c echo.Context) error {
+func (controller *Controller) ReadUser(c echo.Context) error {
 	var user models.UserCity
-	db := db.DbManager()
 	id, _ := strconv.Atoi(c.Param("id")) // (?)
 
-	db.Table("users").Select("users.*, cities.id as city_id, cities.city as city_massage").
+	controller.DB.Table("users").Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").
 		First(&user, id)
 
@@ -78,17 +74,16 @@ func ReadUser(c echo.Context) error {
 }
 
 // UpdateUser ?
-func UpdateUser(c echo.Context) error {
+func (controller *Controller) UpdateUser(c echo.Context) error {
 	var user models.UserCity
-	db := db.DbManager()
 	id, _ := strconv.Atoi(c.Param("id")) // (?)
 
-	db.Table("users").Select("users.*, cities.id as city_id, cities.city as city_massage").
+	controller.DB.Table("users").Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").
 		First(&user, id)
 
 	cities := []models.City{}
-	db.Find(&cities)
+	controller.DB.Find(&cities)
 
 	return c.Render(http.StatusOK, "users/user-view.html", map[string]interface{}{
 		"name":   fmt.Sprintf("User: %s", user.Name),
@@ -99,10 +94,9 @@ func UpdateUser(c echo.Context) error {
 }
 
 // DeleteUser ?
-func DeleteUser(c echo.Context) error {
+func (controller *Controller) DeleteUser(c echo.Context) error {
 	var user models.User
-	db := db.DbManager()
 	id, _ := strconv.Atoi(c.Param("id")) // (?)
-	db.Delete(&user, id)
+	controller.DB.Delete(&user, id)
 	return c.Redirect(http.StatusMovedPermanently, "/users")
 }
