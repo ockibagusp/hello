@@ -23,9 +23,7 @@ func main() {
 	e.Renderer = t.Templates()
 
 	// // Why bootstrap.min.css, bootstrap.min.js, jquery.min.js?
-	// http.Handle("/", http.FileServer(http.Dir("./assets/css")))
-	// http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
-	// e.Static("/", "assets")
+	e.Static("/assets", "assets")
 
 	// controllers init
 	controllers := c.Controller{DB: db.DbManager()}
