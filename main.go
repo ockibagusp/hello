@@ -4,7 +4,7 @@ import (
 	"github.com/OckiFals/hello/db"
 	t "github.com/OckiFals/hello/template"
 
-	"github.com/OckiFals/hello/controllers"
+	c "github.com/OckiFals/hello/controllers"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -25,7 +25,10 @@ func main() {
 	// // Why bootstrap.min.css, bootstrap.min.js, jquery.min.js?
 	e.Static("/assets", "assets")
 
-	// Route => controller
+	// controllers init
+	controllers := c.Controller{DB: db.DbManager()}
+
+	// Route => controllers
 	e.GET("/", controllers.Home).Name = "home"
 	e.GET("/about", controllers.About).Name = "about"
 	e.GET("/users", controllers.Users).Name = "users"
