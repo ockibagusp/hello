@@ -3,10 +3,10 @@ package db
 import (
 	"fmt"
 
-	"github.com/OckiFals/hello/config"
-	"github.com/OckiFals/hello/models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/ockibagusp/hello/config"
+	"github.com/ockibagusp/hello/models"
 )
 
 var db *gorm.DB

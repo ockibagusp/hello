@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/OckiFals/hello/db"
-	t "github.com/OckiFals/hello/template"
+	"github.com/ockibagusp/hello/db"
+	t "github.com/ockibagusp/hello/template"
 
-	c "github.com/OckiFals/hello/controllers"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	c "github.com/ockibagusp/hello/controllers"
 )
 
 func main() {
