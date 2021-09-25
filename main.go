@@ -4,8 +4,8 @@ import (
 	"github.com/ockibagusp/hello/db"
 	t "github.com/ockibagusp/hello/template"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	c "github.com/ockibagusp/hello/controllers"
 )
 
