@@ -12,7 +12,15 @@ import (
 // Users ?
 func (controller *Controller) Users(c echo.Context) error {
 	var users []models.User
-	controller.DB.Find(&users)
+	controller.DB.Limit(25).Find(&users)
+
+	// is parse API: GET /users
+	// -> func (controller *...) Users and controller.ParseAPI("/users") ?
+	_url := controller.ParseAPI("/users")
+	if c.Path() == _url.Path {
+		return c.JSON(http.StatusOK, users)
+	}
+
 	return c.Render(http.StatusOK, "users/user-all.html", map[string]interface{}{
 		"name":  "Users",
 		"nav":   "users", // (?)
@@ -22,8 +30,7 @@ func (controller *Controller) Users(c echo.Context) error {
 
 // CreateUser ?
 func (controller *Controller) CreateUser(c echo.Context) error {
-	if "POST" == c.Request().Method {
-		var err error
+	if c.Request().Method == "POST" {
 		city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
 		if err != nil {
 			return err
@@ -37,10 +44,16 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 			City:     city,
 			Photo:    c.FormValue("photo"),
 		})
-		if err = c.Bind(user); err != nil {
+		if err := c.Bind(user); err != nil {
 			return err
 		}
 		controller.DB.FirstOrCreate(&user)
+
+		// is parse API: POST /users
+		_url := controller.ParseAPI("/users")
+		if c.Path() == _url.Path {
+			return c.JSON(http.StatusOK, user)
+		}
 
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
@@ -65,6 +78,12 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 		Joins("left join cities on users.city = cities.id").
 		First(&user, id)
 
+	// is parse API: GET /users/:id
+	_url := controller.ParseAPI("/users/" + strconv.Itoa(id))
+	if c.Path() == _url.Path {
+		return c.JSON(http.StatusOK, user)
+	}
+
 	return c.Render(http.StatusOK, "users/user-read.html", map[string]interface{}{
 		"name":    fmt.Sprintf("User: %s", user.Name),
 		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
@@ -85,6 +104,12 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 	cities := []models.City{}
 	controller.DB.Find(&cities)
 
+	// is parse API: PUT /users/:id
+	_url := controller.ParseAPI("/users/" + strconv.Itoa(id))
+	if c.Path() == _url.Path {
+		return c.JSON(http.StatusOK, user)
+	}
+
 	return c.Render(http.StatusOK, "users/user-view.html", map[string]interface{}{
 		"name":   fmt.Sprintf("User: %s", user.Name),
 		"nav":    fmt.Sprintf("User: %s", user.Name), // (?)
@@ -98,5 +123,12 @@ func (controller *Controller) DeleteUser(c echo.Context) error {
 	var user models.User
 	id, _ := strconv.Atoi(c.Param("id")) // (?)
 	controller.DB.Delete(&user, id)
+
+	// is parse API: DELETE /users/:id
+	_url := controller.ParseAPI("/users/" + strconv.Itoa(id))
+	if c.Path() == _url.Path {
+		return c.JSON(http.StatusOK, user)
+	}
+
 	return c.Redirect(http.StatusMovedPermanently, "/users")
 }

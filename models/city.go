@@ -2,8 +2,8 @@ package models
 
 // City init
 type City struct {
-	ID   uint
-	City string
+	ID   uint   `json:"id" form:"id"`
+	City string `json:"city" form:"city"`
 }
 
 // TableName name

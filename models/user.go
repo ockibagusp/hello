@@ -7,11 +7,11 @@ import (
 // User init
 type User struct {
 	gorm.Model
-	Email    string
-	Password string
-	Name     string
-	City     uint
-	Photo    string
+	Email    string `json:"email" form:"email"`
+	Password string `json:"password" form:"password"`
+	Name     string `json:"name" form:"name"`
+	City     uint   `json:"city" form:"city"`
+	Photo    string `json:"photo" form:"photo"`
 }
 
 // UserCity init
