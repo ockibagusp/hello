@@ -9,7 +9,7 @@
 - Prettier - Code formatter
 
 
-Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini agak pelupa. Bertahap.
+Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini agak lupa. Bertahap.
 
 ---
 
