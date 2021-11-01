@@ -70,7 +70,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'2020-02-22 15:28:40','2020-02-22 15:28:40',NULL,'ockibagusp','ocki.bagus.p@gmail.com','Ocki Bagus Pratama','admin123',2,''),(2,'2020-03-17 06:56:10','2021-10-31 16:44:03',NULL,'sugriwa','sugriwa@wanara.com','Sugriwa','admin123',0,''),(3,'2020-03-17 06:57:47','2021-10-29 09:49:44',NULL,'subali','subali@wanara.com','Subali','admin123',0,''),(7,'2021-10-31 17:43:27','2021-10-31 17:43:27','2021-11-01 10:45:39','joesmith','joe@smit.com','Joe Smith','admin123',0,'');
+INSERT INTO `users` VALUES (1,'2020-02-22 15:28:40','2020-02-22 15:28:40',NULL,'ockibagusp','ocki.bagus.p@gmail.com','Ocki Bagus Pratama','admin123',2,''),(2,'2020-03-17 06:56:10','2021-10-31 16:44:03',NULL,'sugriwa','sugriwa@wanara.com','Sugriwa','admin123',0,''),(3,'2020-03-17 06:57:47','2021-10-29 09:49:44',NULL,'subali','subali@wanara.com','Subali','admin123',0,'');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -83,4 +83,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-11-01 11:07:36
+-- Dump completed on 2021-11-01 11:23:10
