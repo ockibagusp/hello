@@ -4,8 +4,8 @@ import (
 	"github.com/ockibagusp/hello/db"
 	t "github.com/ockibagusp/hello/template"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	c "github.com/ockibagusp/hello/controllers"
 )
 
@@ -36,7 +36,17 @@ func main() {
 	e.POST("/users/add", controllers.CreateUser).Name = "user/add post"
 	e.GET("/users/read/:id", controllers.ReadUser).Name = "user/read get"
 	e.GET("/users/view/:id", controllers.UpdateUser).Name = "user/view get"
-	e.GET("/users/delete/:id", controllers.DeleteUser).Name = "user/view delete"
+	e.POST("/users/view/:id", controllers.UpdateUser).Name = "user/view post"
+	e.GET("/users/delete/:id", controllers.DeleteUser).Name = "user/delete get"
+
+	// Route => controllers API
+	g := e.Group("/api/v1")
+	g.GET("/users", controllers.UsersAPI).Name = "users get"
+
+	g.POST("/users", controllers.CreateUserAPI).Name = "user post"
+	g.GET("/users/:id", controllers.ReadUserAPI).Name = "user read"
+	g.PUT("/users/:id", controllers.UpdateUserAPI).Name = "user update"
+	g.DELETE("/users/:id", controllers.DeleteUserAPI).Name = "user delete"
 
 	// Start the Echo server
 	e.Start(":8000")

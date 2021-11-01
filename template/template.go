@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"io"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // TemplateRenderer is a custom html/template renderer for Echo framework
