@@ -19,12 +19,6 @@ type Controller struct {
 // Controller is parse API
 func (controller *Controller) ParseAPI(rawurl string) (_url *url.URL) {
 	var err error
-	_url, err = url.Parse(API)
-	if err != nil {
-		panic("invalid url")
-	}
-
-	_url.Path = path.Join(_url.Path, "/users")
 
 	_url, err = url.Parse(API)
 	if err != nil {
