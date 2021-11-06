@@ -131,10 +131,6 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 	// ":id" ?
 	if strings.Replace(c.Path(), ":id", c.Param("id"), 1) == _url.Path {
-		// ?
-		if c.Request().Method == "PUT" {
-			return c.JSON(http.StatusOK, user)
-		}
 		return c.JSON(http.StatusBadRequest, echo.ErrBadRequest)
 	}
 
@@ -196,36 +192,36 @@ func (controller *Controller) ReadUserAPI(c echo.Context) error {
 // CreateUserAPI: POST User
 func (controller *Controller) CreateUserAPI(c echo.Context) error {
 	var user models.User
-	//var err error
+	var err error
 
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
+	// ?
 	fmt.Println("1 -> ", user)
 
 	rules := govalidator.MapData{
 		"username": []string{"required", "between:3,12"},
-		// "email":    []string{"required", "min:5", "max:24", "email"},
-		// "password": []string{"required", "min:5", "max:24"},
-		// "name":     []string{"required", "min:3"},
+		"email":    []string{"required", "min:5", "max:24", "email"},
+		"password": []string{"required", "min:5", "max:24"},
+		"name":     []string{"required", "min:3"},
 	}
 
 	messages := govalidator.MapData{
 		"username": []string{"required:You must provide username", "between:The username field must be between 3 to 12 chars"},
-		// "email":    []string{"required:You must provide email", "between:The email field must be between 5 to 24 chars"},
-		// "password": []string{"required:You must provide password", "between:The password field must be between 5 to 24 chars"},
-		// "name":     []string{"required:You must provide name", "between:The name field must be min 3 chars"},
-		// "city":     []string{"between:can or not"},
-		// "photo":    []string{"between:can or not"},
+		"email":    []string{"required:You must provide email", "between:The email field must be between 5 to 24 chars"},
+		"password": []string{"required:You must provide password", "between:The password field must be between 5 to 24 chars"},
+		"name":     []string{"required:You must provide name", "between:The name field must be min 3 chars"},
+		"city":     []string{"between:can or not"},
+		"photo":    []string{"between:can or not"},
 	}
 
 	opts := govalidator.Options{
-		Request:         c.Request(),
-		Data:            &user,
-		Rules:           rules,
-		Messages:        messages,
-		RequiredDefault: true,
+		Request:  c.Request(),
+		Data:     &user,
+		Rules:    rules,
+		Messages: messages,
 	}
 	gov := govalidator.New(opts)
 	fmt.Println("2 -> ", gov)
@@ -234,16 +230,17 @@ func (controller *Controller) CreateUserAPI(c echo.Context) error {
 
 	if validate != nil {
 		fmt.Println("validate No-Nil")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"validationError": validate})
+		fmt.Println(map[string]interface{}{"validationError": validate})
+		// return c.JSON(http.StatusBadRequest, map[string]interface{}{"validationError": validate})
 	}
 
-	fmt.Println("validate Nil")
+	user, err = user.Save(controller.DB)
 
-	// user, err = user.Save(controller.DB)
-
-	// if err != nil {
-	// 	return err
-	// }
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Error 1062: Duplicate entry",
+		})
+	}
 
 	return c.JSON(http.StatusOK, user)
 }
@@ -272,13 +269,12 @@ func (controller *Controller) UpdateUserAPI(c echo.Context) error {
 
 // DeleteUser API: Delete User
 func (controller *Controller) DeleteUserAPI(c echo.Context) error {
-	var user models.User
-	var err error
 	id, _ := strconv.Atoi(c.Param("id")) // (?)
 
-	if err = user.Delete(controller.DB, id); err != nil {
+	if err := (models.User{}).Delete(controller.DB, id); err != nil {
+		// Why?
 		return err
 	}
 
-	return c.JSON(http.StatusOK, nil)
+	return c.JSON(http.StatusOK, "Not Found")
 }
