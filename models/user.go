@@ -25,9 +25,8 @@ type UserCity struct {
 
 // User: Save
 func (user User) Save(db *gorm.DB) (User, error) {
-	var err error
-	if err = db.Create(&user).Error; err != nil {
-		return User{}, err
+	if err := db.Create(&user).Error; err != nil {
+		return User{}, errors.New("User Exists")
 	}
 
 	return user, nil
@@ -35,12 +34,13 @@ func (user User) Save(db *gorm.DB) (User, error) {
 
 // User: FindAll
 func (User) FindAll(db *gorm.DB) ([]User, error) {
-	var err error
 	users := []User{}
 
 	// Limit: 25 ?
-	if err = db.Limit(25).Find(&users).Error; err != nil {
-		return []User{}, err
+	err := db.Limit(25).Find(&users).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return []User{}, errors.New("User Not Found")
 	}
 
 	return users, nil
@@ -80,7 +80,7 @@ func (user User) Update(db *gorm.DB, id int) (User, error) {
 		Photo:    user.Photo,
 	}).Error
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		return User{}, errors.New("User Not Found")
 	}
 
@@ -89,10 +89,8 @@ func (user User) Update(db *gorm.DB, id int) (User, error) {
 
 // User: Delete
 func (user User) Delete(db *gorm.DB, id int) error {
-	err := db.Delete(&user, id).Error
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return errors.New("User Not Found")
+	if db.Delete(&user, id).Error != nil {
+		return errors.New("Record Not Found")
 	}
 
 	return nil

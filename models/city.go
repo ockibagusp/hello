@@ -21,8 +21,8 @@ func (City) TableName() string {
 func (city City) Save(db *gorm.DB) (City, error) {
 	err := db.Create(&city).Error
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return City{}, err
+	if err != nil {
+		return City{}, errors.New("City Exists")
 	}
 
 	return city, nil
@@ -55,10 +55,8 @@ func (city City) FindByID(db *gorm.DB, id int) (City, error) {
 
 // City: Delete
 func (city City) Delete(db *gorm.DB, id int) error {
-	err := db.Delete(&city, id).Error
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return errors.New("City Not Found")
+	if db.Delete(&city, id).Error != nil {
+		return errors.New("Record Not Found")
 	}
 
 	return nil
