@@ -26,5 +26,7 @@ type Configuration struct {
 func GetConfig() Configuration {
 	configuration := Configuration{}
 	gonfig.GetConf("config/config.json", &configuration)
+	// test db_test.go
+	gonfig.GetConf("../config/config.json", &configuration)
 	return configuration
 }

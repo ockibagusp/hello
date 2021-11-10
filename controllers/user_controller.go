@@ -102,6 +102,14 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 		})
 	}
 
+	// models.City{} or (models.City{}) or var city models.City or city := models.City{}
+	cities, err := models.City{}.FindAll(controller.DB)
+	if err != nil {
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
+	}
+
 	// is parse API: GET /users/:id
 	_url := controller.ParseAPI("/users/" + strconv.Itoa(id))
 
@@ -114,6 +122,7 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 		"name":    fmt.Sprintf("User: %s", user.Name),
 		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
 		"user":    user,
+		"cities":  cities,
 		"is_read": true,
 	})
 }
