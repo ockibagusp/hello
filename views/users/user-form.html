@@ -63,8 +63,7 @@
       <select name="city" class="form-control" {{if.is_read}}disabled{{end}}>
         <option value="0" {{if.is_new}}selected{{end}}>-----</option>
         {{range $key, $value := .cities}}
-        <!-- if eq $value.ID .user.City? -->
-        <option value="{{$value.ID}}">{{$value.City}}</option>
+        <option value="{{$value.ID}}" {{if eq $value.ID $.user.City}}selected{{end}}>{{$value.City}}</option>
         {{end}}
       </select>
     </div>
