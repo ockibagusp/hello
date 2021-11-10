@@ -3,10 +3,13 @@ package db
 import (
 	"testing"
 
+	"github.com/ockibagusp/hello/config"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDB(t *testing.T) {
+func TestGetConnectionDB(t *testing.T) {
 	assert := assert.New(t)
-	assert.Equal(true, true)
+
+	db := config.GetConfig()
+	assert.NotNil(db)
 }

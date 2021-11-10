@@ -15,7 +15,7 @@ var db *sql.DB
 var err error
 
 // Init: new database
-func Init(env string) {
+func Init(env string) *gorm.DB {
 	var connectString string
 	configuration := config.GetConfig()
 
@@ -46,9 +46,6 @@ func Init(env string) {
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxLifetime(10 * time.Minute)
-}
 
-// DbManager
-func DbManager() *gorm.DB {
 	return connection
 }

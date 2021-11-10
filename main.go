@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// PROD or DEV
-	db.Init("PROD")
+	dbManager := db.Init("PROD")
 
 	// Echo instance
 	e := echo.New()
@@ -27,7 +27,7 @@ func main() {
 	e.Static("/assets", "assets")
 
 	// controllers init
-	controllers := c.Controller{DB: db.DbManager()}
+	controllers := c.Controller{DB: dbManager}
 
 	// Route => controllers
 	e.GET("/", controllers.Home).Name = "home"
