@@ -14,15 +14,29 @@ var connection *gorm.DB
 var db *sql.DB
 var err error
 
-// Init (?)
-func Init() {
+// Init: new database
+func Init(env string) {
+	var connectString string
 	configuration := config.GetConfig()
-	connectString := fmt.Sprintf(
-		"%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
-		configuration.DB_USERNAME,
-		configuration.DB_PASSWORD,
-		configuration.DB_NAME,
-	)
+
+	if env == "PROD" {
+		connectString = fmt.Sprintf(
+			"%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+			configuration.PROD.DB_USERNAME,
+			configuration.PROD.DB_PASSWORD,
+			configuration.PROD.DB_NAME,
+		)
+	} else if env == "DEV" {
+		connectString = fmt.Sprintf(
+			"%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+			configuration.DEV.DB_USERNAME,
+			configuration.DEV.DB_PASSWORD,
+			configuration.DEV.DB_NAME,
+		)
+	} else {
+		panic("failed to env: PROD or DEV")
+	}
+
 	connection, err = gorm.Open(mysql.Open(connectString), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
@@ -34,7 +48,7 @@ func Init() {
 	db.SetConnMaxLifetime(10 * time.Minute)
 }
 
-// DbManager (?)
+// DbManager
 func DbManager() *gorm.DB {
 	return connection
 }

@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	db.Init()
+	// PROD or DEV
+	db.Init("PROD")
 
 	// Echo instance
 	e := echo.New()

@@ -11,15 +11,18 @@ import (
 	"github.com/thedevsaddam/govalidator"
 )
 
-// Users ?
+// Users: GET Users
 func (controller *Controller) Users(c echo.Context) error {
+	// models.User{} or (models.User{}) or var user models.User or user := models.User{}
 	users, err := models.User{}.FindAll(controller.DB)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"message": "404 Not Found: " + err.Error(),
+		})
 	}
 
 	// is parse API: GET /users
-	// -> func (controller *...) Users and controller.ParseAPI("/users") ?
+	// -> func (controller *...) Users and controller.ParseAPI("/users")
 	_url := controller.ParseAPI("/users")
 	if c.Path() == _url.Path {
 		return c.JSON(http.StatusOK, users)
@@ -32,13 +35,16 @@ func (controller *Controller) Users(c echo.Context) error {
 	})
 }
 
-// CreateUser ?
+// CreateUser: GET or POST User
 func (controller *Controller) CreateUser(c echo.Context) error {
 	if c.Request().Method == "POST" {
 		city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
 		if err != nil {
-			return err
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"message": "400 Bad Request: " + err.Error(),
+			})
 		}
+		// Kota dan Keb. ?
 		city := uint(city64)
 
 		user := models.User{
@@ -50,18 +56,28 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 			Photo:    c.FormValue("photo"),
 		}
 
-		controller.DB.FirstOrCreate(&user)
-
 		if err := c.Bind(&user); err != nil {
-			return err
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"message": "400 Bad Request: " + err.Error(),
+			})
+		}
+
+		// _, err := user.Save(...): be able
+		if _, err := user.Save(controller.DB); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"message": "Error 1062: Duplicate entry",
+			})
 		}
 
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
 
-	cities, err := (models.City{}).FindAll(controller.DB)
+	// models.City{} or (models.City{}) or var city models.City or city := models.City{}
+	cities, err := models.City{}.FindAll(controller.DB)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
 	}
 
 	return c.Render(http.StatusOK, "users/user-add.html", map[string]interface{}{
@@ -72,14 +88,18 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 	})
 }
 
-// ReadUser ?
+// ReadUser: : GET User :id
 func (controller *Controller) ReadUser(c echo.Context) error {
 	var user models.User
 	var err error
-	id, _ := strconv.Atoi(c.Param("id")) // (?)
 
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	// user, _ = user.FindByID(...): be able
 	if user, err = user.FindByID(controller.DB, id); err != nil {
-		return err
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
 	}
 
 	// is parse API: GET /users/:id
@@ -98,32 +118,43 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 	})
 }
 
-// UpdateUser ?
+// UpdateUser: GET or POST User :id
 func (controller *Controller) UpdateUser(c echo.Context) error {
 	var user models.User
 	var err error
-	id, _ := strconv.Atoi(c.Param("id")) // (?)
+
+	id, _ := strconv.Atoi(c.Param("id"))
 
 	if c.Request().Method == "POST" {
 		if err := c.Bind(&user); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"message": "400 Bad Request: " + err.Error(),
+			})
 		}
 
+		// _, err := user.Update(...): be able
 		if _, err := user.Update(controller.DB, id); err != nil {
-			return err
+			return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+				"message": "405 Method Not Allowed: " + err.Error(),
+			})
 		}
 
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
 
+	// user, _ = user.FindByID(...): be able
 	if user, err = user.FindByID(controller.DB, id); err != nil {
-		return err
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
 	}
 
-	// Wow
-	cities, err := (models.City{}).FindAll(controller.DB)
+	// models.City{} or (models.City{}) or var city models.City or city := models.City{}
+	cities, err := models.City{}.FindAll(controller.DB)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
 	}
 
 	// is parse API: PUT /users/:id
@@ -131,7 +162,9 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 	// ":id" ?
 	if strings.Replace(c.Path(), ":id", c.Param("id"), 1) == _url.Path {
-		return c.JSON(http.StatusBadRequest, echo.ErrBadRequest)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "400 Bad Request: " + err.Error(),
+		})
 	}
 
 	return c.Render(http.StatusOK, "users/user-view.html", map[string]interface{}{
@@ -142,21 +175,25 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 	})
 }
 
-// DeleteUser ?
+// DeleteUser: DELETE User :id
 func (controller *Controller) DeleteUser(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id")) // (?)
+	id, _ := strconv.Atoi(c.Param("id"))
 
+	// (models.User{}) or var user models.User or user := models.User{}
 	if err := (models.User{}).Delete(controller.DB, id); err != nil {
-		return err
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
 	}
 
 	// is parse API: DELETE /users/:id
 	_url := controller.ParseAPI("/users/" + strconv.Itoa(id))
 	if c.Path() == _url.Path {
-		return c.JSON(http.StatusOK, nil)
+		return c.JSON(http.StatusNoContent, map[string]interface{}{
+			"message": "204 No Content",
+		})
 	}
 
-	// return c.JSON(http.StatusBadRequest, "ok")
 	return c.Redirect(http.StatusMovedPermanently, "/users")
 }
 
@@ -164,38 +201,29 @@ func (controller *Controller) DeleteUser(c echo.Context) error {
 
 // UsersAPI: GET Users
 func (controller *Controller) UsersAPI(c echo.Context) error {
+	// models.User{} or (models.User{}) or var user models.User or user := models.User{}
 	user := models.User{}
 	users, err := user.FindAll(controller.DB)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"message": "404 Not Found",
+		})
 	}
 
 	return c.JSON(http.StatusOK, users)
 }
 
-// ReadUserAPI: GET User
-func (controller *Controller) ReadUserAPI(c echo.Context) error {
-	var user models.User
-	id, _ := strconv.Atoi(c.Param("id")) // (?)
-
-	user, err := user.FindByID(controller.DB, id)
-	if err != nil {
-		// err: User Not Found
-		fmt.Println("err: ", err)
-		return err
-	}
-
-	return c.JSON(http.StatusOK, user)
-}
-
 // CreateUserAPI: POST User
 func (controller *Controller) CreateUserAPI(c echo.Context) error {
+	// models.User{} or (models.User{}) or var user models.User or user := models.User{}
 	var user models.User
 	var err error
 
 	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "400 Bad Request: " + err.Error(),
+		})
 	}
 
 	// ?
@@ -230,12 +258,11 @@ func (controller *Controller) CreateUserAPI(c echo.Context) error {
 
 	if validate != nil {
 		fmt.Println("validate No-Nil")
-		fmt.Println(map[string]interface{}{"validationError": validate})
-		// return c.JSON(http.StatusBadRequest, map[string]interface{}{"validationError": validate})
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"validationError": validate})
 	}
 
+	// user, err = user.Save(...): be able
 	user, err = user.Save(controller.DB)
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"message": "Error 1062: Duplicate entry",
@@ -245,23 +272,47 @@ func (controller *Controller) CreateUserAPI(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+// ReadUserAPI: GET User
+func (controller *Controller) ReadUserAPI(c echo.Context) error {
+	var user models.User
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	// user, err := user.FindByID(...): be able
+	user, err := user.FindByID(controller.DB, id)
+	if err != nil {
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, user)
+}
+
 // UpdateUserAPI: PUT User
 func (controller *Controller) UpdateUserAPI(c echo.Context) error {
 	var user models.User
-	id, _ := strconv.Atoi(c.Param("id")) // (?)
+	id, _ := strconv.Atoi(c.Param("id"))
 
 	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "400 Bad Request: " + err.Error(),
+		})
 	}
 
+	// _, err := user.Update(...): be able
 	if _, err := user.Update(controller.DB, id); err != nil {
-		return err
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
 	}
 
+	// user, err := user.FindByID(...): be able
 	user, err := user.FindByID(controller.DB, id)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -269,12 +320,16 @@ func (controller *Controller) UpdateUserAPI(c echo.Context) error {
 
 // DeleteUser API: Delete User
 func (controller *Controller) DeleteUserAPI(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id")) // (?)
+	id, _ := strconv.Atoi(c.Param("id"))
 
+	// (models.User{}) or var user models.User or user := models.User{}
 	if err := (models.User{}).Delete(controller.DB, id); err != nil {
-		// Why?
-		return err
+		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
 	}
 
-	return c.JSON(http.StatusOK, "Not Found")
+	return c.JSON(http.StatusNoContent, map[string]interface{}{
+		"message": "204 No Content",
+	})
 }
