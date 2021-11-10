@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ockibagusp/hello/models"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
@@ -15,9 +14,6 @@ var _controller Controller = Controller{
 	DB:  new(gorm.DB),
 	API: "/api/v1", // API test
 }
-
-// var user models.User
-var users []models.User
 
 func TestController_ParseAPI(t *testing.T) {
 	assert := assert.New(t)
