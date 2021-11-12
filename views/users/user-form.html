@@ -14,7 +14,7 @@
         class="form-control"
         name="username"
         value="{{if not .is_new}}{{.user.Username}}{{end}}"
-        autofocus
+        id="username"
         required
         {{if.is_read}}disabled{{end}}
       />
@@ -89,4 +89,9 @@
   {{end}} {{if not .is_read}}
 </form>
 {{end}}
+<script>
+  window.onload = function() {
+    document.getElementById("username").focus();
+  }
+</script>
 {{end}}
