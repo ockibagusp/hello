@@ -14,8 +14,9 @@
         class="form-control"
         name="username"
         value="{{if not .is_new}}{{.user.Username}}{{end}}"
-        id="username"
+        placeholder="Username"
         required
+        {{if.is_new}}autofocus{{end}}
         {{if.is_read}}disabled{{end}}
       />
     </div>
@@ -26,6 +27,7 @@
         class="form-control"
         name="name"
         value="{{if not .is_new}}{{.user.Name}}{{end}}"
+        placeholder="Name"
         required
         {{if.is_read}}disabled{{end}}
       />
@@ -37,6 +39,7 @@
         class="form-control"
         name="email"
         value="{{if not .is_new}}{{.user.Email}}{{end}}"
+        placeholder="Email"
         required
         {{if.is_read}}disabled{{end}}
       />
@@ -48,6 +51,7 @@
         class="form-control"
         name="password"
         value="{{if not .is_new}}{{.user.Password}}{{end}}"
+        placeholder="Password"
         required
         {{if.is_read}}disabled{{end}}
       />
@@ -89,9 +93,4 @@
   {{end}} {{if not .is_read}}
 </form>
 {{end}}
-<script>
-  window.onload = function() {
-    document.getElementById("username").focus();
-  }
-</script>
 {{end}}
