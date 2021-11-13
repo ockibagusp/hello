@@ -9,49 +9,49 @@
   <div class="form-row">
     <div class="form-group col-md-12">
       <label for="username">Username</label>
-      <!-- username: ockibagusp -->
       <input
         type="text"
         class="form-control"
         name="username"
-        value="{{if .is_new}}ockibagusp{{else}}{{.user.Username}}{{end}}"
+        value="{{if not .is_new}}{{.user.Username}}{{end}}"
+        placeholder="Username"
         required
+        {{if.is_new}}autofocus{{end}}
         {{if.is_read}}disabled{{end}}
       />
     </div>
     <div class="form-group col-md-12">
       <label for="name">Name</label>
-      <!-- name: Ocki Bagus Pratama -->
       <input
         type="text"
         class="form-control"
         name="name"
-        value="{{if .is_new}}Ocki Bagus Pratama{{else}}{{.user.Name}}{{end}}"
+        value="{{if not .is_new}}{{.user.Name}}{{end}}"
+        placeholder="Name"
         required
         {{if.is_read}}disabled{{end}}
       />
     </div>
     <div class="form-group col-md-6">
       <label for="email">Email</label>
-      <!-- email: ocki.bagus.p@gmail.com -->
       <input
         type="email"
         class="form-control"
         name="email"
-        value="{{if .is_new}}ocki.bagus.p@gmail.com{{else}}{{.user.Email}}{{end}}"
+        value="{{if not .is_new}}{{.user.Email}}{{end}}"
+        placeholder="Email"
         required
         {{if.is_read}}disabled{{end}}
       />
     </div>
     <div class="form-group col-md-6">
       <label for="password">Password</label>
-      <!-- Password (?) -->
-      <!-- password: admin123 -->
       <input
         type="password"
         class="form-control"
         name="password"
-        value="{{if .is_new}}admin123{{else}}{{.user.Password}}{{end}}"
+        value="{{if not .is_new}}{{.user.Password}}{{end}}"
+        placeholder="Password"
         required
         {{if.is_read}}disabled{{end}}
       />
@@ -61,7 +61,7 @@
     <div class="form-group col-md-6">
       <label for="city">City</label>
       <select name="city" class="form-control" {{if.is_read}}disabled{{end}}>
-        <option value="0" {{if.is_new}}selected{{end}}>-----</option>
+        <option value="0">-----</option>
         {{range $key, $value := .cities}}
           {{if not $.is_new}}
         <option value="{{$value.ID}}" {{if eq $value.ID $.user.City}}selected{{end}}>{{$value.City}}</option>
@@ -92,4 +92,5 @@
   >
   {{end}} {{if not .is_read}}
 </form>
-{{end}} {{end}}
+{{end}}
+{{end}}
