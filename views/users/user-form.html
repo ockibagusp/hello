@@ -5,7 +5,7 @@
   action="/users{{if .is_new}}/add{{else}}/view/{{.user.Model.ID}}{{end}}"
   method="post"
 >
-  {{end}}
+{{end}}
   <div class="form-row">
     <div class="form-group col-md-12">
       <label for="username">Username</label>
@@ -90,7 +90,9 @@
   <a href="/users/delete/{{.user.Model.ID}}" class="btn btn-sm btn-danger"
     >Delete</a
   >
-  {{end}} {{if not .is_read}}
+  {{end}}
+{{if not .is_read}}
 </form>
 {{end}}
+
 {{end}}
