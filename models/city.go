@@ -6,13 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// City init
+// City: struct
 type City struct {
 	ID   uint   `json:"id" form:"id"`
 	City string `json:"city" form:"city"`
 }
 
-// TableName name
+// TableName name: string
 func (City) TableName() string {
 	return "cities"
 }

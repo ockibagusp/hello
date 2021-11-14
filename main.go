@@ -23,7 +23,7 @@ func main() {
 	// Instantiate a template registry with an array of template set
 	e.Renderer = t.Templates()
 
-	// // Why bootstrap.min.css, bootstrap.min.js, jquery.min.js?
+	// Why bootstrap.min.css, bootstrap.min.js, jquery.min.js?
 	e.Static("/assets", "assets")
 
 	// controllers init

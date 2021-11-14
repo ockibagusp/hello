@@ -4,7 +4,7 @@ import (
 	"github.com/tkanos/gonfig"
 )
 
-// Configuration init
+// Configuration: struct
 type Configuration struct {
 	PROD struct {
 		DB_USERNAME string
@@ -22,7 +22,7 @@ type Configuration struct {
 	}
 }
 
-// GetConfig init
+// GetConfig: Configuration
 func GetConfig() Configuration {
 	configuration := Configuration{}
 	gonfig.GetConf("config/config.json", &configuration)

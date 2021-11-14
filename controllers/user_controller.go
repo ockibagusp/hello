@@ -88,7 +88,7 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 	})
 }
 
-// ReadUser: : GET User :id
+// ReadUser: GET User :id
 func (controller *Controller) ReadUser(c echo.Context) error {
 	var user models.User
 	var err error

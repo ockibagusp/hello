@@ -39,7 +39,7 @@ func parseFiles(s string, t ...string) *template.Template {
 	return template.Must(template.ParseFiles(s, "views/base.html"))
 }
 
-// Templates ?
+// Templates
 func Templates() *TemplateRenderer {
 	t := make(map[string]*template.Template)
 	t["home.html"] = parseFiles("views/home.html")

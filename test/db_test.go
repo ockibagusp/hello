@@ -1,15 +1,18 @@
-package db
+package test
 
 import (
 	"testing"
 
-	"github.com/ockibagusp/hello/config"
+	dbManager "github.com/ockibagusp/hello/db"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
+
+// PROD or DEV
+var db *gorm.DB = dbManager.Init("DEV")
 
 func TestGetConnectionDB(t *testing.T) {
 	assert := assert.New(t)
 
-	db := config.GetConfig()
 	assert.NotNil(db)
 }

@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// User init
+// User: struct
 type User struct {
 	Model
 	Username string `gorm:"unique;not null" json:"username" form:"username"`
@@ -17,7 +17,7 @@ type User struct {
 	Photo    string `json:"photo" form:"photo"`
 }
 
-// UserCity init
+// UserCity: struct
 type UserCity struct {
 	User
 	CityMassage string `gorm:"index:city_massage" json:"city_massage" form:"city_massage"`
