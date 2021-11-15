@@ -21,16 +21,20 @@ func Init(env string) *gorm.DB {
 
 	if env == "PROD" {
 		connectString = fmt.Sprintf(
-			"%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+			"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 			configuration.PROD.DB_USERNAME,
 			configuration.PROD.DB_PASSWORD,
+			configuration.PROD.DB_HOST,
+			configuration.PROD.DB_PORT,
 			configuration.PROD.DB_NAME,
 		)
 	} else if env == "DEV" {
 		connectString = fmt.Sprintf(
-			"%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+			"%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 			configuration.DEV.DB_USERNAME,
 			configuration.DEV.DB_PASSWORD,
+			configuration.DEV.DB_HOST,
+			configuration.DEV.DB_PORT,
 			configuration.DEV.DB_NAME,
 		)
 	} else {
