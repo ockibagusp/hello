@@ -1,5 +1,7 @@
 .vscode
 vendor
 __debug_bin
-.air.toml
 gin-bin
+# air
+.air.toml
+tmp
