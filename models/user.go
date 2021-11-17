@@ -51,9 +51,12 @@ func (User) FindAll(db *gorm.DB) ([]User, error) {
 	// Limit: 25 ?
 	err := tx.Limit(25).Find(&users).Error
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		tx.Rollback()
-		return []User{}, errors.New("User Not Found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return []User{}, errors.New("User Not Found")
+		}
+		return []User{}, err
 	}
 	tx.Commit()
 
@@ -69,9 +72,12 @@ func (user User) FindByID(db *gorm.DB, id int) (User, error) {
 
 	err := tx.First(&user, id).Error
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		tx.Rollback()
-		return User{}, errors.New("User Not Found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return User{}, errors.New("User Not Found")
+		}
+		return User{}, err
 	}
 	tx.Commit()
 
@@ -88,9 +94,12 @@ func (user User) FindByCityID(db *gorm.DB, id int) (User, error) {
 	err := tx.Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").First(&user, id).Error
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		tx.Rollback()
-		return User{}, errors.New("User Not Found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return User{}, errors.New("User Not Found")
+		}
+		return User{}, err
 	}
 	tx.Commit()
 
@@ -115,7 +124,7 @@ func (user User) Update(db *gorm.DB, id int) (User, error) {
 
 	if err != nil {
 		tx.Rollback()
-		return User{}, errors.New("User Not Found")
+		return User{}, err
 	}
 	tx.Commit()
 
@@ -129,9 +138,11 @@ func (user User) Delete(db *gorm.DB, id int) error {
 		return err
 	}
 
-	if tx.Delete(&user, id).Error != nil {
+	// if tx.Delete(&user, id).Error != nil {}
+	if err := tx.Delete(&user, id).Error; err != nil {
 		tx.Rollback()
-		return errors.New("Record Not Found")
+		// return errors.New("Record Not Found")
+		return err
 	}
 	tx.Commit()
 

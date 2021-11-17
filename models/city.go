@@ -47,9 +47,12 @@ func (City) FindAll(db *gorm.DB) ([]City, error) {
 
 	err = tx.Find(&cities).Error
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		tx.Rollback()
-		return []City{}, errors.New("City Not Found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return []City{}, errors.New("City Not Found")
+		}
+		return []City{}, err
 	}
 	tx.Commit()
 
@@ -65,9 +68,12 @@ func (city City) FindByID(db *gorm.DB, id int) (City, error) {
 
 	err := tx.First(&city, id).Error
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		tx.Rollback()
-		return City{}, errors.New("City Not Found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return City{}, errors.New("City Not Found")
+		}
+		return City{}, err
 	}
 	tx.Commit()
 
@@ -81,9 +87,11 @@ func (city City) Delete(db *gorm.DB, id int) error {
 		return err
 	}
 
-	if tx.Delete(&city, id).Error != nil {
+	// if tx.Delete(&city, id).Error != nil {}
+	if err := tx.Delete(&city, id).Error; err != nil {
 		tx.Rollback()
-		return errors.New("Record Not Found")
+		// return errors.New("Record Not Found")
+		return err
 	}
 	tx.Commit()
 
