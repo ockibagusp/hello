@@ -8,7 +8,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/ockibagusp/hello/models"
-	"github.com/thedevsaddam/govalidator"
 )
 
 // Users: GET Users
@@ -16,7 +15,7 @@ func (controller *Controller) Users(c echo.Context) error {
 	// models.User{} or (models.User{}) or var user models.User or user := models.User{}
 	users, err := models.User{}.FindAll(controller.DB)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
+		return c.JSON(http.StatusNotFound, echo.Map{
 			"message": "404 Not Found: " + err.Error(),
 		})
 	}
@@ -28,7 +27,7 @@ func (controller *Controller) Users(c echo.Context) error {
 		return c.JSON(http.StatusOK, users)
 	}
 
-	return c.Render(http.StatusOK, "users/user-all.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "users/user-all.html", echo.Map{
 		"name":  "Users",
 		"nav":   "users", // (?)
 		"users": users,
@@ -40,7 +39,7 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 	if c.Request().Method == "POST" {
 		city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": "400 Bad Request: " + err.Error(),
 			})
 		}
@@ -57,14 +56,14 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		}
 
 		if err := c.Bind(&user); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": "400 Bad Request: " + err.Error(),
 			})
 		}
 
 		// _, err := user.Save(...): be able
 		if _, err := user.Save(controller.DB); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{
+			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": "Error 1062: Duplicate entry",
 			})
 		}
@@ -75,12 +74,12 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 	// models.City{} or (models.City{}) or var city models.City or city := models.City{}
 	cities, err := models.City{}.FindAll(controller.DB)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
 
-	return c.Render(http.StatusOK, "users/user-add.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "users/user-add.html", echo.Map{
 		"name":   "User Add",
 		"nav":    "user Add", // (?)
 		"cities": cities,
@@ -97,7 +96,7 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 
 	// user, _ = user.FindByID(...): be able
 	if user, err = user.FindByID(controller.DB, id); err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
@@ -105,7 +104,7 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 	// models.City{} or (models.City{}) or var city models.City or city := models.City{}
 	cities, err := models.City{}.FindAll(controller.DB)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
@@ -118,7 +117,7 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 		return c.JSON(http.StatusOK, user)
 	}
 
-	return c.Render(http.StatusOK, "users/user-read.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "users/user-read.html", echo.Map{
 		"name":    fmt.Sprintf("User: %s", user.Name),
 		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
 		"user":    user,
@@ -136,14 +135,14 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 	if c.Request().Method == "POST" {
 		if err := c.Bind(&user); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": "400 Bad Request: " + err.Error(),
 			})
 		}
 
 		// _, err := user.Update(...): be able
 		if _, err := user.Update(controller.DB, id); err != nil {
-			return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+			return c.JSON(http.StatusNotAcceptable, echo.Map{
 				"message": "405 Method Not Allowed: " + err.Error(),
 			})
 		}
@@ -153,7 +152,7 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 	// user, _ = user.FindByID(...): be able
 	if user, err = user.FindByID(controller.DB, id); err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
@@ -161,7 +160,7 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 	// models.City{} or (models.City{}) or var city models.City or city := models.City{}
 	cities, err := models.City{}.FindAll(controller.DB)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
@@ -171,12 +170,12 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 	// ":id" ?
 	if strings.Replace(c.Path(), ":id", c.Param("id"), 1) == _url.Path {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": "400 Bad Request: " + err.Error(),
 		})
 	}
 
-	return c.Render(http.StatusOK, "users/user-view.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "users/user-view.html", echo.Map{
 		"name":   fmt.Sprintf("User: %s", user.Name),
 		"nav":    fmt.Sprintf("User: %s", user.Name), // (?)
 		"user":   user,
@@ -190,7 +189,7 @@ func (controller *Controller) DeleteUser(c echo.Context) error {
 
 	// (models.User{}) or var user models.User or user := models.User{}
 	if err := (models.User{}).Delete(controller.DB, id); err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
@@ -198,7 +197,7 @@ func (controller *Controller) DeleteUser(c echo.Context) error {
 	// is parse API: DELETE /users/:id
 	_url := controller.ParseAPI("/users/" + strconv.Itoa(id))
 	if c.Path() == _url.Path {
-		return c.JSON(http.StatusNoContent, map[string]interface{}{
+		return c.JSON(http.StatusNoContent, echo.Map{
 			"message": "204 No Content",
 		})
 	}
@@ -215,7 +214,7 @@ func (controller *Controller) UsersAPI(c echo.Context) error {
 	users, err := user.FindAll(controller.DB)
 
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
+		return c.JSON(http.StatusNotFound, echo.Map{
 			"message": "404 Not Found",
 		})
 	}
@@ -230,50 +229,15 @@ func (controller *Controller) CreateUserAPI(c echo.Context) error {
 	var err error
 
 	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": "400 Bad Request: " + err.Error(),
 		})
-	}
-
-	// ?
-	fmt.Println("1 -> ", user)
-
-	rules := govalidator.MapData{
-		"username": []string{"required", "between:3,12"},
-		"email":    []string{"required", "min:5", "max:24", "email"},
-		"password": []string{"required", "min:5", "max:24"},
-		"name":     []string{"required", "min:3"},
-	}
-
-	messages := govalidator.MapData{
-		"username": []string{"required:You must provide username", "between:The username field must be between 3 to 12 chars"},
-		"email":    []string{"required:You must provide email", "between:The email field must be between 5 to 24 chars"},
-		"password": []string{"required:You must provide password", "between:The password field must be between 5 to 24 chars"},
-		"name":     []string{"required:You must provide name", "between:The name field must be min 3 chars"},
-		"city":     []string{"between:can or not"},
-		"photo":    []string{"between:can or not"},
-	}
-
-	opts := govalidator.Options{
-		Request:  c.Request(),
-		Data:     &user,
-		Rules:    rules,
-		Messages: messages,
-	}
-	gov := govalidator.New(opts)
-	fmt.Println("2 -> ", gov)
-	validate := gov.Validate()
-	fmt.Println("3 -> ", validate)
-
-	if validate != nil {
-		fmt.Println("validate No-Nil")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"validationError": validate})
 	}
 
 	// user, err = user.Save(...): be able
 	user, err = user.Save(controller.DB)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": "Error 1062: Duplicate entry",
 		})
 	}
@@ -289,7 +253,7 @@ func (controller *Controller) ReadUserAPI(c echo.Context) error {
 	// user, err := user.FindByID(...): be able
 	user, err := user.FindByID(controller.DB, id)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
@@ -303,14 +267,14 @@ func (controller *Controller) UpdateUserAPI(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, echo.Map{
 			"message": "400 Bad Request: " + err.Error(),
 		})
 	}
 
 	// _, err := user.Update(...): be able
 	if _, err := user.Update(controller.DB, id); err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
@@ -319,7 +283,7 @@ func (controller *Controller) UpdateUserAPI(c echo.Context) error {
 	user, err := user.FindByID(controller.DB, id)
 
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
@@ -333,12 +297,12 @@ func (controller *Controller) DeleteUserAPI(c echo.Context) error {
 
 	// (models.User{}) or var user models.User or user := models.User{}
 	if err := (models.User{}).Delete(controller.DB, id); err != nil {
-		return c.JSON(http.StatusNotAcceptable, map[string]interface{}{
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusNoContent, map[string]interface{}{
+	return c.JSON(http.StatusNoContent, echo.Map{
 		"message": "204 No Content",
 	})
 }
