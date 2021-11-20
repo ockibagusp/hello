@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"path"
 
+	"github.com/ockibagusp/hello/db"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +15,17 @@ const API string = "/api/v1"
 type Controller struct {
 	DB  *gorm.DB
 	API string
+}
+
+// New Controller
+func New() *Controller {
+	// PROD or DEV
+	dbManager := db.Init("PROD")
+
+	return &Controller{
+		DB:  dbManager,
+		API: API,
+	}
 }
 
 // Controller is parse API
