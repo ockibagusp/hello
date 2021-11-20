@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.26, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.27, for Linux (x86_64)
 --
 -- Host: localhost    Database: hello
 -- ------------------------------------------------------
--- Server version	8.0.26
+-- Server version	8.0.27
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -61,7 +61,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `username_UNIQUE` (`username`),
   KEY `idx_users_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -70,7 +70,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'2020-02-22 15:28:40','2020-02-22 15:28:40',NULL,'ockibagusp','ocki.bagus.p@gmail.com','Ocki Bagus Pratama','admin123',2,''),(2,'2020-03-17 06:56:10','2021-10-31 16:44:03',NULL,'sugriwa','sugriwa@wanara.com','Sugriwa','admin123',0,''),(3,'2020-03-17 06:57:47','2021-10-29 09:49:44',NULL,'subali','subali@wanara.com','Subali','admin123',0,'');
+INSERT INTO `users` VALUES (1,'2020-02-22 15:28:40','2021-11-19 22:42:10',NULL,'ockibagusp','ocki.bagus.p@gmail.com','Ocki Bagus Pratama','e606e38b0d8c19b24cf0ee3808183162ea7cd63ff7912dbb22b5e803286b4446',2,''),(2,'2020-03-17 06:56:10','2021-10-31 16:44:03',NULL,'sugriwa','sugriwa@wanara.com','Sugriwa','e606e38b0d8c19b24cf0ee3808183162ea7cd63ff7912dbb22b5e803286b4446',0,''),(3,'2020-03-17 06:57:47','2021-11-16 17:41:19',NULL,'subali','subali@wanara.com','Subali','e606e38b0d8c19b24cf0ee3808183162ea7cd63ff7912dbb22b5e803286b4446',0,'');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -83,4 +83,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-11-01 11:23:10
+-- Dump completed on 2021-11-20  7:17:05
