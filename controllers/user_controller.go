@@ -7,11 +7,21 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/ockibagusp/hello/middleware"
 	"github.com/ockibagusp/hello/models"
 )
 
 // Users: GET Users
 func (controller *Controller) Users(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// TODO: template/template: TemplateRenderer.Render(...), data.(map[string]interface{})["foo"] ?
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	// models.User{} or (models.User{}) or var user models.User or user := models.User{}
 	users, err := models.User{}.FindAll(controller.DB)
 	if err != nil {
@@ -36,6 +46,14 @@ func (controller *Controller) Users(c echo.Context) error {
 
 // CreateUser: GET or POST User
 func (controller *Controller) CreateUser(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	if c.Request().Method == "POST" {
 		city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
 		if err != nil {
@@ -89,6 +107,14 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 
 // ReadUser: GET User :id
 func (controller *Controller) ReadUser(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	var user models.User
 	var err error
 
@@ -128,6 +154,14 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 
 // UpdateUser: GET or POST User :id
 func (controller *Controller) UpdateUser(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	var user models.User
 	var err error
 
@@ -185,6 +219,14 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 // DeleteUser: DELETE User :id
 func (controller *Controller) DeleteUser(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	// (models.User{}) or var user models.User or user := models.User{}
@@ -209,6 +251,14 @@ func (controller *Controller) DeleteUser(c echo.Context) error {
 
 // UsersAPI: GET Users
 func (controller *Controller) UsersAPI(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	// models.User{} or (models.User{}) or var user models.User or user := models.User{}
 	user := models.User{}
 	users, err := user.FindAll(controller.DB)
@@ -224,6 +274,14 @@ func (controller *Controller) UsersAPI(c echo.Context) error {
 
 // CreateUserAPI: POST User
 func (controller *Controller) CreateUserAPI(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	// models.User{} or (models.User{}) or var user models.User or user := models.User{}
 	var user models.User
 	var err error
@@ -247,6 +305,14 @@ func (controller *Controller) CreateUserAPI(c echo.Context) error {
 
 // ReadUserAPI: GET User
 func (controller *Controller) ReadUserAPI(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	var user models.User
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -263,6 +329,14 @@ func (controller *Controller) ReadUserAPI(c echo.Context) error {
 
 // UpdateUserAPI: PUT User
 func (controller *Controller) UpdateUserAPI(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	var user models.User
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -293,6 +367,14 @@ func (controller *Controller) UpdateUserAPI(c echo.Context) error {
 
 // DeleteUser API: Delete User
 func (controller *Controller) DeleteUserAPI(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	// (models.User{}) or var user models.User or user := models.User{}
