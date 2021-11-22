@@ -8,13 +8,28 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// TemplateRenderer is a custom html/template renderer for Echo framework
-type TemplateRenderer struct {
+// Templates is a custom html/template renderer for Echo framework
+type Templates struct {
 	Templates map[string]*template.Template
 }
 
+// New Templates
+func New() *Templates {
+	t := make(map[string]*template.Template)
+	t["home.html"] = parseFiles("views/home.html")
+	t["about.html"] = parseFiles("views/about.html")
+	t["users/user-all.html"] = parseFiles("views/users/user-all.html")
+	t["users/user-add.html"] = parseFiles("views/users/user-add.html", "views/users/user-form.html")
+	t["users/user-read.html"] = parseFiles("views/users/user-read.html", "views/users/user-form.html")
+	t["users/user-view.html"] = parseFiles("views/users/user-view.html", "views/users/user-form.html")
+
+	return &Templates{
+		Templates: t,
+	}
+}
+
 // Render implement e.Renderer interface
-func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	// Add global methods if data is a map
 	if viewContext, isMap := data.(map[string]interface{}); isMap {
 		viewContext["reverse"] = c.Echo().Reverse
@@ -22,8 +37,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 
 	tmpl, ok := t.Templates[name]
 	if !ok {
-		err := errors.New("Template not found -> " + name)
-		return err
+		return errors.New("Template not found -> " + name)
 	}
 	return tmpl.ExecuteTemplate(w, "base.html", data)
 }
@@ -37,19 +51,4 @@ func parseFiles(s string, t ...string) *template.Template {
 	}
 	// "views/base.html"?
 	return template.Must(template.ParseFiles(s, "views/base.html"))
-}
-
-// Templates
-func Templates() *TemplateRenderer {
-	t := make(map[string]*template.Template)
-	t["home.html"] = parseFiles("views/home.html")
-	t["about.html"] = parseFiles("views/about.html")
-	t["users/user-all.html"] = parseFiles("views/users/user-all.html")
-	t["users/user-add.html"] = parseFiles("views/users/user-add.html", "views/users/user-form.html")
-	t["users/user-read.html"] = parseFiles("views/users/user-read.html", "views/users/user-form.html")
-	t["users/user-view.html"] = parseFiles("views/users/user-view.html", "views/users/user-form.html")
-
-	return &TemplateRenderer{
-		Templates: t,
-	}
 }

@@ -1,20 +1,17 @@
 package main
 
 import (
-	"github.com/ockibagusp/hello/db"
-	t "github.com/ockibagusp/hello/template"
+	"log"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	c "github.com/ockibagusp/hello/controllers"
+	"github.com/ockibagusp/hello/controllers"
+	"github.com/ockibagusp/hello/template"
 )
 
 func main() {
-	// PROD or DEV
-	dbManager := db.Init("PROD")
-
 	// Echo instance
 	e := echo.New()
 
@@ -27,13 +24,13 @@ func main() {
 	)))
 
 	// Instantiate a template registry with an array of template set
-	e.Renderer = t.Templates()
+	e.Renderer = template.New()
 
 	// Why bootstrap.min.css, bootstrap.min.js, jquery.min.js?
 	e.Static("/assets", "assets")
 
 	// controllers init
-	controllers := c.Controller{DB: dbManager}
+	controllers := controllers.New()
 
 	// Route => controllers
 	e.GET("/", controllers.Home).Name = "home"
@@ -59,5 +56,7 @@ func main() {
 	g.DELETE("/users/:id", controllers.DeleteUserAPI).Name = "user delete"
 
 	// Start the Echo server
-	e.Start(":8000")
+	if err := e.Start(":8000"); err != nil {
+		log.Fatal(err)
+	}
 }
