@@ -46,15 +46,6 @@ func main() {
 	e.POST("/users/view/:id", controllers.UpdateUser).Name = "user/view post"
 	e.GET("/users/delete/:id", controllers.DeleteUser).Name = "user/delete get"
 
-	// Route => controllers API
-	g := e.Group("/api/v1")
-	g.GET("/users", controllers.UsersAPI).Name = "users get"
-
-	g.POST("/users", controllers.CreateUserAPI).Name = "user post"
-	g.GET("/users/:id", controllers.ReadUserAPI).Name = "user read"
-	g.PUT("/users/:id", controllers.UpdateUserAPI).Name = "user update"
-	g.DELETE("/users/:id", controllers.DeleteUserAPI).Name = "user delete"
-
 	// Start the Echo server
 	if err := e.Start(":8000"); err != nil {
 		log.Fatal(err)

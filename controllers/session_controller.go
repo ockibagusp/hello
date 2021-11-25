@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"net/http"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -44,26 +42,26 @@ func (controller *Controller) Login(c echo.Context) error {
 			return err
 		}
 
-		var user models.User
-		tx := controller.DB.Begin()
-		if err = tx.Error; err != nil {
-			return err
-		}
-
-		// SHA256 hasher
-		hasher := sha256.New()
-		hasher.Write([]byte(credentials.password))
-		sha := hex.EncodeToString(hasher.Sum(nil))
-
-		// err := tx.Select(...).Where(...).First(...).Error
-		err = tx.Select("username, password").Where(
-			"username = ? AND password = ?", credentials.username, sha,
-		).First(&user).Error
+		// Password Hash
+		hash, err := middleware.PasswordHash(credentials.password)
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
-		tx.Commit()
+
+		// check hash password:
+		// match = true
+		// match = false
+		if !middleware.CheckHashPassword(hash, credentials.password) {
+			return err
+		}
+
+		var user models.User
+		// err := controller.DB.Select(...).Where(...).Find(...).Error
+		if err := controller.DB.Select("username, password").Where(
+			"username = ? AND password = ?", credentials.username, hash,
+		).Find(&user).Error; err != nil {
+			return err
+		}
 
 		if _, err := middleware.SetSession(user, c); err != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{
