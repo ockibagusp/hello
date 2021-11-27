@@ -19,7 +19,7 @@ type credentials struct {
 func (lf credentials) Validate() error {
 	return validation.ValidateStruct(&lf,
 		validation.Field(&lf.username, validation.Required, validation.Length(4, 15)),
-		validation.Field(&lf.password, validation.Required, validation.Length(6, 16)),
+		validation.Field(&lf.password, validation.Required, validation.Length(6, 18)),
 	)
 }
 
