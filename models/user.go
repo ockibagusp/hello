@@ -23,128 +23,94 @@ type UserCity struct {
 	CityMassage string `gorm:"index:city_massage" json:"city_massage" form:"city_massage"`
 }
 
+/*
+ * the tx *DB: exists apparetly
+ */
+
 // User: Save
 func (user User) Save(db *gorm.DB) (User, error) {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
-		return User{}, err
-	}
-
-	if err := tx.Create(&user).Error; err != nil {
-		tx.Rollback()
+	if err := db.Create(&user).Error; err != nil {
 		return User{}, errors.New("User Exists")
 	}
-	tx.Commit()
 
 	return user, nil
 }
 
 // User: FindAll
 func (User) FindAll(db *gorm.DB) ([]User, error) {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
-		return []User{}, err
-	}
-
 	users := []User{}
 
 	// Limit: 25 ?
-	err := tx.Limit(25).Find(&users).Error
-
+	err := db.Limit(25).Find(&users).Error
 	if err != nil {
-		tx.Rollback()
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return []User{}, errors.New("User Not Found")
 		}
 		return []User{}, err
 	}
-	tx.Commit()
 
 	return users, nil
 }
 
 // User: FindByID
 func (user User) FindByID(db *gorm.DB, id int) (User, error) {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
-		return User{}, err
-	}
-
-	err := tx.First(&user, id).Error
-
+	err := db.First(&user, id).Error
 	if err != nil {
-		tx.Rollback()
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return User{}, errors.New("User Not Found")
 		}
 		return User{}, err
 	}
-	tx.Commit()
 
 	return user, nil
 }
 
 // User: FindByCityID
 func (user User) FindByCityID(db *gorm.DB, id int) (User, error) {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
-		return User{}, err
-	}
-
-	err := tx.Select("users.*, cities.id as city_id, cities.city as city_massage").
+	err := db.Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").First(&user, id).Error
-
 	if err != nil {
-		tx.Rollback()
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return User{}, errors.New("User Not Found")
 		}
 		return User{}, err
 	}
-	tx.Commit()
 
 	return user, nil
 }
 
 // User: Update
 func (user User) Update(db *gorm.DB, id int) (User, error) {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
-		return User{}, err
-	}
-
-	err := tx.Where("id = ?", id).Updates(&User{
+	err := db.Where("id = ?", id).Updates(&User{
 		Username: user.Username,
 		Email:    user.Email,
-		Password: user.Password,
 		Name:     user.Name,
 		City:     user.City,
 		Photo:    user.Photo,
 	}).Error
-
 	if err != nil {
-		tx.Rollback()
 		return User{}, err
 	}
-	tx.Commit()
 
 	return user, nil
 }
 
-// User: Delete
-func (user User) Delete(db *gorm.DB, id int) error {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
+// User: Update By ID and Password
+func (user User) UpdateByIDandPassword(db *gorm.DB, id int, password string) (err error) {
+	if err = db.Where(" id = ?", id).Update("password", password).Find(user).Error; err != nil {
 		return err
 	}
 
-	// if tx.Delete(&user, id).Error != nil {}
-	if err := tx.Delete(&user, id).Error; err != nil {
-		tx.Rollback()
+	return
+}
+
+// User: Delete
+func (user User) Delete(db *gorm.DB, id int) error {
+	// if db.Delete(&user, id).Error != nil {}
+	if err := db.Delete(&user, id).Error; err != nil {
 		// return errors.New("Record Not Found")
 		return err
 	}
-	tx.Commit()
 
 	return nil
 }
