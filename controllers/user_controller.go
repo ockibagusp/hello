@@ -4,18 +4,23 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/ockibagusp/hello/middleware"
 	"github.com/ockibagusp/hello/models"
 )
 
-// Users: GET Users
+/*
+ * Users All
+ *
+ * @target: Users
+ * @method: GET
+ * @route: /users
+ */
 func (controller *Controller) Users(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// /users to /login? Why?
+		// TODO: /users to /login? Why?
 		c.Request().URL.Path = "/login"
 		return c.HTML(http.StatusUnauthorized, loginFormHTML)
 		// TODO: template/template: TemplateRenderer.Render(...), data.(map[string]interface{})["foo"] ?
@@ -30,13 +35,6 @@ func (controller *Controller) Users(c echo.Context) error {
 		})
 	}
 
-	// is parse API: GET /users
-	// -> func (controller *...) Users and controller.ParseAPI("/users")
-	_url := controller.ParseAPI("/users")
-	if c.Path() == _url.Path {
-		return c.JSON(http.StatusOK, users)
-	}
-
 	return c.Render(http.StatusOK, "users/user-all.html", echo.Map{
 		"name":  "Users",
 		"nav":   "users", // (?)
@@ -44,7 +42,13 @@ func (controller *Controller) Users(c echo.Context) error {
 	})
 }
 
-// CreateUser: GET or POST User
+/*
+ * User Add
+ *
+ * @target: Users
+ * @method: GET or POST
+ * @route: /users/add
+ */
 func (controller *Controller) CreateUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
@@ -105,7 +109,13 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 	})
 }
 
-// ReadUser: GET User :id
+/*
+ * Read User ID
+ *
+ * @target: Users
+ * @method: GET
+ * @route: /users/read/:id
+ */
 func (controller *Controller) ReadUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
@@ -115,13 +125,12 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 		// return c.Redirect(http.StatusUnauthorized, "/login")
 	}
 
-	var user models.User
-	var err error
-
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	// user, _ = user.FindByID(...): be able
-	if user, err = user.FindByID(controller.DB, id); err != nil {
+	var user models.User
+	// user, err := user.FindByID(...): be able
+	user, err := user.FindByID(controller.DB, id)
+	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
@@ -133,14 +142,6 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
-	}
-
-	// is parse API: GET /users/:id
-	_url := controller.ParseAPI("/users/" + strconv.Itoa(id))
-
-	// ":id" ?
-	if strings.Replace(c.Path(), ":id", c.Param("id"), 1) == _url.Path {
-		return c.JSON(http.StatusOK, user)
 	}
 
 	return c.Render(http.StatusOK, "users/user-read.html", echo.Map{
@@ -152,7 +153,13 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 	})
 }
 
-// UpdateUser: GET or POST User :id
+/*
+ * Update User ID
+ *
+ * @target: Users
+ * @method: GET or POST
+ * @route: /users/view/:id
+ */
 func (controller *Controller) UpdateUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
@@ -162,19 +169,18 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 		// return c.Redirect(http.StatusUnauthorized, "/login")
 	}
 
-	var user models.User
-	var err error
-
 	id, _ := strconv.Atoi(c.Param("id"))
 
+	var user models.User
 	if c.Request().Method == "POST" {
+		// TODO: html flash message
 		if err := c.Bind(&user); err != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": "400 Bad Request: " + err.Error(),
 			})
 		}
 
-		// _, err := user.Update(...): be able
+		// _, err = user.Update(...): be able
 		if _, err := user.Update(controller.DB, id); err != nil {
 			return c.JSON(http.StatusNotAcceptable, echo.Map{
 				"message": "405 Method Not Allowed: " + err.Error(),
@@ -184,8 +190,9 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
 
-	// user, _ = user.FindByID(...): be able
-	if user, err = user.FindByID(controller.DB, id); err != nil {
+	// user, err := user.FindByID(...): be able
+	user, err := user.FindByID(controller.DB, id)
+	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
@@ -199,16 +206,6 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 		})
 	}
 
-	// is parse API: PUT /users/:id
-	_url := controller.ParseAPI("/users/" + strconv.Itoa(id))
-
-	// ":id" ?
-	if strings.Replace(c.Path(), ":id", c.Param("id"), 1) == _url.Path {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": "400 Bad Request: " + err.Error(),
-		})
-	}
-
 	return c.Render(http.StatusOK, "users/user-view.html", echo.Map{
 		"name":   fmt.Sprintf("User: %s", user.Name),
 		"nav":    fmt.Sprintf("User: %s", user.Name), // (?)
@@ -217,7 +214,74 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 	})
 }
 
-// DeleteUser: DELETE User :id
+/*
+ * Update User ID by Password
+ *
+ * @target: Users
+ * @method: GET or POST
+ * @route: /users/view/:id/password
+ */
+func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	if len(session.Values) == 0 {
+		// /users to /login? Why?
+		c.Request().URL.Path = "/login"
+		return c.HTML(http.StatusUnauthorized, loginFormHTML)
+		// return c.Redirect(http.StatusUnauthorized, "/login")
+	}
+
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	if c.Request().Method == "POST" {
+		if c.FormValue("password") != c.FormValue("confirm_password") {
+			return c.JSON(http.StatusBadRequest, echo.Map{
+				"message": "Passwords Don't Match",
+			})
+		}
+
+		user := models.User{
+			Password: c.FormValue("password"),
+		}
+
+		if err := c.Bind(&user); err != nil {
+			return c.JSON(http.StatusBadRequest, echo.Map{
+				"message": "400 Bad Request: " + err.Error(),
+			})
+		}
+
+		// err := user.UpdateByIDandPassword(...): be able
+		if err := user.UpdateByIDandPassword(controller.DB, id, user.Password); err != nil {
+			return c.JSON(http.StatusNotAcceptable, echo.Map{
+				"message": "405 Method Not Allowed: " + err.Error(),
+			})
+		}
+
+		return c.Redirect(http.StatusMovedPermanently, "/users")
+	}
+
+	var user models.User
+	var err error
+	// _, err = user.FindByID(...): be able
+	if user, err = user.FindByID(controller.DB, id); err != nil {
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
+	}
+
+	return c.Render(http.StatusOK, "users/user-view-password.html", echo.Map{
+		"name": fmt.Sprintf("User: %s", user.Name),
+		"nav":  fmt.Sprintf("User: %s", user.Name), // (?)
+		"user": user,
+	})
+}
+
+/*
+ * Delete User ID
+ *
+ * @target: Users
+ * @method: GET
+ * @route: /users/delete/:id
+ */
 func (controller *Controller) DeleteUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
@@ -233,14 +297,6 @@ func (controller *Controller) DeleteUser(c echo.Context) error {
 	if err := (models.User{}).Delete(controller.DB, id); err != nil {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
-		})
-	}
-
-	// is parse API: DELETE /users/:id
-	_url := controller.ParseAPI("/users/" + strconv.Itoa(id))
-	if c.Path() == _url.Path {
-		return c.JSON(http.StatusNoContent, echo.Map{
-			"message": "204 No Content",
 		})
 	}
 

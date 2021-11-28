@@ -15,11 +15,10 @@
 <body>
   <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
     <a class="navbar-brand" href="/">Hello</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-      aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+    <div class="collapse navbar-collapse">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item {{if or (eq .nav " home")}}active{{end}}">
           <a class="nav-link" href="/">Home {{if or (eq .nav "home")}}<span class="sr-only">(current)</span>{{end}}</a>
@@ -29,9 +28,7 @@
               class="sr-only">(current)</span>{{end}}</a>
         </li>
       </ul>
-      <!-- (?) -->
-      <a href="/users" class="btn">Users</a>
-      <a href="/users/add" class="btn btn-outline-success my-2 my-sm-0">Sign-in</a>
+      {{template "navbar-right" .}}
     </div>
   </nav>
   {{template "body" .}}
@@ -39,6 +36,6 @@
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
   integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-
+  {{template "footer" .}}
 </html>
 {{end}}

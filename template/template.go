@@ -15,6 +15,7 @@ type Templates struct {
 
 // New Templates
 func New() *Templates {
+
 	t := make(map[string]*template.Template)
 	t["home.html"] = parseFiles("views/home.html")
 	t["about.html"] = parseFiles("views/about.html")
@@ -22,6 +23,7 @@ func New() *Templates {
 	t["users/user-add.html"] = parseFiles("views/users/user-add.html", "views/users/user-form.html")
 	t["users/user-read.html"] = parseFiles("views/users/user-read.html", "views/users/user-form.html")
 	t["users/user-view.html"] = parseFiles("views/users/user-view.html", "views/users/user-form.html")
+	t["users/user-view-password.html"] = parseFiles("views/users/user-view-password.html")
 
 	return &Templates{
 		Templates: t,
@@ -33,6 +35,18 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 	// Add global methods if data is a map
 	if viewContext, isMap := data.(map[string]interface{}); isMap {
 		viewContext["reverse"] = c.Echo().Reverse
+
+		/*
+		* @param
+		* - Is Auth Type:
+		* is_auth_type (int): {0:unauthorized, 1:admin, 2:user}
+		 */
+		isAuthType := 2 // user.is_auth_type = 2 ?
+		viewContext["is_auth_type"] = isAuthType
+
+		viewContext["is_html_only"] = true
+		if viewContext["is_html_only"] == true {
+		}
 	}
 
 	tmpl, ok := t.Templates[name]

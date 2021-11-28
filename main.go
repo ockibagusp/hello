@@ -44,6 +44,10 @@ func main() {
 	e.GET("/users/read/:id", controllers.ReadUser).Name = "user/read get"
 	e.GET("/users/view/:id", controllers.UpdateUser).Name = "user/view get"
 	e.POST("/users/view/:id", controllers.UpdateUser).Name = "user/view post"
+	e.GET("/users/view/:id/password", controllers.UpdateUserByPassword).
+		Name = "user/view/:id/password get"
+	e.POST("/users/view/:id/password", controllers.UpdateUserByPassword).
+		Name = "user/view/:id/password post"
 	e.GET("/users/delete/:id", controllers.DeleteUser).Name = "user/delete get"
 
 	// Start the Echo server
