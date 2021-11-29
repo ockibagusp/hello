@@ -20,11 +20,9 @@ import (
 func (controller *Controller) Users(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// TODO: /users to /login? Why?
-		c.Request().URL.Path = "/login"
-		return c.HTML(http.StatusUnauthorized, loginFormHTML)
-		// TODO: template/template: TemplateRenderer.Render(...), data.(map[string]interface{})["foo"] ?
+		// TODO: why? return c.Redirect(...): html "status":500,"error":"invalid redirect status code"
 		// return c.Redirect(http.StatusUnauthorized, "/login")
+		return c.Redirect(http.StatusFound, "/login")
 	}
 
 	// models.User{} or (models.User{}) or var user models.User or user := models.User{}
@@ -50,14 +48,6 @@ func (controller *Controller) Users(c echo.Context) error {
  * @route: /users/add
  */
 func (controller *Controller) CreateUser(c echo.Context) error {
-	session, _ := middleware.GetUser(c)
-	if len(session.Values) == 0 {
-		// /users to /login? Why?
-		c.Request().URL.Path = "/login"
-		return c.HTML(http.StatusUnauthorized, loginFormHTML)
-		// return c.Redirect(http.StatusUnauthorized, "/login")
-	}
-
 	if c.Request().Method == "POST" {
 		city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
 		if err != nil {
@@ -119,10 +109,8 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 func (controller *Controller) ReadUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// /users to /login? Why?
-		c.Request().URL.Path = "/login"
-		return c.HTML(http.StatusUnauthorized, loginFormHTML)
 		// return c.Redirect(http.StatusUnauthorized, "/login")
+		return c.Redirect(http.StatusFound, "/login")
 	}
 
 	id, _ := strconv.Atoi(c.Param("id"))
@@ -163,10 +151,8 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 func (controller *Controller) UpdateUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// /users to /login? Why?
-		c.Request().URL.Path = "/login"
-		return c.HTML(http.StatusUnauthorized, loginFormHTML)
 		// return c.Redirect(http.StatusUnauthorized, "/login")
+		return c.Redirect(http.StatusFound, "/login")
 	}
 
 	id, _ := strconv.Atoi(c.Param("id"))
@@ -224,10 +210,8 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// /users to /login? Why?
-		c.Request().URL.Path = "/login"
-		return c.HTML(http.StatusUnauthorized, loginFormHTML)
 		// return c.Redirect(http.StatusUnauthorized, "/login")
+		return c.Redirect(http.StatusFound, "/login")
 	}
 
 	id, _ := strconv.Atoi(c.Param("id"))
@@ -285,10 +269,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 func (controller *Controller) DeleteUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// /users to /login? Why?
-		c.Request().URL.Path = "/login"
-		return c.HTML(http.StatusUnauthorized, loginFormHTML)
 		// return c.Redirect(http.StatusUnauthorized, "/login")
+		return c.Redirect(http.StatusFound, "/login")
 	}
 
 	id, _ := strconv.Atoi(c.Param("id"))

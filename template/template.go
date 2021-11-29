@@ -19,6 +19,7 @@ func New() *Templates {
 	t := make(map[string]*template.Template)
 	t["home.html"] = parseFiles("views/home.html")
 	t["about.html"] = parseFiles("views/about.html")
+	t["login.html"] = template.Must(template.ParseFiles("views/login.html"))
 	t["users/user-all.html"] = parseFiles("views/users/user-all.html")
 	t["users/user-add.html"] = parseFiles("views/users/user-add.html", "views/users/user-form.html")
 	t["users/user-read.html"] = parseFiles("views/users/user-read.html", "views/users/user-form.html")
@@ -32,27 +33,25 @@ func New() *Templates {
 
 // Render implement e.Renderer interface
 func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	// Add global methods if data is a map
-	if viewContext, isMap := data.(map[string]interface{}); isMap {
-		viewContext["reverse"] = c.Echo().Reverse
-
-		/*
-		* @param
-		* - Is Auth Type:
-		* is_auth_type (int): {0:unauthorized, 1:admin, 2:user}
-		 */
-		isAuthType := 2 // user.is_auth_type = 2 ?
-		viewContext["is_auth_type"] = isAuthType
-
-		viewContext["is_html_only"] = true
-		if viewContext["is_html_only"] == true {
-		}
-	}
-
 	tmpl, ok := t.Templates[name]
 	if !ok {
 		return errors.New("Template not found -> " + name)
 	}
+
+	// Add global methods if data is a map
+	if viewContext, isMap := data.(echo.Map); isMap {
+		viewContext["reverse"] = c.Echo().Reverse
+
+		/*
+			@param /login
+			- Is HTML Only
+			is_html_only (bool): {true, false}
+		*/
+		if viewContext["is_html_only"] == true {
+			return tmpl.ExecuteTemplate(w, name, data)
+		}
+	}
+
 	return tmpl.ExecuteTemplate(w, "base.html", data)
 }
 

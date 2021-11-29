@@ -72,7 +72,9 @@ func (controller *Controller) Login(c echo.Context) error {
 		return c.Redirect(http.StatusFound, "/")
 	}
 
-	return c.HTML(http.StatusOK, loginFormHTML)
+	return c.Render(http.StatusOK, "login.html", echo.Map{
+		"is_html_only": true,
+	})
 }
 
 // Session: GET Logout
@@ -85,44 +87,3 @@ func (controller *Controller) Logout(c echo.Context) error {
 
 	return c.Redirect(http.StatusSeeOther, "/")
 }
-
-/*
-why?
-
-TODO:
-- template/template: TemplateRenderer.Render(...), data.(map[string]interface{})["foo"] ?
-- template/template: TemplateRenderer.Render(...), if errors.As(...) ?
-*/
-const loginFormHTML string = `
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Login</title>
-
-    <link rel="canonical" href="/login">
-
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="/assets/css/signin.css">
-  </head>
-
-  <body class="text-center">
-    <form class="form-signin" action="/login" method="post">
-      <img class="mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
-      <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-      <label for="username" class="sr-only">Usernane</label>
-      <input type="username" name="username" class="form-control" placeholder="Usernane" value="ockibagusp" required autofocus>
-      <label for="password" class="sr-only">Password</label>
-      <input type="password" name="password" class="form-control" placeholder="Password" value="user123" required>
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-      <p class="mt-5 mb-3 text-muted">&copy; 2021</p>
-    </form>
-  </body>
-</html>
-`
