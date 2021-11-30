@@ -2,11 +2,6 @@
   {{index . "name"}} 
 {{end}} 
 
-{{define "navbar-right"}}
-<a href="/users" class="btn">Users</a>
-<a href="/users/add" class="btn btn-outline-success my-2 my-sm-0">Sign-in</a>
-{{end}}
-
 {{define "body"}}
 <main role="main">
   <div class="container">
@@ -21,7 +16,6 @@
 </main>
 {{end}}
 
-{{define "footer"}}
 <!-- jQuery Validate -->
 <!-- too long, around 2015 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
@@ -88,4 +82,3 @@
     })
   });
 </script>
-{{end}}

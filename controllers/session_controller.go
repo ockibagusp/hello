@@ -42,25 +42,21 @@ func (controller *Controller) Login(c echo.Context) error {
 			return err
 		}
 
-		// Password Hash
-		hash, err := middleware.PasswordHash(credentials.password)
-		if err != nil {
+		var user models.User
+		// err := controller.DB.Select(...).Where(...).Find(...).Error
+		if err := controller.DB.Debug().Select("username", "password").Where(
+			"username = ?", credentials.username,
+		).Find(&user).Error; err != nil {
 			return err
 		}
 
 		// check hash password:
 		// match = true
 		// match = false
-		if !middleware.CheckHashPassword(hash, credentials.password) {
-			return err
-		}
-
-		var user models.User
-		// err := controller.DB.Select(...).Where(...).Find(...).Error
-		if err := controller.DB.Select("username, password").Where(
-			"username = ? AND password = ?", credentials.username, hash,
-		).Find(&user).Error; err != nil {
-			return err
+		if !middleware.CheckHashPassword(user.Password, credentials.password) {
+			return c.Render(http.StatusForbidden, "login.html", echo.Map{
+				"is_html_only": true,
+			})
 		}
 
 		if _, err := middleware.SetSession(user, c); err != nil {

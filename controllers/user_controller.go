@@ -23,8 +23,6 @@ import (
 func (controller *Controller) Users(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// TODO: why? return c.Redirect(...): html "status":500,"error":"invalid redirect status code"
-		// return c.Redirect(http.StatusUnauthorized, "/login")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -61,7 +59,7 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		// Kota dan Keb. ?
 		city := uint(city64)
 
-		// START moves dictionary ?
+		// TODO: START moves dictionary ?
 
 		// type userForm: of a user
 		type userForm struct {
@@ -128,13 +126,6 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 			return err
 		}
 
-		// check hash password:
-		// match = true
-		// match = false
-		if !middleware.CheckHashPassword(hash, _userForm.password) {
-			return err
-		}
-
 		user := models.User{
 			Username: _userForm.username,
 			Email:    _userForm.email,
@@ -142,12 +133,6 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 			Name:     _userForm.name,
 			City:     _userForm.city,
 			Photo:    _userForm.photo,
-		}
-
-		if err := c.Bind(&user); err != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": "400 Bad Request: " + err.Error(),
-			})
 		}
 
 		// _, err := user.Save(...): be able
@@ -186,7 +171,6 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 func (controller *Controller) ReadUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// return c.Redirect(http.StatusUnauthorized, "/login")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -228,7 +212,6 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 func (controller *Controller) UpdateUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// return c.Redirect(http.StatusUnauthorized, "/login")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -287,7 +270,6 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// return c.Redirect(http.StatusUnauthorized, "/login")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -346,7 +328,6 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 func (controller *Controller) DeleteUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
 	if len(session.Values) == 0 {
-		// return c.Redirect(http.StatusUnauthorized, "/login")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 

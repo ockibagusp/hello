@@ -2,11 +2,6 @@
  {{index . "name"}}
 {{end}} 
 
-{{define "navbar-right"}}
-<a href="/users" class="btn">Users</a>
-<a href="/users/add" class="btn btn-outline-success my-2 my-sm-0">Sign-in</a>
-{{end}}
-
 {{define "body"}}
 <main role="main">
   <div class="container">
@@ -20,6 +15,7 @@
             >
           </div>
         </div>
+        {{.session.Values}}
         <div class="table-responsive">
           <table class="table table-striped no-margin">
             <tbody>
@@ -66,7 +62,4 @@
     </div>
   </div>
 </main>
-{{end}}
-
-{{define "footer"}}
 {{end}}
