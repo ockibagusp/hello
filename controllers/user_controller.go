@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/labstack/echo/v4"
 	"github.com/ockibagusp/hello/middleware"
 	"github.com/ockibagusp/hello/models"
@@ -58,13 +61,87 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		// Kota dan Keb. ?
 		city := uint(city64)
 
+		// START moves dictionary ?
+
+		// type userForm: of a user
+		type userForm struct {
+			username         string
+			email            string
+			password         string
+			confirm_password string
+			name             string
+			city             uint
+			photo            string
+		}
+
+		// function passwordEquals: of password equals confirm_password
+		passwordEquals := func(confirm_password string) validation.RuleFunc {
+			return func(value interface{}) error {
+				password, _ := value.(string)
+				if password != confirm_password {
+					return errors.New("unexpected password")
+				}
+				return nil
+			}
+		}
+
+		// userForm: type of a user
+		_userForm := userForm{
+			username:         c.FormValue("username"),
+			email:            c.FormValue("email"),
+			password:         c.FormValue("password"),
+			confirm_password: c.FormValue("confirm_password"),
+			name:             c.FormValue("name"),
+			city:             city,
+			photo:            c.FormValue("photo"),
+		}
+
+		// _userForm: Validate: of a validate user
+		err = validation.Errors{
+			"username": validation.Validate(
+				_userForm.username, validation.Required, validation.Length(4, 15),
+			),
+			"email": validation.Validate(_userForm.email, validation.Required, is.Email),
+			"password": validation.Validate(
+				_userForm.password, validation.Required, validation.Length(6, 18),
+				validation.By(passwordEquals(_userForm.confirm_password)),
+			),
+			"name":  validation.Validate(_userForm.name, validation.Required),
+			"city":  validation.Validate(_userForm.city),
+			"photo": validation.Validate(_userForm.photo),
+		}.Filter()
+		/* if err = validation.Errors{...}.Filter(); err != nil {
+			...
+		} why?
+		*/
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, echo.Map{
+				"message": "400 Bad Request: " + err.Error(),
+			})
+		}
+
+		// END
+
+		// Password Hash
+		hash, err := middleware.PasswordHash(_userForm.password)
+		if err != nil {
+			return err
+		}
+
+		// check hash password:
+		// match = true
+		// match = false
+		if !middleware.CheckHashPassword(hash, _userForm.password) {
+			return err
+		}
+
 		user := models.User{
-			Username: c.FormValue("username"),
-			Email:    c.FormValue("email"),
-			Password: c.FormValue("password"),
-			Name:     c.FormValue("name"),
-			City:     city,
-			Photo:    c.FormValue("photo"),
+			Username: _userForm.username,
+			Email:    _userForm.email,
+			Password: hash,
+			Name:     _userForm.name,
+			City:     _userForm.city,
+			Photo:    _userForm.photo,
 		}
 
 		if err := c.Bind(&user); err != nil {
@@ -76,7 +153,7 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		// _, err := user.Save(...): be able
 		if _, err := user.Save(controller.DB); err != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": "Error 1062: Duplicate entry",
+				"message": err.Error(),
 			})
 		}
 

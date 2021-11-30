@@ -30,7 +30,7 @@ type UserCity struct {
 // User: Save
 func (user User) Save(db *gorm.DB) (User, error) {
 	if err := db.Create(&user).Error; err != nil {
-		return User{}, errors.New("User Exists")
+		return User{}, err
 	}
 
 	return user, nil
