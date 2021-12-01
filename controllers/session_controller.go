@@ -44,7 +44,7 @@ func (controller *Controller) Login(c echo.Context) error {
 
 		var user models.User
 		// err := controller.DB.Select(...).Where(...).Find(...).Error
-		if err := controller.DB.Debug().Select("username", "password").Where(
+		if err := controller.DB.Select("username", "password").Where(
 			"username = ?", credentials.username,
 		).Find(&user).Error; err != nil {
 			return err
