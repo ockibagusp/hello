@@ -34,10 +34,12 @@ func (controller *Controller) Users(c echo.Context) error {
 		})
 	}
 
+	session_values, _ := middleware.GetSessionValues(session.Values)
 	return c.Render(http.StatusOK, "users/user-all.html", echo.Map{
-		"name":  "Users",
-		"nav":   "users", // (?)
-		"users": users,
+		"name":           "Users",
+		"nav":            "users", // (?)
+		"session_values": session_values,
+		"users":          users,
 	})
 }
 
@@ -153,11 +155,14 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		})
 	}
 
+	session, _ := middleware.GetUser(c)
+	session_values, _ := middleware.GetSessionValues(session.Values)
 	return c.Render(http.StatusOK, "users/user-add.html", echo.Map{
-		"name":   "User Add",
-		"nav":    "user Add", // (?)
-		"cities": cities,
-		"is_new": true,
+		"name":           "User Add",
+		"nav":            "user Add", // (?)
+		"session_values": session_values,
+		"cities":         cities,
+		"is_new":         true,
 	})
 }
 
@@ -193,12 +198,14 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 		})
 	}
 
+	session_values, _ := middleware.GetSessionValues(session.Values)
 	return c.Render(http.StatusOK, "users/user-read.html", echo.Map{
-		"name":    fmt.Sprintf("User: %s", user.Name),
-		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
-		"user":    user,
-		"cities":  cities,
-		"is_read": true,
+		"name":           fmt.Sprintf("User: %s", user.Name),
+		"nav":            fmt.Sprintf("User: %s", user.Name), // (?)
+		"session_values": session_values,
+		"user":           user,
+		"cities":         cities,
+		"is_read":        true,
 	})
 }
 
@@ -252,11 +259,13 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 		})
 	}
 
+	session_values, _ := middleware.GetSessionValues(session.Values)
 	return c.Render(http.StatusOK, "users/user-view.html", echo.Map{
-		"name":   fmt.Sprintf("User: %s", user.Name),
-		"nav":    fmt.Sprintf("User: %s", user.Name), // (?)
-		"user":   user,
-		"cities": cities,
+		"name":           fmt.Sprintf("User: %s", user.Name),
+		"nav":            fmt.Sprintf("User: %s", user.Name), // (?)
+		"session_values": session_values,
+		"user":           user,
+		"cities":         cities,
 	})
 }
 
@@ -311,10 +320,12 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		})
 	}
 
+	session_values, _ := middleware.GetSessionValues(session.Values)
 	return c.Render(http.StatusOK, "users/user-view-password.html", echo.Map{
-		"name": fmt.Sprintf("User: %s", user.Name),
-		"nav":  fmt.Sprintf("User: %s", user.Name), // (?)
-		"user": user,
+		"name":           fmt.Sprintf("User: %s", user.Name),
+		"nav":            fmt.Sprintf("User: %s", user.Name), // (?)
+		"session_values": session_values,
+		"user":           user,
 	})
 }
 

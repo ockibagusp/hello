@@ -46,7 +46,7 @@ func SetSession(user models.User, c echo.Context) (session_values *SessionValues
 	session_gorilla.Save(c.Request(), c.Response())
 
 	if session_values, err = GetSessionValues(session_gorilla.Values); err != nil {
-		return session_values, err
+		return nil, err
 	}
 
 	return
@@ -87,12 +87,19 @@ type SessionValues struct {
 // GetSessionValues: get session values from User
 func GetSessionValues(session_values_map map[interface{}]interface{}) (
 	session_values *SessionValues, err error) {
-	if _, ok := session_values_map["username"].(string); !ok {
-		err = errors.New("username: session expired")
+
+	// it's session_values_map["is_auth_type"]
+	if session_values_map["is_auth_type"] == nil {
+		session_values = &SessionValues{
+			Username:   "",
+			IsAuthType: -1,
+		}
 		return
-	} else if _, ok := session_values_map["is_auth_type"].(int); !ok {
-		err = errors.New("is_auth_type: session expired")
-		return
+	}
+
+	session_values = &SessionValues{
+		Username:   session_values_map["username"].(string),
+		IsAuthType: session_values_map["is_auth_type"].(int),
 	}
 
 	return
