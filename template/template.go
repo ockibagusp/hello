@@ -14,7 +14,8 @@ type Templates struct {
 }
 
 // New Templates
-func New() *Templates {
+func NewTemplates() *Templates {
+	// TODO: tpl := template.Must(template.New("main").Funcs(template.FuncMap{"tostring": ToString}))
 
 	t := make(map[string]*template.Template)
 	t["home.html"] = parseFiles("views/home.html")

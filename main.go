@@ -24,7 +24,7 @@ func main() {
 	)))
 
 	// Instantiate a template registry with an array of template set
-	e.Renderer = template.New()
+	e.Renderer = template.NewTemplates()
 
 	// Why bootstrap.min.css, bootstrap.min.js, jquery.min.js?
 	e.Static("/assets", "assets")
