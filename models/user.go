@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// User init
+// User: struct
 type User struct {
 	Model
 	Username string `gorm:"unique;not null" json:"username" form:"username"`
@@ -17,16 +17,20 @@ type User struct {
 	Photo    string `json:"photo" form:"photo"`
 }
 
-// UserCity init
+// UserCity: struct
 type UserCity struct {
 	User
 	CityMassage string `gorm:"index:city_massage" json:"city_massage" form:"city_massage"`
 }
 
+/*
+ * the tx *DB: exists apparetly
+ */
+
 // User: Save
 func (user User) Save(db *gorm.DB) (User, error) {
 	if err := db.Create(&user).Error; err != nil {
-		return User{}, errors.New("User Exists")
+		return User{}, err
 	}
 
 	return user, nil
@@ -38,9 +42,11 @@ func (User) FindAll(db *gorm.DB) ([]User, error) {
 
 	// Limit: 25 ?
 	err := db.Limit(25).Find(&users).Error
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return []User{}, errors.New("User Not Found")
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return []User{}, errors.New("User Not Found")
+		}
+		return []User{}, err
 	}
 
 	return users, nil
@@ -49,9 +55,11 @@ func (User) FindAll(db *gorm.DB) ([]User, error) {
 // User: FindByID
 func (user User) FindByID(db *gorm.DB, id int) (User, error) {
 	err := db.First(&user, id).Error
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return User{}, errors.New("User Not Found")
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return User{}, errors.New("User Not Found")
+		}
+		return User{}, err
 	}
 
 	return user, nil
@@ -61,9 +69,11 @@ func (user User) FindByID(db *gorm.DB, id int) (User, error) {
 func (user User) FindByCityID(db *gorm.DB, id int) (User, error) {
 	err := db.Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").First(&user, id).Error
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return User{}, errors.New("User Not Found")
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return User{}, errors.New("User Not Found")
+		}
+		return User{}, err
 	}
 
 	return user, nil
@@ -74,23 +84,32 @@ func (user User) Update(db *gorm.DB, id int) (User, error) {
 	err := db.Where("id = ?", id).Updates(&User{
 		Username: user.Username,
 		Email:    user.Email,
-		Password: user.Password,
 		Name:     user.Name,
 		City:     user.City,
 		Photo:    user.Photo,
 	}).Error
-
 	if err != nil {
-		return User{}, errors.New("User Not Found")
+		return User{}, err
 	}
 
 	return user, nil
 }
 
+// User: Update By ID and Password
+func (user User) UpdateByIDandPassword(db *gorm.DB, id int, password string) (err error) {
+	if err = db.Where(" id = ?", id).Update("password", password).Find(user).Error; err != nil {
+		return err
+	}
+
+	return
+}
+
 // User: Delete
 func (user User) Delete(db *gorm.DB, id int) error {
-	if db.Delete(&user, id).Error != nil {
-		return errors.New("Record Not Found")
+	// if db.Delete(&user, id).Error != nil {}
+	if err := db.Delete(&user, id).Error; err != nil {
+		// return errors.New("Record Not Found")
+		return err
 	}
 
 	return nil

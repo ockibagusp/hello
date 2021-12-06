@@ -1,16 +1,17 @@
-package controllers
+package test
 
 import (
 	"net/url"
 	"strings"
 	"testing"
 
+	"github.com/ockibagusp/hello/controllers"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
 // Controller test
-var _controller Controller = Controller{
+var _controller controllers.Controller = controllers.Controller{
 	DB:  new(gorm.DB),
 	API: "/api/v1", // API test
 }
