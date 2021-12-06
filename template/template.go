@@ -59,10 +59,23 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 func parseFiles(s string, t ...string) *template.Template {
 	// t parseFiles, example "views/user-form.html"
 	if len(t) == 1 {
-		return template.Must(template.ParseFiles(s, t[0], "views/base.html"))
+		return template.Must(
+			/* template.New("") or template.New("base"), same ?
+
+			t := make(map[string]*template.Template)
+			t["home.html"] = parseFiles("views/home.html")
+			...
+
+			*/
+			template.New("").Funcs(template.FuncMap{"tostring": ToString}).
+				ParseFiles(s, t[0], "views/base.html"),
+		)
 	} else if len(t) >= 2 {
 		panic("t [1] parseFiles, example \"views/users/user-form.html\"")
 	}
 	// "views/base.html"?
-	return template.Must(template.ParseFiles(s, "views/base.html"))
+	return template.Must(
+		template.New("").Funcs(template.FuncMap{"tostring": ToString}).
+			ParseFiles(s, "views/base.html"),
+	)
 }

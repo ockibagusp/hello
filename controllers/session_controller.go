@@ -26,7 +26,7 @@ func (lf credentials) Validate() error {
 // Session: GET Login
 func (controller *Controller) Login(c echo.Context) error {
 	session, err := middleware.GetUser(c)
-	if len(session.Values) != 0 && err == nil {
+	if session.Values["is_auth_type"] != -1 && err == nil {
 		return c.Redirect(http.StatusFound, "/")
 	}
 

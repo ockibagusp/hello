@@ -1,13 +1,13 @@
 package middleware
 
 import (
-	"errors"
-
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/ockibagusp/hello/models"
 )
+
+// base.html -> {{if eq ((index .session.Values "is_auth_type") | tostring) -1 }}ok{{end}}
 
 // GetUser: get session from User
 func GetUser(c echo.Context) (session_gorilla *sessions.Session, err error) {
@@ -15,12 +15,11 @@ func GetUser(c echo.Context) (session_gorilla *sessions.Session, err error) {
 		return
 	}
 
-	if _, ok := session_gorilla.Values["username"].(string); !ok {
-		err = errors.New("username: session expired")
-		return
-	} else if _, ok := session_gorilla.Values["is_auth_type"].(int); !ok {
-		err = errors.New("is_auth_type: session expired")
-		return
+	if _, ok := session_gorilla.Values["username"]; !ok {
+		session_gorilla.Values["username"] = ""
+	}
+	if _, ok := session_gorilla.Values["is_auth_type"]; !ok {
+		session_gorilla.Values["is_auth_type"] = -1
 	}
 
 	return
