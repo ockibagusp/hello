@@ -3,7 +3,7 @@ package middleware
 import "golang.org/x/crypto/bcrypt"
 
 /*
-password is slow: ok
+password is slow: yes
 ----------------
 password := "..."
 hash, err := PasswordHash(password)
