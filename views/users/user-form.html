@@ -31,7 +31,7 @@
           placeholder="Confirm Password" required />
         {{else}}
         <a class="btn btn-outline-secondary btn-block {{if.is_read}}disabled{{end}}"
-          href="/users/view/{{.user.ID}}/password" role="button">Link</a>
+          {{if not .is_read}}href="/users/view/{{.user.ID}}/password"{{end}} role="button">Link</a>
         {{end}}
       </div>
     </div>
