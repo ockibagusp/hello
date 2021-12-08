@@ -2,6 +2,10 @@
 vendor
 __debug_bin
 gin-bin
+
+# main testing
+main_testing.go
+
 # air
 .air.toml
 tmp
