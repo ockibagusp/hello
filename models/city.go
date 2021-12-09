@@ -8,8 +8,8 @@ import (
 
 // City: struct
 type City struct {
-	ID   uint   `json:"id" form:"id"`
-	City string `json:"city" form:"city"`
+	ID   uint   `form:"id"`
+	City string `form:"city"`
 }
 
 // TableName name: string
@@ -59,8 +59,8 @@ func (City) FindAll(db *gorm.DB) ([]City, error) {
 	return cities, nil
 }
 
-// City: FindByID
-func (city City) FindByID(db *gorm.DB, id int) (City, error) {
+// City: FirstByID
+func (city City) FirstByID(db *gorm.DB, id int) (City, error) {
 	tx := db.Begin()
 	if err := tx.Error; err != nil {
 		return City{}, err
