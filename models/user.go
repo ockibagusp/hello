@@ -65,8 +65,8 @@ func (user User) FirstByID(db *gorm.DB, id int) (User, error) {
 	return user, nil
 }
 
-// User: FindByCityID
-func (user User) FindByCityID(db *gorm.DB, id int) (User, error) {
+// User: FirstByCityID
+func (user User) FirstByCityID(db *gorm.DB, id int) (User, error) {
 	err := db.Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").First(&user, id).Error
 	if err != nil {
