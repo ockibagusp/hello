@@ -81,7 +81,7 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 func parseFilesBase(s string, t ...string) *template.Template {
 	dir := rootedPathName()
 
-	templateBase := template.New("base").Funcs(template.FuncMap{"tostring": ToString})
+	templateBase := template.New("base").Funcs(FuncMapMore())
 
 	// t parseFilesBase, example "views/user-form.html"
 	if len(t) == 1 {
@@ -122,7 +122,7 @@ func parseFileHTMLOnly(name string) *template.Template {
 		t["login.html"] = parseFileHTMLOnly("views/login.html")
 		...
 		*/
-		template.New("HTML_only").Funcs(template.FuncMap{"tostring": ToString}).
+		template.New("HTML_only").Funcs(FuncMapMore()).
 			ParseFiles(
 				fmt.Sprintf("%s/%s", dir, name),
 			),
