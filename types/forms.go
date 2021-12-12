@@ -6,7 +6,14 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
-// type userForm: of a user
+/*
+ * type userForm: of a user
+ *
+ * @method: POST
+ * @controller: CreateUser
+ *				(user_controller.go)
+ * @route: /users/add
+ */
 type UserForm struct {
 	Username        string
 	Email           string
@@ -17,7 +24,14 @@ type UserForm struct {
 	Photo           string
 }
 
-// type PasswordForm: of a username and password
+/*
+ * type PasswordForm: of a username and password
+ *
+ * @method: POST
+ * @controller: Login
+ * 				(session_controller.go)
+ * @route: /login
+ */
 type PasswordForm struct {
 	Username string
 	Password string
@@ -31,7 +45,14 @@ func (lf PasswordForm) Validate() error {
 	)
 }
 
-// type NewPasswordForm: of a password user
+/*
+ * type NewPasswordForm: of a password user
+ *
+ * @method: POST
+ * @controller: UpdateUserByPassword
+ * 				(user_controller.go)
+ * @route: /login
+ */
 type NewPasswordForm struct {
 	OldPassword        string // nothing
 	NewPassword        string
