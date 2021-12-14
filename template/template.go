@@ -86,7 +86,7 @@ func parseFilesBase(s string, t ...string) *template.Template {
 	// t parseFilesBase, example "views/user-form.html"
 	if len(t) == 1 {
 		return template.Must(
-			/* template.New("") or template.New("base"), same ?
+			/* template.New("") and template.New("base"), same.
 
 			t := make(map[string]*template.Template)
 			t["home.html"] = parseFilesBase("views/home.html")
@@ -115,7 +115,7 @@ func parseFileHTMLOnly(name string) *template.Template {
 	dir := rootedPathName()
 
 	return template.Must(
-		/* template.New("") or template.New(""HTML_only""), same ?
+		/* template.New("") and template.New("HTML_only"), same.
 
 		t := make(map[string]*template.Template)
 		...
