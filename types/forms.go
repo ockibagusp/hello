@@ -25,20 +25,20 @@ type UserForm struct {
 }
 
 /*
- * type PasswordForm: of a username and password
+ * type LoginForm: of a username and password
  *
  * @method: POST
  * @controller: Login
  * 				(session_controller.go)
  * @route: /login
  */
-type PasswordForm struct {
+type LoginForm struct {
 	Username string
 	Password string
 }
 
 // (type PasswordForm) Validate: of a validate username and password
-func (lf PasswordForm) Validate() error {
+func (lf LoginForm) Validate() error {
 	return validation.ValidateStruct(&lf,
 		validation.Field(&lf.Username, validation.Required, validation.Length(4, 15)),
 		validation.Field(&lf.Password, validation.Required, validation.Length(6, 18)),

@@ -23,7 +23,7 @@ func (controller *Controller) Login(c echo.Context) error {
 	}
 
 	if c.Request().Method == "POST" {
-		passwordForm := &types.PasswordForm{
+		passwordForm := &types.LoginForm{
 			Username: c.FormValue("username"),
 			Password: c.FormValue("password"),
 		}
@@ -38,7 +38,7 @@ func (controller *Controller) Login(c echo.Context) error {
 		// err := controller.DB.Select(...).Where(...).Find(...).Error
 		if err := controller.DB.Select("username", "password").Where(
 			"username = ?", passwordForm.Username,
-		).Find(&user).Error; err != nil {
+		).First(&user).Error; err != nil {
 			return err
 		}
 
