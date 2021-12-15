@@ -9,8 +9,6 @@ Run and Debug: [launch.json](https://github.com/ockibagusp/hello/blob/master/.vs
 ### MySQL Database Service
 file: hello.sql -> new database: hello
 
-Copy and Paste,
-
 file: hello.sql -> new database: hello_test
 
 
@@ -24,7 +22,7 @@ file: hello.sql -> new database: hello_test
 
 
 ### Router
-This using [Router](https://github.com/ockibagusp/hello/blob/master/router/router.go).
+This using [router](https://github.com/ockibagusp/hello/blob/master/router/router.go).
 
 Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini agak lupa. Bertahap.
 
