@@ -3,6 +3,10 @@ vendor
 __debug_bin
 gin-bin
 
+# build
+hello
+hello.exe
+
 # main testing
 main_testing.go
 

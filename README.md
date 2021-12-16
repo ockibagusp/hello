@@ -1,18 +1,21 @@
 # Hello
-
-## Golang Echo templates.
-
-### Visual Studio Code
-Run and Debug: [launch.json](https://github.com/ockibagusp/hello/blob/master/.vscode/launch.json).
+Golang Echo templates.
 
 
-### MySQL Database Service
+## Visual Studio Code
+
+### Run and Debug: [launch.json](https://github.com/ockibagusp/hello/blob/master/.vscode/launch.json).
+
+
+## MySQL Database
+
+### Database 
 file: hello.sql -> new database: hello
 
+### Testing
 file: hello.sql -> new database: hello_test
 
-
-### Users Table
+## User Tables
 
 | Username | Password |
 | --- | --- |
@@ -21,8 +24,47 @@ file: hello.sql -> new database: hello_test
 | subali | user123 |
 
 
-### Router
+## Router
 This using [router](https://github.com/ockibagusp/hello/blob/master/router/router.go).
+
+
+## Use it
+
+### Compile and run Go program
+```
+$ go run main.go
+```
+
+or,
+
+#### Build compiles the packages
+
+```
+$ go build
+```
+
+- On Linux or Mac:
+
+```
+$ ./hello
+```
+
+- On  Windows:
+
+```
+$ hello.exe
+```
+
+
+## TODO List
+- test
+- CSRF
+- session.GetUser() to session.GetAuth()
+- session: IsAdmin, IsUser and IsAuth
+- list pagination with next, previous, first and last
+- Mutex: BankAccount
+- too much
+
 
 Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini agak lupa. Bertahap.
 
