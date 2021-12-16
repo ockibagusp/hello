@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -11,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/ockibagusp/hello/middleware"
 	"github.com/ockibagusp/hello/models"
+	"github.com/ockibagusp/hello/types"
 )
 
 /*
@@ -60,54 +60,30 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		// Kota dan Keb. ?
 		city := uint(city64)
 
-		// TODO: START moves dictionary ?
-
-		// type userForm: of a user
-		type userForm struct {
-			username         string
-			email            string
-			password         string
-			confirm_password string
-			name             string
-			city             uint
-			photo            string
-		}
-
-		// function passwordEquals: of password equals confirm_password
-		passwordEquals := func(confirm_password string) validation.RuleFunc {
-			return func(value interface{}) error {
-				password, _ := value.(string)
-				if password != confirm_password {
-					return errors.New("unexpected password")
-				}
-				return nil
-			}
-		}
-
 		// userForm: type of a user
-		_userForm := userForm{
-			username:         c.FormValue("username"),
-			email:            c.FormValue("email"),
-			password:         c.FormValue("password"),
-			confirm_password: c.FormValue("confirm_password"),
-			name:             c.FormValue("name"),
-			city:             city,
-			photo:            c.FormValue("photo"),
+		_userForm := types.UserForm{
+			Username:        c.FormValue("username"),
+			Email:           c.FormValue("email"),
+			Password:        c.FormValue("password"),
+			ConfirmPassword: c.FormValue("confirm_password"),
+			Name:            c.FormValue("name"),
+			City:            city,
+			Photo:           c.FormValue("photo"),
 		}
 
-		// _userForm: Validate: of a validate user
+		// _userForm: Validate of a validate user
 		err = validation.Errors{
 			"username": validation.Validate(
-				_userForm.username, validation.Required, validation.Length(4, 15),
+				_userForm.Username, validation.Required, validation.Length(4, 15),
 			),
-			"email": validation.Validate(_userForm.email, validation.Required, is.Email),
+			"email": validation.Validate(_userForm.Email, validation.Required, is.Email),
 			"password": validation.Validate(
-				_userForm.password, validation.Required, validation.Length(6, 18),
-				validation.By(passwordEquals(_userForm.confirm_password)),
+				_userForm.Password, validation.Required, validation.Length(6, 18),
+				validation.By(types.PasswordEquals(_userForm.ConfirmPassword)),
 			),
-			"name":  validation.Validate(_userForm.name, validation.Required),
-			"city":  validation.Validate(_userForm.city),
-			"photo": validation.Validate(_userForm.photo),
+			"name":  validation.Validate(_userForm.Name, validation.Required),
+			"city":  validation.Validate(_userForm.City),
+			"photo": validation.Validate(_userForm.Photo),
 		}.Filter()
 		/* if err = validation.Errors{...}.Filter(); err != nil {
 			...
@@ -119,21 +95,19 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 			})
 		}
 
-		// END
-
 		// Password Hash
-		hash, err := middleware.PasswordHash(_userForm.password)
+		hash, err := middleware.PasswordHash(_userForm.Password)
 		if err != nil {
 			return err
 		}
 
 		user := models.User{
-			Username: _userForm.username,
-			Email:    _userForm.email,
+			Username: _userForm.Username,
+			Email:    _userForm.Email,
 			Password: hash,
-			Name:     _userForm.name,
-			City:     _userForm.city,
-			Photo:    _userForm.photo,
+			Name:     _userForm.Name,
+			City:     _userForm.City,
+			Photo:    _userForm.Photo,
 		}
 
 		// _, err := user.Save(...): be able
@@ -180,8 +154,8 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	var user models.User
-	// user, err := user.FindByID(...): be able
-	user, err := user.FindByID(controller.DB, id)
+	// user, err := user.FirstByID(...): be able
+	user, err := user.FirstByID(controller.DB, id)
 	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
@@ -240,8 +214,8 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
 
-	// user, err := user.FindByID(...): be able
-	user, err := user.FindByID(controller.DB, id)
+	// user, err := user.FirstByID(...): be able
+	user, err := user.FirstByID(controller.DB, id)
 	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
@@ -281,46 +255,96 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	if c.Request().Method == "POST" {
-		if c.FormValue("password") != c.FormValue("confirm_password") {
-			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": "Passwords Don't Match",
+		/*
+			for example:
+			username ockibagusp update by password 'ockibagusp': ok
+			username ockibagusp update by password 'sugriwa': no
+		*/
+		var user models.User
+
+		if err := controller.DB.Select("id", "username").Where(
+			"username = ?", session.Values["username"],
+		).First(&user, id).Error; err != nil {
+			return c.JSON(http.StatusNotAcceptable, echo.Map{
+				"message": "405 Method Not Allowed: " + err.Error(),
 			})
 		}
 
-		user := models.User{
-			Password: c.FormValue("password"),
+		// newPasswordForm: type of a password user
+		_newPasswordForm := types.NewPasswordForm{
+			NewPassword:        c.FormValue("new_password"),
+			ConfirmNewPassword: c.FormValue("confirm_new_password"),
 		}
 
-		if err := c.Bind(&user); err != nil {
+		// _newPasswordForm: Validate of a validate user
+		err := validation.Errors{
+			"password": validation.Validate(
+				_newPasswordForm.NewPassword, validation.Required, validation.Length(6, 18),
+				validation.By(types.PasswordEquals(_newPasswordForm.ConfirmNewPassword)),
+			),
+		}.Filter()
+		/* if err = validation.Errors{...}.Filter(); err != nil {
+			...
+		} why?
+		*/
+		if err != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"message": "400 Bad Request: " + err.Error(),
 			})
 		}
 
+		// if c.FormValue("new_password") != c.FormValue("confirm_new_password") {
+		// 	return c.JSON(http.StatusBadRequest, echo.Map{
+		// 		"message": "Passwords Don't Match",
+		// 	})
+		// }
+
+		// user := models.User{
+		// 	Password: c.FormValue("new_password"),
+		// }
+
+		// fmt.Println("-> ", user)
+
+		// if err := c.Bind(&user); err != nil {
+		// 	return c.JSON(http.StatusBadRequest, echo.Map{
+		// 		"message": "400 Bad Request: " + err.Error(),
+		// 	})
+		// }
+
+		fmt.Println("--> ", user)
+
+		// password and hash
+
 		// err := user.UpdateByIDandPassword(...): be able
-		if err := user.UpdateByIDandPassword(controller.DB, id, user.Password); err != nil {
-			return c.JSON(http.StatusNotAcceptable, echo.Map{
-				"message": "405 Method Not Allowed: " + err.Error(),
-			})
-		}
+		// if err := user.UpdateByIDandPassword(controller.DB, id, user.Password); err != nil {
+		// 	return c.JSON(http.StatusNotAcceptable, echo.Map{
+		// 		"message": "405 Method Not Allowed: " + err.Error(),
+		// 	})
+		// }
 
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
 
 	var user models.User
 	var err error
-	// _, err = user.FindByID(...): be able
-	if user, err = user.FindByID(controller.DB, id); err != nil {
+	// _, err = user.FirstByID(...): be able
+	if user, err = user.FirstByID(controller.DB, id); err != nil {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
 	}
 
-	return c.Render(http.StatusOK, "users/user-view-password.html", echo.Map{
-		"name":    fmt.Sprintf("User: %s", user.Name),
-		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
-		"session": session,
-		"user":    user,
+	/*
+		name (string): "users/user-view-password.html" -> no
+			{..,"status":500,"error":"html/template: \"users/user-view-password.html\" is undefined",..}
+			why?
+		name (string): "user-view-password.html" -> yes
+	*/
+	return c.Render(http.StatusOK, "user-view-password.html", echo.Map{
+		"session":      session,
+		"name":         fmt.Sprintf("User: %s", user.Name),
+		"user":         user,
+		"is_html_only": true,
 	})
 }
 

@@ -2,8 +2,13 @@ package template
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
+	"log"
+	"os"
+	"path"
+	"regexp"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,17 +20,21 @@ type Templates struct {
 
 // New Templates
 func NewTemplates() *Templates {
-	// TODO: tpl := template.Must(template.New("main").Funcs(template.FuncMap{"tostring": ToString}))
-
 	t := make(map[string]*template.Template)
-	t["home.html"] = parseFiles("views/home.html")
-	t["about.html"] = parseFiles("views/about.html")
-	t["login.html"] = template.Must(template.ParseFiles("views/login.html"))
-	t["users/user-all.html"] = parseFiles("views/users/user-all.html")
-	t["users/user-add.html"] = parseFiles("views/users/user-add.html", "views/users/user-form.html")
-	t["users/user-read.html"] = parseFiles("views/users/user-read.html", "views/users/user-form.html")
-	t["users/user-view.html"] = parseFiles("views/users/user-view.html", "views/users/user-form.html")
-	t["users/user-view-password.html"] = parseFiles("views/users/user-view-password.html")
+	t["home.html"] = parseFilesBase("views/home.html")
+	t["about.html"] = parseFilesBase("views/about.html")
+	t["login.html"] = parseFileHTMLOnly("views/login.html")
+	t["users/user-all.html"] = parseFilesBase("views/users/user-all.html")
+	t["users/user-add.html"] = parseFilesBase("views/users/user-add.html", "views/users/user-form.html")
+	t["users/user-read.html"] = parseFilesBase("views/users/user-read.html", "views/users/user-form.html")
+	t["users/user-view.html"] = parseFilesBase("views/users/user-view.html", "views/users/user-form.html")
+	/*
+		t["users/user-view-password.html"] -> no
+			{..,"status":500,"error":"html/template: \"users/user-view-password.html\" is undefined",..}
+			why?
+		t["user-view-password.html"] -> yes
+	*/
+	t["user-view-password.html"] = parseFileHTMLOnly("views/users/user-view-password.html")
 
 	return &Templates{
 		Templates: t,
@@ -44,9 +53,15 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 		viewContext["reverse"] = c.Echo().Reverse
 
 		/*
-			@param /login
+			@param /login and /users/view/:id/password
 			- Is HTML Only
 			is_html_only (bool): {true, false}
+
+			TODO:
+			Login name: 				"login.html -> ok
+			UpdateUserByPassword name: 	"user-view-password.html" -> ok
+										"users/user-view-password.html" -> no
+			why?
 		*/
 		if viewContext["is_html_only"] == true {
 			return tmpl.ExecuteTemplate(w, name, data)
@@ -56,26 +71,86 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 	return tmpl.ExecuteTemplate(w, "base.html", data)
 }
 
-func parseFiles(s string, t ...string) *template.Template {
-	// t parseFiles, example "views/user-form.html"
+// Parse Files Base: not implement
+//
+// parseFilesBase("views/login.html") -> base.html. Yes, but nothing.
+// parseFilesBase("views/users/user-view-password.html") -> base.html. Yes, but nothing.
+// ---
+// parseFileHTMLOnly("views/login.html") -> Yes, this is good.
+// parseFileHTMLOnly("views/users/user-view-password.html") -> Yes, this is good.
+func parseFilesBase(s string, t ...string) *template.Template {
+	dir := rootedPathName()
+
+	templateBase := template.New("base").Funcs(FuncMapMore())
+
+	// t parseFilesBase, example "views/user-form.html"
 	if len(t) == 1 {
 		return template.Must(
-			/* template.New("") or template.New("base"), same ?
+			/* template.New("") and template.New("base"), same.
 
 			t := make(map[string]*template.Template)
-			t["home.html"] = parseFiles("views/home.html")
+			t["home.html"] = parseFilesBase("views/home.html")
 			...
-
 			*/
-			template.New("").Funcs(template.FuncMap{"tostring": ToString}).
-				ParseFiles(s, t[0], "views/base.html"),
+			templateBase.ParseFiles(
+				fmt.Sprintf("%s/%s", dir, s),
+				fmt.Sprintf("%s/%s", dir, t[0]),
+				fmt.Sprintf("%s/%s", dir, "views/base.html"),
+			),
 		)
 	} else if len(t) >= 2 {
-		panic("t [1] parseFiles, example \"views/users/user-form.html\"")
+		panic("t [1] parseFilesBase, example \"views/users/user-form.html\"")
 	}
 	// "views/base.html"?
 	return template.Must(
-		template.New("").Funcs(template.FuncMap{"tostring": ToString}).
-			ParseFiles(s, "views/base.html"),
+		templateBase.ParseFiles(
+			fmt.Sprintf("%s/%s", dir, s),
+			fmt.Sprintf("%s/%s", dir, "views/base.html"),
+		),
 	)
+}
+
+// Parse File HTML Only
+func parseFileHTMLOnly(name string) *template.Template {
+	dir := rootedPathName()
+
+	return template.Must(
+		/* template.New("") and template.New("HTML_only"), same.
+
+		t := make(map[string]*template.Template)
+		...
+		t["login.html"] = parseFileHTMLOnly("views/login.html")
+		...
+		*/
+		template.New("HTML_only").Funcs(FuncMapMore()).
+			ParseFiles(
+				fmt.Sprintf("%s/%s", dir, name),
+			),
+	)
+}
+
+// Rooted Path Name
+func rootedPathName() (dir string) {
+	dir, err := os.Getwd()
+	if err != nil {
+		// TODO: Docker, Kubernetes ex.?
+		log.Fatal(err)
+	}
+
+	// TODO: Linux and MacOS: ok. Windows: ...?
+	regex := regexp.MustCompile("/test$")
+	match := regex.Match([]byte(dir))
+
+	if match {
+		_dir, err := os.Open(path.Join(dir, "../"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		dir = _dir.Name()
+	}
+	return
+}
+
+func executable() {
+
 }

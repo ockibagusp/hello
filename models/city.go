@@ -8,8 +8,8 @@ import (
 
 // City: struct
 type City struct {
-	ID   uint   `json:"id" form:"id"`
-	City string `json:"city" form:"city"`
+	ID   uint   `form:"id"`
+	City string `form:"city"`
 }
 
 // TableName name: string
@@ -19,81 +19,46 @@ func (City) TableName() string {
 
 // City: Save
 func (city City) Save(db *gorm.DB) (City, error) {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
-		return City{}, err
-	}
-
-	err := tx.Create(&city).Error
-
-	if err != nil {
-		tx.Rollback()
+	if err := db.Create(&city).Error; err != nil {
 		return City{}, errors.New("City Exists")
 	}
-	tx.Commit()
 
 	return city, nil
 }
 
 // City: FindAll
 func (City) FindAll(db *gorm.DB) ([]City, error) {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
-		return []City{}, err
-	}
-
-	var err error
 	cities := []City{}
 
-	err = tx.Find(&cities).Error
-
-	if err != nil {
-		tx.Rollback()
+	if err := db.Find(&cities).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return []City{}, errors.New("City Not Found")
 		}
 		return []City{}, err
 	}
-	tx.Commit()
 
 	return cities, nil
 }
 
-// City: FindByID
-func (city City) FindByID(db *gorm.DB, id int) (City, error) {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
-		return City{}, err
-	}
-
-	err := tx.First(&city, id).Error
-
-	if err != nil {
-		tx.Rollback()
+// City: FirstByID
+func (city City) FirstByID(db *gorm.DB, id int) (City, error) {
+	if err := db.First(&city, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return City{}, errors.New("City Not Found")
 		}
 		return City{}, err
 	}
-	tx.Commit()
 
 	return city, nil
 }
 
 // City: Delete
 func (city City) Delete(db *gorm.DB, id int) error {
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
-		return err
-	}
-
-	// if tx.Delete(&city, id).Error != nil {}
-	if err := tx.Delete(&city, id).Error; err != nil {
-		tx.Rollback()
+	// if db.Delete(&city, id).Error != nil {}
+	if err := db.Delete(&city, id).Error; err != nil {
 		// return errors.New("Record Not Found")
 		return err
 	}
-	tx.Commit()
 
 	return nil
 }

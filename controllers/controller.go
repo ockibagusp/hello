@@ -1,20 +1,13 @@
 package controllers
 
 import (
-	"net/url"
-	"path"
-
 	"github.com/ockibagusp/hello/db"
 	"gorm.io/gorm"
 )
 
-// .env (?)
-const API string = "/api/v1"
-
 // Controller is a controller for this application
 type Controller struct {
-	DB  *gorm.DB
-	API string
+	DB *gorm.DB
 }
 
 // New Controller
@@ -23,20 +16,6 @@ func New() *Controller {
 	dbManager := db.Init("PROD")
 
 	return &Controller{
-		DB:  dbManager,
-		API: API,
+		DB: dbManager,
 	}
-}
-
-// Controller is parse API
-func (controller *Controller) ParseAPI(rawurl string) (_url *url.URL) {
-	var err error
-
-	_url, err = url.Parse(API)
-	if err != nil {
-		panic("invalid url")
-	}
-
-	_url.Path = path.Join(_url.Path, rawurl)
-	return
 }

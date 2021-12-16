@@ -9,18 +9,18 @@ import (
 // User: struct
 type User struct {
 	Model
-	Username string `gorm:"unique;not null" json:"username" form:"username"`
-	Email    string `gorm:"unique;not null" json:"email" form:"email"`
-	Password string `gorm:"not null" json:"password" form:"password"`
-	Name     string `gorm:"not null" json:"name" form:"name"`
-	City     uint   `json:"city" form:"city"`
-	Photo    string `json:"photo" form:"photo"`
+	Username string `gorm:"unique;not null" form:"username"`
+	Email    string `gorm:"unique;not null" form:"email"`
+	Password string `gorm:"not null" form:"password"`
+	Name     string `gorm:"not null" form:"name"`
+	City     uint   `form:"city"`
+	Photo    string `form:"photo"`
 }
 
 // UserCity: struct
 type UserCity struct {
 	User
-	CityMassage string `gorm:"index:city_massage" json:"city_massage" form:"city_massage"`
+	CityMassage string `gorm:"index:city_massage" form:"city_massage"`
 }
 
 /*
@@ -52,8 +52,8 @@ func (User) FindAll(db *gorm.DB) ([]User, error) {
 	return users, nil
 }
 
-// User: FindByID
-func (user User) FindByID(db *gorm.DB, id int) (User, error) {
+// User: FirstByID
+func (user User) FirstByID(db *gorm.DB, id int) (User, error) {
 	err := db.First(&user, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -65,8 +65,8 @@ func (user User) FindByID(db *gorm.DB, id int) (User, error) {
 	return user, nil
 }
 
-// User: FindByCityID
-func (user User) FindByCityID(db *gorm.DB, id int) (User, error) {
+// User: FirstByCityID
+func (user User) FirstByCityID(db *gorm.DB, id int) (User, error) {
 	err := db.Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").First(&user, id).Error
 	if err != nil {
@@ -97,7 +97,7 @@ func (user User) Update(db *gorm.DB, id int) (User, error) {
 
 // User: Update By ID and Password
 func (user User) UpdateByIDandPassword(db *gorm.DB, id int, password string) (err error) {
-	if err = db.Where(" id = ?", id).Update("password", password).Find(user).Error; err != nil {
+	if err = db.Where("id = ?", id).Update("password", password).First(&user).Error; err != nil {
 		return err
 	}
 
