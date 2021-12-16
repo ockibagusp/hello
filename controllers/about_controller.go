@@ -7,7 +7,13 @@ import (
 	"github.com/ockibagusp/hello/middleware"
 )
 
-// About "about.html"
+/*
+ * About "about.html"
+ *
+ * @target: All
+ * @method: GET
+ * @route: /about
+ */
 func (Controller) About(c echo.Context) error {
 	// Please note the the second parameter "about.html" is the template name and should
 	// be equal to one of the keys in the TemplateRegistry array defined in main.go
