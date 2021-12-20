@@ -2,17 +2,23 @@
 Golang Echo for templates.
 
 
-## Visual Studio Code
+### Visual Studio Code
 
-### Run and Debug: [launch.json](https://github.com/ockibagusp/hello/blob/master/.vscode/launch.json).
+#### Run and Debug: [launch.json](https://github.com/ockibagusp/hello/blob/master/.vscode/launch.json).
 
 
-## MySQL Database
+## Getting Started
+First, clone the repo:
+```bash
+$ git clone https://github.com/ockibagusp/hello.git
+```
 
-### Database 
+### Setting MySQL database
+
+#### Database 
 file: hello.sql -> new database: hello
 
-### Testing
+#### Testing
 file: hello.sql -> new database: hello_test
 
 ## User Tables
@@ -28,9 +34,9 @@ file: hello.sql -> new database: hello_test
 This using [router](https://github.com/ockibagusp/hello/blob/master/router/router.go).
 
 
-## Use it
+### Running app
 
-### Compile and run Go program
+#### Compile and run Go program
 ```
 $ go run main.go
 ```
