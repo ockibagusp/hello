@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
+	"github.com/ockibagusp/hello/models"
 	"github.com/ockibagusp/hello/types"
 	"gorm.io/gorm"
 )
@@ -86,6 +87,14 @@ func TestCreateUserController(t *testing.T) {
 func TestReadUserController(t *testing.T) {
 	noAuth := setupTestServer(t)
 	auth := setupTestServerAuth(noAuth)
+
+	// test for db users
+	truncateUsers(db)
+	models.User{
+		Username: "sugriwa",
+		Email:    "sugriwa@wanara.com",
+		Name:     "Sugriwa",
+	}.Save(db)
 
 	t.Run("users [username] success", func(t *testing.T) {
 		auth.GET("/users/read/{id}").
