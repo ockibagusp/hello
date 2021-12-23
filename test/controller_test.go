@@ -1,18 +1,30 @@
 package test
 
 import (
+	"net/http"
 	"testing"
 
-	"github.com/ockibagusp/hello/controllers"
+	c "github.com/ockibagusp/hello/controllers"
+	"github.com/ockibagusp/hello/router"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
 )
 
+// setup test Handler
+func setupTestHandler() http.Handler {
+	return router.New(controller)
+}
+
 // Controller test
-var _controller controllers.Controller = controllers.Controller{
-	DB: new(gorm.DB),
+var controller *c.Controller = &c.Controller{
+	DB: db,
 }
 
 func TestController(t *testing.T) {
-	assert.NotNil(t, _controller.DB)
+	/*
+		assert := assert.New(t)
+		assert.NotNil(controller.DB)
+
+		or,
+	*/
+	assert.NotNil(t, controller.DB)
 }
