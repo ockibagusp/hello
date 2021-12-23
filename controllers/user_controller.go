@@ -51,14 +51,17 @@ func (controller *Controller) Users(c echo.Context) error {
  */
 func (controller *Controller) CreateUser(c echo.Context) error {
 	if c.Request().Method == "POST" {
-		city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": "400 Bad Request: " + err.Error(),
-			})
+		var city uint
+		if c.FormValue("city") != "" {
+			city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, echo.Map{
+					"message": "400 Bad Request: " + err.Error(),
+				})
+			}
+			// Kota dan Keb. ?
+			city = uint(city64)
 		}
-		// Kota dan Keb. ?
-		city := uint(city64)
 
 		// userForm: type of a user
 		_userForm := types.UserForm{
@@ -72,7 +75,7 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		}
 
 		// _userForm: Validate of a validate user
-		err = validation.Errors{
+		err := validation.Errors{
 			"username": validation.Validate(
 				_userForm.Username, validation.Required, validation.Length(4, 15),
 			),
@@ -158,7 +161,7 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 	user, err := user.FirstByID(controller.DB, id)
 	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
-			"message": "405 Method Not Allowed: " + err.Error(),
+			"message": "406 Not Acceptable: " + err.Error(),
 		})
 	}
 

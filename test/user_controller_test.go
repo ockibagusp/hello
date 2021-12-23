@@ -1,176 +1,126 @@
 package test
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"log"
 	"net/http"
-	"net/http/httptest"
-	"strconv"
-	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
-	c "github.com/ockibagusp/hello/controllers"
-	"github.com/ockibagusp/hello/models"
-	"github.com/stretchr/testify/assert"
+	"github.com/gavv/httpexpect/v2"
+	"github.com/ockibagusp/hello/types"
 	"gorm.io/gorm"
 )
 
+// truncate Users
+//
+// parameter: db *gorm.DB or not available:
+// func truncateUsers() {...}, just the same
 func truncateUsers(db *gorm.DB) {
-	// db.Exec("TRUNCATE users")
+	db.Exec("TRUNCATE users")
 }
 
-func setupRouter() (router *echo.Echo) {
-	router = echo.New()
+func TestUsersController(t *testing.T) {
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
 
-	// controllers init
-	controllers := c.Controller{DB: db}
-
-	router.GET("/users", controllers.Users).Name = "users"
-
-	return
-}
-
-const (
-	userJSON  = `{"id":1,"name":"Jon Snow"}`
-	usersJSON = `[{"id":1,"name":"Jon Snow"}]`
-)
-
-func TestEchoHandler(t *testing.T) {
-	assert := assert.New(t)
-
-	e := echo.New()
-
-	// HandlerFunc
-	e.GET("/ok", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
+	t.Run("users success", func(t *testing.T) {
+		auth.GET("/users").
+			Expect().
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "/ok", nil)
-	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, req)
-
-	assert.Equal(http.StatusOK, rec.Code)
-	assert.Equal("OK", rec.Body.String())
+	t.Run("users failure", func(t *testing.T) {
+		noAuth.GET("/users").
+			WithRedirectPolicy(httpexpect.DontFollowRedirects).
+			Expect().
+			// HTTP response status: 302 Found
+			Status(http.StatusFound)
+	})
 }
 
-func TestUserControllerAPI(t *testing.T) {
-	assert := assert.New(t)
+func TestCreateUserController(t *testing.T) {
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
 
+	// test for db users
 	truncateUsers(db)
 
-	tx := db.Begin()
-
-	defer tx.Rollback()
-
-	if err := tx.Commit(); err != nil {
-		log.Fatal(err)
+	userForm := types.UserForm{
+		Username:        "sugriwa",
+		Email:           "sugriwa@wanara.com",
+		Name:            "Sugriwa",
+		Password:        "user123",
+		ConfirmPassword: "user123",
 	}
 
-	assert.True(true)
-}
+	t.Run("users create success: GET", func(t *testing.T) {
+		auth.GET("/users/add").
+			Expect().
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
+	})
 
-func TestUserController(t *testing.T) {
-	assert := assert.New(t)
+	t.Run("users create success: POST", func(t *testing.T) {
+		auth.POST("/users/add").
+			WithForm(userForm).
+			Expect().
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
+	})
 
-	request := httptest.NewRequest(http.MethodGet, "/users", nil)
-	recorder := httptest.NewRecorder()
+	t.Run("users create failure: GET", func(t *testing.T) {
+		noAuth.GET("/users/add").
+			Expect().
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
+	})
 
-	fmt.Println("req -> ", request)
-
-	router := echo.New()
-
-	// controllers init
-	controllers := c.Controller{DB: db}
-	router.GET("/users", controllers.Users)
-	req := httptest.NewRequest(http.MethodGet, "/users", nil)
-	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
-
-	fmt.Println("req -> ", req)
-	fmt.Println("rec -> ", rec)
-
-	assert.Equal(http.StatusOK, rec.Code)
-	assert.Equal("OK", rec.Body.String())
-
-	// ???
-	// req := httptest.NewRequest(method, path, nil)
-	// rec := httptest.NewRecorder()
-	// e.ServeHTTP(rec, req)
-	// return rec.Code, rec.Body.String()
-
-	// u := router.NewContext(request, recorder)
-
-	// h := &handler{mockDB}
-
-	// // Assertions
-	// if assert.NoError(h.getUser(c)) {
-	// 	assert.Equal(http.StatusOK, recorder.Code)
-	// 	assert.Equal(userJSON, recorder.Body.String())
-	// }
-	response := recorder.Result()
-	defer response.Body.Close()
-
-	// err := controllers.Users(u)
-
-	// if assert.NoError(controllers.UsersAPI(u)) {
-	// 	assert.Equal(http.StatusOK, response.StatusCode)
-	// }
-
-	// assert.Equal(200, response.StatusCode)
-
-	// // h := &handler{mockDB}
-
-	// body, _ := io.ReadAll(response.Body)
-	// var responseBody map[string]interface{}
-	// json.Unmarshal(body, &responseBody)
-
-	// //assert.Equal(200, int(responseBody["code"].(float64)))
-	// assert.Equal("OK", responseBody["status"])
+	t.Run("users create failure: POST", func(t *testing.T) {
+		noAuth.POST("/users/add").
+			WithForm(userForm).
+			Expect().
+			// HTTP response status: 400 Bad Request
+			Status(http.StatusBadRequest)
+	})
 }
 
 func TestReadUserController(t *testing.T) {
-	assert := assert.New(t)
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
 
-	// // func trucate
-	// db.Exec("TRUNCATE users")
+	t.Run("users [username] success", func(t *testing.T) {
+		auth.GET("/users/read/{id}").
+			WithPath("id", "1").
+			Expect().
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
+	})
 
-	// f := make(url.Values)
-	// f.Set("name", "Jon Snow")
-	// f.Set("email", "jon@labstack.com")
-	// request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(f.Encode()))
-	// request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	t.Run("users [username] failure: 1 session and no-id", func(t *testing.T) {
+		auth.GET("/users/read/{id}").
+			WithPath("id", "-1").
+			WithRedirectPolicy(httpexpect.FollowAllRedirects).
+			Expect().
+			// HTTP response status: 406 Not Acceptable
+			Status(http.StatusNotAcceptable)
+	})
 
-	e := echo.New()
+	t.Run("users [username] failure: 2 no-session and id", func(t *testing.T) {
+		noAuth.GET("/users/read/{id}").
+			WithPath("id", "1").
+			WithRedirectPolicy(httpexpect.FollowAllRedirects).
+			Expect().
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
+		// redirection login
+	})
 
-	// user.FindAll()
-	user, _ := models.User{}.FindByID(db, 1)
-
-	requestBody := strings.NewReader(`{"name" : "Gadget"}`)
-	request := httptest.NewRequest(http.MethodGet, "/users/read/"+strconv.Itoa(int(user.Model.ID)), requestBody)
-	fmt.Println("request -> ", request)
-
-	recorder := httptest.NewRecorder()
-
-	c := e.NewContext(request, recorder)
-	c.SetPath("/users/read/" + strconv.Itoa(int(user.Model.ID)))
-	fmt.Println("c -> ", c.Path())
-	// c.SetParamNames("email")
-	// c.SetParamValues("jon@labstack.com")
-
-	response := recorder.Result()
-
-	assert.Equal(200, response.StatusCode)
-
-	// h := &handler{mockDB}
-
-	body, _ := io.ReadAll(response.Body)
-	var responseBody map[string]interface{}
-	json.Unmarshal(body, &responseBody)
-
-	//assert.Equal(200, int(responseBody["code"].(float64)))
-	assert.Equal("OK", responseBody["status"])
-
+	t.Run("users [username] failure: 3 no-session and no-id", func(t *testing.T) {
+		noAuth.GET("/users/read/{id}").
+			WithPath("id", "-1").
+			WithRedirectPolicy(httpexpect.FollowAllRedirects).
+			Expect().
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
+		// redirection login
+	})
 }
