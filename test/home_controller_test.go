@@ -8,6 +8,8 @@ import (
 func TestHomeController(t *testing.T) {
 	noAuth := setupTestServer(t)
 
+	// TODO: home test
+
 	t.Run("home success", func(t *testing.T) {
 		auth := setupTestServerAuth(noAuth)
 		auth.GET("/").

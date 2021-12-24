@@ -22,14 +22,14 @@ func TestUsersController(t *testing.T) {
 	noAuth := setupTestServer(t)
 	auth := setupTestServerAuth(noAuth)
 
-	t.Run("users success", func(t *testing.T) {
+	t.Run("users [auth] to GET for success", func(t *testing.T) {
 		auth.GET("/users").
 			Expect().
 			// HTTP response status: 200 OK
 			Status(http.StatusOK)
 	})
 
-	t.Run("users failure", func(t *testing.T) {
+	t.Run("users [no auth] to GET for failure", func(t *testing.T) {
 		noAuth.GET("/users").
 			WithRedirectPolicy(httpexpect.DontFollowRedirects).
 			Expect().
@@ -53,14 +53,21 @@ func TestCreateUserController(t *testing.T) {
 		ConfirmPassword: "user123",
 	}
 
-	t.Run("users create success: GET", func(t *testing.T) {
+	t.Run("users [no auth] to GET create for success", func(t *testing.T) {
+		noAuth.GET("/users/add").
+			Expect().
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
+	})
+
+	t.Run("users [auth] to GET create for success", func(t *testing.T) {
 		auth.GET("/users/add").
 			Expect().
 			// HTTP response status: 200 OK
 			Status(http.StatusOK)
 	})
 
-	t.Run("users create success: POST", func(t *testing.T) {
+	t.Run("user [auth] to POST create for success", func(t *testing.T) {
 		auth.POST("/users/add").
 			WithForm(userForm).
 			Expect().
@@ -68,14 +75,8 @@ func TestCreateUserController(t *testing.T) {
 			Status(http.StatusOK)
 	})
 
-	t.Run("users create failure: GET", func(t *testing.T) {
-		noAuth.GET("/users/add").
-			Expect().
-			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-	})
-
-	t.Run("users create failure: POST", func(t *testing.T) {
+	// Database: " Error 1062: Duplicate entry 'sugriwa@wanara.com' for key 'users.email_UNIQUE' "
+	t.Run("users [no auth] to POST create for failure: Duplicate entry", func(t *testing.T) {
 		noAuth.POST("/users/add").
 			WithForm(userForm).
 			Expect().
@@ -96,7 +97,7 @@ func TestReadUserController(t *testing.T) {
 		Name:     "Sugriwa",
 	}.Save(db)
 
-	t.Run("users [username] success", func(t *testing.T) {
+	t.Run("users [auth] to GET read for success", func(t *testing.T) {
 		auth.GET("/users/read/{id}").
 			WithPath("id", "1").
 			Expect().
@@ -104,7 +105,7 @@ func TestReadUserController(t *testing.T) {
 			Status(http.StatusOK)
 	})
 
-	t.Run("users [username] failure: 1 session and no-id", func(t *testing.T) {
+	t.Run("users [auth] to GET read for failure: 1 session and no-id", func(t *testing.T) {
 		auth.GET("/users/read/{id}").
 			WithPath("id", "-1").
 			WithRedirectPolicy(httpexpect.FollowAllRedirects).
@@ -113,7 +114,7 @@ func TestReadUserController(t *testing.T) {
 			Status(http.StatusNotAcceptable)
 	})
 
-	t.Run("users [username] failure: 2 no-session and id", func(t *testing.T) {
+	t.Run("users [no auth] to GET read for failure: 2 no-session and id", func(t *testing.T) {
 		noAuth.GET("/users/read/{id}").
 			WithPath("id", "1").
 			WithRedirectPolicy(httpexpect.FollowAllRedirects).
@@ -123,7 +124,7 @@ func TestReadUserController(t *testing.T) {
 		// redirection login
 	})
 
-	t.Run("users [username] failure: 3 no-session and no-id", func(t *testing.T) {
+	t.Run("users [auth] to GET read for failure: 3 no-session and no-id", func(t *testing.T) {
 		noAuth.GET("/users/read/{id}").
 			WithPath("id", "-1").
 			WithRedirectPolicy(httpexpect.FollowAllRedirects).
