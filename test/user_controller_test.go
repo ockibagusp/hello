@@ -224,65 +224,18 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 		}.Save(db)
 	}
 
-	// t.Run("users [auth] to GET update user by password it success", func(t *testing.T) {
-	// 	auth.GET("/users/view/{id}/password").
-	// 		WithPath("id", "1").
-	// 		Expect().
-	// 		// HTTP response status: 200 OK
-	// 		Status(http.StatusOK)
-	// })
-
 	// t.Run("users [auth] to POST update user by password it success", func(t *testing.T) {
 	// 	auth.POST("/users/view/{id}/password").
 	// 		WithPath("id", "1").
 	// 		WithForm(types.NewPasswordForm{
-	// 			OldPassword:        "user123",
-	// 			NewPassword:        "password_success",
-	// 			ConfirmNewPassword: "password_success",
+	// 			...
 	// 		}).
 	// 		Expect().
-	// 		// HTTP response status: 200 OK
 	// 		Status(http.StatusOK)
 	// })
-
-	// t.Run("users [auth] to POST update user by password it failure: 1"+
-	// 	" passwords don't match", func(t *testing.T) {
-	// 	auth.POST("/users/view/{id}/password").
-	// 		WithPath("id", "1").
-	// 		WithForm(types.NewPasswordForm{
-	// 			OldPassword:        "user123",
-	// 			NewPassword:        "password_success",
-	// 			ConfirmNewPassword: "password_failure",
-	// 		}).
-	// 		Expect().
-	// 		// HTTP response status: 403 Forbidden
-	// 		Status(http.StatusForbidden)
-	// })
-
-	// t.Run("users [auth] to POST update user by password it failure: 2"+
-	// 	" username does not matching", func(t *testing.T) {
-	// 	auth.POST("/users/view/{id}/password").
-	// 		WithPath("id", "2").
-	// 		WithForm(types.NewPasswordForm{
-	// 			OldPassword:        "user123",
-	// 			NewPassword:        "password_failure",
-	// 			ConfirmNewPassword: "password_failure",
-	// 		}).
-	// 		Expect().
-	// 		// HTTP response status: 406 Not Acceptable
-	// 		Status(http.StatusNotAcceptable)
-	// })
-
-	// t.Run("users [no-auth] to GET update user by password it failure: 3"+
-	// 	" no session", func(t *testing.T) {
-	// 	noAuth.GET("/users/view/{id}/password").
-	// 		WithPath("id", "1").
-	// 		Expect().
-	// 		// redirect @route: /login
-	// 		// HTTP response status: 200 OK
-	// 		Status(http.StatusOK)
-	// })
-
+	//
+	// ...
+	//
 	// t.Run("users [no-auth] to POST update user by password it failure: 4"+
 	// 	" no session", func(t *testing.T) {
 	// 	noAuth.POST("/users/view/{id}/password").
@@ -297,7 +250,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 		name   string
 		expect *httpexpect.Expect // auth or no-auth
 		method int                // method 1: GET or 2: POST
-		path   int                // id:int exemple, id=1
+		path   int                // id:int. Exemple, id:1
 		form   types.NewPasswordForm
 		status int
 	}{
