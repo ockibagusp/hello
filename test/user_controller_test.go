@@ -249,8 +249,8 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 	testCases := []struct {
 		name   string
 		expect *httpexpect.Expect // auth or no-auth
-		method int                // method 1: GET or 2: POST
-		path   int                // id:int. Exemple, id:1
+		method int                // method: 1=GET or 2=POST
+		path   int                // id=int. Exemple, id=1
 		form   types.NewPasswordForm
 		status int
 	}{
@@ -344,7 +344,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 					Status(tc.status)
 				return
 			}
-			panic("method: 1=GET and 2=POST")
+			panic("method: 1=GET or 2=POST")
 		})
 	}
 }
