@@ -95,6 +95,9 @@ func setupTestServerAuth(e *httpexpect.Expect) (auth *httpexpect.Expect) {
 	session_gorilla.Values["username"] = user.Username
 	session_gorilla.Values["is_auth_type"] = 2 // admin: 1 and user: 2
 	---
+	[+] Session:
+	"username" = "ockibagusp"
+	"is_auth_type" = 2
 */
 const session = "MTY0MDA4MzU1MnxEdi1CQkFFQ180SUFBUkFCRUFBQVNfLUNBQUlHYzNSeWFXNW" +
 	"5EQW9BQ0hWelpYSnVZVzFsQm5OMGNtbHVad3dNQUFwdlkydHBZbUZuZFhOd0JuTjBjbWx1Wnd3" +

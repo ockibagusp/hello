@@ -265,7 +265,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		*/
 		var user models.User
 
-		if err := controller.DB.Select("id", "username").Where(
+		if err := controller.DB.Select("id", "username", "password").Where(
 			"username = ?", session.Values["username"],
 		).First(&user, id).Error; err != nil {
 			return c.JSON(http.StatusNotAcceptable, echo.Map{
@@ -275,8 +275,18 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 
 		// newPasswordForm: type of a password user
 		_newPasswordForm := types.NewPasswordForm{
+			OldPassword:        c.FormValue("old_password"),
 			NewPassword:        c.FormValue("new_password"),
 			ConfirmNewPassword: c.FormValue("confirm_new_password"),
+		}
+
+		if !middleware.CheckHashPassword(user.Password, _newPasswordForm.OldPassword) {
+			return c.Render(http.StatusForbidden, "user-view-password.html", echo.Map{
+				"session":      session,
+				"name":         fmt.Sprintf("User: %s", user.Name),
+				"user":         user,
+				"is_html_only": true,
+			})
 		}
 
 		// _newPasswordForm: Validate of a validate user
@@ -291,39 +301,33 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		} why?
 		*/
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": "400 Bad Request: " + err.Error(),
+			// return c.JSON(http.StatusBadRequest, echo.Map{
+			// 	"message": "Passwords Don't Match",
+			// })
+			return c.Render(http.StatusForbidden, "user-view-password.html", echo.Map{
+				"session":      session,
+				"name":         fmt.Sprintf("User: %s", user.Name),
+				"user":         user,
+				"is_html_only": true,
 			})
 		}
 
-		// if c.FormValue("new_password") != c.FormValue("confirm_new_password") {
-		// 	return c.JSON(http.StatusBadRequest, echo.Map{
-		// 		"message": "Passwords Don't Match",
-		// 	})
-		// }
+		// Password Hash
+		hash, err := middleware.PasswordHash(_newPasswordForm.NewPassword)
+		if err != nil {
+			return err
+		}
 
-		// user := models.User{
-		// 	Password: c.FormValue("new_password"),
-		// }
-
-		// fmt.Println("-> ", user)
-
-		// if err := c.Bind(&user); err != nil {
-		// 	return c.JSON(http.StatusBadRequest, echo.Map{
-		// 		"message": "400 Bad Request: " + err.Error(),
-		// 	})
-		// }
-
-		fmt.Println("--> ", user)
-
-		// password and hash
+		user = models.User{
+			Password: hash,
+		}
 
 		// err := user.UpdateByIDandPassword(...): be able
-		// if err := user.UpdateByIDandPassword(controller.DB, id, user.Password); err != nil {
-		// 	return c.JSON(http.StatusNotAcceptable, echo.Map{
-		// 		"message": "405 Method Not Allowed: " + err.Error(),
-		// 	})
-		// }
+		if err := user.UpdateByIDandPassword(controller.DB, id, user.Password); err != nil {
+			return c.JSON(http.StatusNotAcceptable, echo.Map{
+				"message": "405 Method Not Allowed: " + err.Error(),
+			})
+		}
 
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}

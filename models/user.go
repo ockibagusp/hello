@@ -97,7 +97,7 @@ func (user User) Update(db *gorm.DB, id int) (User, error) {
 
 // User: Update By ID and Password
 func (user User) UpdateByIDandPassword(db *gorm.DB, id int, password string) (err error) {
-	if err = db.Where("id = ?", id).Update("password", password).First(&user).Error; err != nil {
+	if err = db.Model(&user).Where("id = ?", id).Update("password", password).First(&user).Error; err != nil {
 		return err
 	}
 

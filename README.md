@@ -65,6 +65,20 @@ $ hello.exe
 - Mutex: BankAccount
 - too much
 
+## Stack Overflow (with me)
+
+- Error Code: 1406. Data too long for column - MySQL
+[link](https://stackoverflow.com/questions/15949038/error-code-1406-data-too-long-for-column-mysql)
+
+## Operating System (with me)
+### Linux:
+- Fedora 35 Workstation
+
+### Go: 
+- go1.16.11 linux/amd64
+
+### MySQL: 
+- mysql  Ver 8.0.27 for Linux on x86_64 (Source distribution)
 
 Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini agak lupa. Bertahap.
 
