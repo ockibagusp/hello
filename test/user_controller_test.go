@@ -18,6 +18,17 @@ func truncateUsers(db *gorm.DB) {
 	db.Exec("TRUNCATE users")
 }
 
+// TODO: types users error
+// // type: users test cases
+// type usersTestCases []struct {
+// 	name   string
+// 	expect *httpexpect.Expect // auth or no-auth
+// 	method int                // method: 1=GET or 2=POST
+// 	path   int                // id=int. Exemple, id=1
+// 	form   struct{} ?
+// 	status int
+// }
+
 func TestUsersController(t *testing.T) {
 	noAuth := setupTestServer(t)
 	auth := setupTestServerAuth(noAuth)
@@ -53,36 +64,74 @@ func TestCreateUserController(t *testing.T) {
 		ConfirmPassword: "user123",
 	}
 
-	t.Run("users [no auth] to GET create it success", func(t *testing.T) {
-		noAuth.GET("/users/add").
-			Expect().
+	testCases := []struct {
+		name   string
+		expect *httpexpect.Expect // auth or no-auth
+		method int                // method: 1=GET or 2=POST
+		form   types.UserForm
+		status int
+	}{
+		{
+			name:   "users [auth] to GET create it success",
+			expect: auth,
+			method: GET,
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-	})
-
-	t.Run("users [auth] to GET create it success", func(t *testing.T) {
-		auth.GET("/users/add").
-			Expect().
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [no auth] to GET create it success",
+			expect: noAuth,
+			method: GET,
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-	})
-
-	t.Run("user [auth] to POST create it success", func(t *testing.T) {
-		auth.POST("/users/add").
-			WithForm(userForm).
-			Expect().
+			status: http.StatusOK,
+		},
+		{
+			name:   "user [auth] to POST create it success",
+			expect: auth,
+			method: POST,
+			form:   userForm,
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-	})
-
-	// Database: " Error 1062: Duplicate entry 'sugriwa@wanara.com' for key 'users.email_UNIQUE' "
-	t.Run("users [no auth] to POST create it failure: Duplicate entry", func(t *testing.T) {
-		noAuth.POST("/users/add").
-			WithForm(userForm).
-			Expect().
+			status: http.StatusOK,
+		},
+		// Database: " Error 1062: Duplicate entry 'sugriwa@wanara.com' for key 'users.email_UNIQUE' "
+		{
+			name:   "users [no auth] to POST create it failure: Duplicate entry",
+			expect: noAuth,
+			method: POST,
+			form:   userForm,
 			// HTTP response status: 400 Bad Request
-			Status(http.StatusBadRequest)
-	})
+			status: http.StatusBadRequest,
+		},
+	}
+
+	for _, test := range testCases {
+		expect := test.expect // auth or no-auth
+
+		t.Run(test.name, func(t *testing.T) {
+			var result *httpexpect.Response
+			if test.method == GET {
+				result = expect.GET("/users/add").
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else if test.method == POST {
+				result = expect.POST("/users/add").
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else {
+				panic("method: 1=GET or 2=POST")
+			}
+
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
+		})
+	}
 }
 
 func TestReadUserController(t *testing.T) {
@@ -97,41 +146,76 @@ func TestReadUserController(t *testing.T) {
 		Name:     "Sugriwa",
 	}.Save(db)
 
-	t.Run("users [auth] to GET read it success", func(t *testing.T) {
-		auth.GET("/users/read/{id}").
-			WithPath("id", "1").
-			Expect().
+	testCases := []struct {
+		name   string
+		expect *httpexpect.Expect // auth or no-auth
+		method int                // method: 1=GET or 2=POST
+		path   int
+		status int
+	}{
+		{
+			name:   "users [auth] to GET read it success",
+			expect: auth,
+			method: GET,
+			path:   1,
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-	})
-
-	t.Run("users [auth] to GET read it failure: 1 session and no-id", func(t *testing.T) {
-		auth.GET("/users/read/{id}").
-			WithPath("id", "-1").
-			Expect().
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [auth] to GET read it failure: 1 session and no-id",
+			expect: auth,
+			method: GET,
+			path:   -1,
 			// HTTP response status: 406 Not Acceptable
-			Status(http.StatusNotAcceptable)
-	})
-
-	t.Run("users [no auth] to GET read it failure: 2 no-session and id", func(t *testing.T) {
-		noAuth.GET("/users/read/{id}").
-			WithPath("id", "1").
-			Expect().
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [no auth] to GET read it failure: 2 no-session and id",
+			expect: noAuth,
+			method: GET,
+			path:   1,
 			// redirect @route: /login
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-		// redirection login
-	})
-
-	t.Run("users [no auth] to GET read it failure: 3 no-session and no-id", func(t *testing.T) {
-		noAuth.GET("/users/read/{id}").
-			WithPath("id", "-1").
-			Expect().
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [no auth] to GET read it failure: 3 no-session and no-id",
+			expect: noAuth,
+			method: GET,
+			path:   -1,
 			// redirect @route: /login
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-		// redirection login
-	})
+			status: http.StatusOK,
+		},
+	}
+
+	for _, test := range testCases {
+		var result *httpexpect.Response
+		expect := test.expect // auth or no-auth
+
+		t.Run(test.name, func(t *testing.T) {
+			if test.method == GET {
+				// same:
+				//
+				// expect.GET("/users/read/{id}").
+				//	WithPath("id", tc.path).
+				// ...
+				result = expect.GET("/users/read/{id}", test.path).
+					Expect().
+					Status(test.status)
+			} else {
+				panic("method: 1=GET")
+			}
+
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
+		})
+	}
 }
 
 func TestUpdateUserController(t *testing.T) {
@@ -146,52 +230,97 @@ func TestUpdateUserController(t *testing.T) {
 		Name:     "Subali",
 	}.Save(db)
 
-	t.Run("users [auth] to GET update it success", func(t *testing.T) {
-		auth.GET("/users/view/{id}").
-			WithPath("id", "1").
-			Expect().
+	testCases := []struct {
+		name   string
+		expect *httpexpect.Expect // auth or no-auth
+		method int                // method: 1=GET or 2=POST
+		path   int                // id=int. Exemple, id=1
+		form   types.UserForm
+		status int
+	}{
+		{
+			name:   "users [auth] to GET update it success",
+			expect: auth,
+			method: GET,
+			path:   1,
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-	})
-
-	t.Run("users [auth] to POST update it success", func(t *testing.T) {
-		auth.POST("/users/view/{id}").
-			WithPath("id", "1").
-			WithForm(types.UserForm{
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [auth] to POST update it success",
+			expect: auth,
+			method: POST,
+			path:   1,
+			form: types.UserForm{
 				Username: "rahwana",
 				Email:    "rahwana@rakshasa.com",
 				Name:     "Rahwana",
-			}).
-			Expect().
+			},
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-	})
-
-	t.Run("users [auth] to GET update it failure: 1 session and no-id", func(t *testing.T) {
-		auth.GET("/users/view/{id}").
-			WithPath("id", "-1").
-			Expect().
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [auth] to GET update it failure: 1 session and no-id",
+			expect: auth,
+			method: GET,
+			path:   -1,
 			// HTTP response status: 406 Not Acceptable
-			Status(http.StatusNotAcceptable)
-	})
-
-	t.Run("users [no auth] to GET update it failure: 2 no-session and id", func(t *testing.T) {
-		noAuth.GET("/users/view/{id}").
-			WithPath("id", "1").
-			Expect().
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [no auth] to GET update it failure: 2 no-session and id",
+			expect: noAuth,
+			method: GET,
+			path:   1,
 			// redirect @route: /login
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-	})
-
-	t.Run("users [no auth] to GET update it failure: 3 no-session and no-id", func(t *testing.T) {
-		noAuth.GET("/users/view/{id}").
-			WithPath("id", "-1").
-			Expect().
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [no auth] to GET update it failure: 3 no-session and no-id",
+			expect: noAuth,
+			method: GET,
+			path:   -1,
 			// redirect @route: /login
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
-	})
+			status: http.StatusOK,
+		},
+	}
+
+	for _, test := range testCases {
+		expect := test.expect // auth or no-auth
+
+		t.Run(test.name, func(t *testing.T) {
+			var result *httpexpect.Response
+			if test.method == GET {
+				// same:
+				//
+				// expect.GET("/users/view/{id}").
+				//	WithPath("id", test.path).
+				// ...
+				result = expect.GET("/users/view/{id}", test.path).
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else if test.method == POST {
+				result = expect.POST("/users/view/{id}").
+					WithPath("id", test.path).
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else {
+				panic("method: 1=GET or 2=POST")
+			}
+
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
+		})
+	}
 }
 
 func TestUpdateUserByPasswordUserController(t *testing.T) {
@@ -223,28 +352,6 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			Name:     user.Name,
 		}.Save(db)
 	}
-
-	// t.Run("users [auth] to POST update user by password it success", func(t *testing.T) {
-	// 	auth.POST("/users/view/{id}/password").
-	// 		WithPath("id", "1").
-	// 		WithForm(types.NewPasswordForm{
-	// 			...
-	// 		}).
-	// 		Expect().
-	// 		Status(http.StatusOK)
-	// })
-	//
-	// ...
-	//
-	// t.Run("users [no-auth] to POST update user by password it failure: 4"+
-	// 	" no session", func(t *testing.T) {
-	// 	noAuth.POST("/users/view/{id}/password").
-	// 		WithPath("id", "1").
-	// 		Expect().
-	// 		// redirect @route: /login
-	// 		// HTTP response status: 200 OK
-	// 		Status(http.StatusOK)
-	// })
 
 	testCases := []struct {
 		name   string
@@ -325,26 +432,56 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		expect := tc.expect // auth or no-auth
+	// for...{...}, same:
+	//
+	// t.Run("users [auth] to POST update user by password it success", func(t *testing.T) {
+	// 	auth.POST("/users/view/{id}/password").
+	// 		WithPath("id", "1").
+	// 		WithForm(types.NewPasswordForm{
+	// 			...
+	// 		}).
+	// 		Expect().
+	// 		Status(http.StatusOK)
+	// })
+	//
+	// ...
+	//
+	// t.Run("users [no-auth] to POST update user by password it failure: 4"+
+	// 	" no session", func(t *testing.T) {
+	// 	noAuth.POST("/users/view/{id}/password").
+	// 		WithPath("id", "1").
+	// 		Expect().
+	// 		// redirect @route: /login
+	// 		// HTTP response status: 200 OK
+	// 		Status(http.StatusOK)
+	// })
+	for _, test := range testCases {
+		var result *httpexpect.Response
+		expect := test.expect // auth or no-auth
 
-		t.Run(tc.name, func(t *testing.T) {
-			if tc.method == GET {
-				expect.GET("/users/view/{id}/password").
-					WithPath("id", tc.path).
-					WithForm(tc.form).
+		t.Run(test.name, func(t *testing.T) {
+			if test.method == GET {
+				result = expect.GET("/users/view/{id}/password", test.path).
+					WithForm(test.form).
 					Expect().
-					Status(tc.status)
-				return
-			} else if tc.method == POST {
-				expect.POST("/users/view/{id}/password").
-					WithPath("id", tc.path).
-					WithForm(tc.form).
+					Status(test.status)
+			} else if test.method == POST {
+				result = expect.POST("/users/view/{id}/password").
+					WithPath("id", test.path).
+					WithForm(test.form).
 					Expect().
-					Status(tc.status)
-				return
+					Status(test.status)
+			} else {
+				panic("method: 1=GET or 2=POST")
 			}
-			panic("method: 1=GET or 2=POST")
+
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
 		})
 	}
 }
