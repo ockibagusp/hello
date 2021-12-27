@@ -67,8 +67,24 @@ func (user User) FirstByID(db *gorm.DB, id int) (User, error) {
 }
 
 // User: FirstByIDAndUsername
-func (user User) FirstByIDAndUsername(db *gorm.DB, id int, username string) (User, error) {
-	err := db.Where("username = ?", username).First(&user, id).Error
+//
+// example:
+// user, err := models.User{}.FirstByIDAndUsername(controllers.DB, 1, "ockibagusp")
+//
+// or,
+//
+// user, err := models.User{}.FirstByIDAndUsername(controllers.DB, 1, "ockibagusp", true)
+func (user User) FirstByIDAndUsername(db *gorm.DB, id int, username string, too ...bool) (User, error) {
+	var err error
+	if len(too) == 0 {
+		err = db.Select("id", "username", "password").
+			Where("username = ?", username).First(&user, id).Error
+	} else if len(too) == 1 {
+		err = db.Where("username = ?", username).First(&user, id).Error
+	} else { // too agrs [2,..]=bool
+		return User{}, errors.New("models.User{}.FirstByIDAndUsername: too agrs [0, 1]=bool")
+	}
+
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return User{}, errors.New("User Not Found")

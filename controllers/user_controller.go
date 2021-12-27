@@ -262,11 +262,10 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		username ockibagusp update by password 'ockibagusp': ok
 		username ockibagusp update by password 'sugriwa': no
 	*/
-	var user models.User
-
-	if err := controller.DB.Select("id", "username", "password").Where(
-		"username = ?", session.Values["username"],
-	).First(&user, id).Error; err != nil {
+	user, err := models.User{}.FirstByIDAndUsername(
+		controller.DB, id, session.Values["username"].(string),
+	)
+	if err != nil {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"message": "405 Method Not Allowed: " + err.Error(),
 		})
