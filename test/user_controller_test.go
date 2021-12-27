@@ -56,6 +56,7 @@ func TestCreateUserController(t *testing.T) {
 	// test for db users
 	truncateUsers(db)
 
+	// database: just `users.username` varchar 15
 	userForm := types.UserForm{
 		Username:        "sugriwa",
 		Email:           "sugriwa@wanara.com",
@@ -140,6 +141,7 @@ func TestReadUserController(t *testing.T) {
 
 	// test for db users
 	truncateUsers(db)
+	// database: just `users.username` varchar 15
 	models.User{
 		Username: "sugriwa",
 		Email:    "sugriwa@wanara.com",
@@ -224,6 +226,7 @@ func TestUpdateUserController(t *testing.T) {
 
 	// test for db users
 	truncateUsers(db)
+	// database: just `users.username` varchar 15
 	models.User{
 		Username: "subali",
 		Email:    "subali@wanara.com",
@@ -329,6 +332,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 
 	// test for db users
 	truncateUsers(db)
+	// database: just `users.username` varchar 15
 	users := []models.User{
 		{
 			Username: "ockibagusp",
@@ -337,21 +341,14 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			Name:     "Ocki Bagus Pratama",
 		},
 		{
-			Username: "password_success",
-			Email:    "password_success@exemple.com",
+			Username: "success",
+			Email:    "success@exemple.com",
 			Password: "password_success",
-			Name:     "Password success",
+			Name:     "Success",
 		},
 	}
-
-	for _, user := range users {
-		models.User{
-			Username: user.Username,
-			Email:    user.Email,
-			Password: user.Password,
-			Name:     user.Name,
-		}.Save(db)
-	}
+	// *gorm.DB
+	db.Create(&users)
 
 	testCases := []struct {
 		name   string
@@ -383,8 +380,17 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			status: http.StatusOK,
 		},
 		{
-			name: "users [auth] to POST update user by password it failure: 1" +
-				" passwords don't match",
+			name: "users [auth] to GET update user by password it failure: 1" +
+				" GET passwords don't match",
+			expect: auth,
+			method: GET,
+			path:   2,
+			// HTTP response status: 406 Not Acceptabl
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name: "users [auth] to POST update user by password it failure: 2" +
+				" POST passwords don't match",
 			expect: auth,
 			method: POST,
 			path:   1,
@@ -397,7 +403,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			status: http.StatusForbidden,
 		},
 		{
-			name: "users [auth] to POST update user by password it failure: 2" +
+			name: "users [auth] to POST update user by password it failure: 3" +
 				" username don't match",
 			expect: auth,
 			method: POST,
@@ -411,7 +417,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			status: http.StatusNotAcceptable,
 		},
 		{
-			name: "users [no-auth] to GET update user by password it failure: 3" +
+			name: "users [no-auth] to GET update user by password it failure: 4" +
 				" no session",
 			expect: noAuth,
 			method: GET,
@@ -421,7 +427,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			status: http.StatusOK,
 		},
 		{
-			name: "users [no-auth] to POST update user by password it failure: 4" +
+			name: "users [no-auth] to POST update user by password it failure: 5" +
 				" no session",
 			expect: noAuth,
 			method: POST,

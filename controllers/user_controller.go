@@ -257,22 +257,22 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 
 	id, _ := strconv.Atoi(c.Param("id"))
 
+	/*
+		for example:
+		username ockibagusp update by password 'ockibagusp': ok
+		username ockibagusp update by password 'sugriwa': no
+	*/
+	var user models.User
+
+	if err := controller.DB.Select("id", "username", "password").Where(
+		"username = ?", session.Values["username"],
+	).First(&user, id).Error; err != nil {
+		return c.JSON(http.StatusNotAcceptable, echo.Map{
+			"message": "405 Method Not Allowed: " + err.Error(),
+		})
+	}
+
 	if c.Request().Method == "POST" {
-		/*
-			for example:
-			username ockibagusp update by password 'ockibagusp': ok
-			username ockibagusp update by password 'sugriwa': no
-		*/
-		var user models.User
-
-		if err := controller.DB.Select("id", "username", "password").Where(
-			"username = ?", session.Values["username"],
-		).First(&user, id).Error; err != nil {
-			return c.JSON(http.StatusNotAcceptable, echo.Map{
-				"message": "405 Method Not Allowed: " + err.Error(),
-			})
-		}
-
 		// newPasswordForm: type of a password user
 		_newPasswordForm := types.NewPasswordForm{
 			OldPassword:        c.FormValue("old_password"),
@@ -330,15 +330,6 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		}
 
 		return c.Redirect(http.StatusMovedPermanently, "/users")
-	}
-
-	var user models.User
-	var err error
-	// _, err = user.FirstByID(...): be able
-	if user, err = user.FirstByID(controller.DB, id); err != nil {
-		return c.JSON(http.StatusNotAcceptable, echo.Map{
-			"message": "405 Method Not Allowed: " + err.Error(),
-		})
 	}
 
 	/*

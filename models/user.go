@@ -9,7 +9,8 @@ import (
 // User: struct
 type User struct {
 	Model
-	Username string `gorm:"unique;not null" form:"username"`
+	// database: just `username` varchar 15
+	Username string `gorm:"unique;not null;type:varchar(15)" form:"username"`
 	Email    string `gorm:"unique;not null" form:"email"`
 	Password string `gorm:"not null" form:"password"`
 	Name     string `gorm:"not null" form:"name"`
@@ -55,6 +56,19 @@ func (User) FindAll(db *gorm.DB) ([]User, error) {
 // User: FirstByID
 func (user User) FirstByID(db *gorm.DB, id int) (User, error) {
 	err := db.First(&user, id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return User{}, errors.New("User Not Found")
+		}
+		return User{}, err
+	}
+
+	return user, nil
+}
+
+// User: FirstByIDAndUsername
+func (user User) FirstByIDAndUsername(db *gorm.DB, id int, username string) (User, error) {
+	err := db.Where("username = ?", username).First(&user, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return User{}, errors.New("User Not Found")
