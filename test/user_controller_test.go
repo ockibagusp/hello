@@ -467,6 +467,11 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 
 		t.Run(test.name, func(t *testing.T) {
 			if test.method == GET {
+				// same:
+				//
+				// expect.POST("/users/view/{id}/password").
+				//	WithPath("id", test.path).
+				// ...
 				result = expect.GET("/users/view/{id}/password", test.path).
 					WithForm(test.form).
 					Expect().
