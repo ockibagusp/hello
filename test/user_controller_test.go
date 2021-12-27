@@ -343,7 +343,6 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 		{
 			Username: "success",
 			Email:    "success@exemple.com",
-			Password: "password_success",
 			Name:     "Success",
 		},
 	}
@@ -495,4 +494,8 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDeleteUserController(t *testing.T) {
+
 }
