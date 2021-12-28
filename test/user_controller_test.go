@@ -152,14 +152,14 @@ func TestReadUserController(t *testing.T) {
 		name   string
 		expect *httpexpect.Expect // auth or no-auth
 		method int                // method: 1=GET or 2=POST
-		path   int
+		path   string
 		status int
 	}{
 		{
 			name:   "users [auth] to GET read it success",
 			expect: auth,
 			method: GET,
-			path:   1,
+			path:   "1",
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
 		},
@@ -167,7 +167,7 @@ func TestReadUserController(t *testing.T) {
 			name:   "users [auth] to GET read it failure: 1 session and no-id",
 			expect: auth,
 			method: GET,
-			path:   -1,
+			path:   "-1",
 			// HTTP response status: 406 Not Acceptable
 			status: http.StatusNotAcceptable,
 		},
@@ -175,7 +175,7 @@ func TestReadUserController(t *testing.T) {
 			name:   "users [no auth] to GET read it failure: 2 no-session and id",
 			expect: noAuth,
 			method: GET,
-			path:   1,
+			path:   "1",
 			// redirect @route: /login
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
@@ -184,7 +184,7 @@ func TestReadUserController(t *testing.T) {
 			name:   "users [no auth] to GET read it failure: 3 no-session and no-id",
 			expect: noAuth,
 			method: GET,
-			path:   -1,
+			path:   "-1",
 			// redirect @route: /login
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
@@ -237,7 +237,7 @@ func TestUpdateUserController(t *testing.T) {
 		name   string
 		expect *httpexpect.Expect // auth or no-auth
 		method int                // method: 1=GET or 2=POST
-		path   int                // id=int. Exemple, id=1
+		path   string             // id=string. Exemple, id="1"
 		form   types.UserForm
 		status int
 	}{
@@ -245,7 +245,7 @@ func TestUpdateUserController(t *testing.T) {
 			name:   "users [auth] to GET update it success",
 			expect: auth,
 			method: GET,
-			path:   1,
+			path:   "1",
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
 		},
@@ -253,7 +253,7 @@ func TestUpdateUserController(t *testing.T) {
 			name:   "users [auth] to POST update it success",
 			expect: auth,
 			method: POST,
-			path:   1,
+			path:   "1",
 			form: types.UserForm{
 				Username: "rahwana",
 				Email:    "rahwana@rakshasa.com",
@@ -266,7 +266,7 @@ func TestUpdateUserController(t *testing.T) {
 			name:   "users [auth] to GET update it failure: 1 session and no-id",
 			expect: auth,
 			method: GET,
-			path:   -1,
+			path:   "-1",
 			// HTTP response status: 406 Not Acceptable
 			status: http.StatusNotAcceptable,
 		},
@@ -274,7 +274,7 @@ func TestUpdateUserController(t *testing.T) {
 			name:   "users [no auth] to GET update it failure: 2 no-session and id",
 			expect: noAuth,
 			method: GET,
-			path:   1,
+			path:   "1",
 			// redirect @route: /login
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
@@ -283,7 +283,7 @@ func TestUpdateUserController(t *testing.T) {
 			name:   "users [no auth] to GET update it failure: 3 no-session and no-id",
 			expect: noAuth,
 			method: GET,
-			path:   -1,
+			path:   "-1",
 			// redirect @route: /login
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
@@ -353,7 +353,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 		name   string
 		expect *httpexpect.Expect // auth or no-auth
 		method int                // method: 1=GET or 2=POST
-		path   int                // id=int. Exemple, id=1
+		path   string             // id=string. Exemple, id="1"
 		form   types.NewPasswordForm
 		status int
 	}{
@@ -361,7 +361,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			name:   "users [auth] to GET update user by password it success",
 			expect: auth,
 			method: GET,
-			path:   1,
+			path:   "1",
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
 		},
@@ -369,7 +369,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			name:   "users [auth] to POST update user by password it success",
 			expect: auth,
 			method: POST,
-			path:   1,
+			path:   "1",
 			form: types.NewPasswordForm{
 				OldPassword:        "user123",
 				NewPassword:        "password_success",
@@ -383,7 +383,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 				" GET passwords don't match",
 			expect: auth,
 			method: GET,
-			path:   2,
+			path:   "2",
 			// HTTP response status: 406 Not Acceptabl
 			status: http.StatusNotAcceptable,
 		},
@@ -392,7 +392,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 				" POST passwords don't match",
 			expect: auth,
 			method: POST,
-			path:   1,
+			path:   "1",
 			form: types.NewPasswordForm{
 				OldPassword:        "user123",
 				NewPassword:        "password_success",
@@ -406,7 +406,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 				" username don't match",
 			expect: auth,
 			method: POST,
-			path:   2,
+			path:   "2",
 			form: types.NewPasswordForm{
 				OldPassword:        "user123",
 				NewPassword:        "password_failure",
@@ -420,7 +420,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 				" no session",
 			expect: noAuth,
 			method: GET,
-			path:   1,
+			path:   "1",
 			// redirect @route: /login
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
@@ -430,7 +430,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 				" no session",
 			expect: noAuth,
 			method: POST,
-			path:   1,
+			path:   "1",
 			// redirect @route: /login
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
@@ -515,13 +515,13 @@ func TestDeleteUserController(t *testing.T) {
 	testCases := []struct {
 		name   string
 		expect *httpexpect.Expect // auth or no-auth
-		path   int                // id=int. Exemple, id=1
+		path   string             // id=string. Exemple, id="1"
 		status int
 	}{
 		{
 			name:   "users [auth] to DELETE it success",
 			expect: auth,
-			path:   1,
+			path:   "1",
 			// redirect @route: /users
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
@@ -529,33 +529,41 @@ func TestDeleteUserController(t *testing.T) {
 		{
 			name:   "users [auth] to DELETE it failure: 1 (id=1) delete exists",
 			expect: auth,
-			path:   1,
+			path:   "1",
 			// HTTP response status: 406 Not Acceptable
 			status: http.StatusNotAcceptable,
 		},
 		{
 			name:   "users [auth] to DELETE it failure: 2 (id=-1)",
 			expect: auth,
-			path:   -1,
+			path:   "-1",
 			// HTTP response status: 406 Not Acceptable
 			status: http.StatusNotAcceptable,
 		},
 		{
 			name:   "users [no-auth] to DELETE it failure: 3 (id=1)",
-			expect: auth,
-			path:   1,
-			// HTTP response status: 406 Not Acceptable
-			status: http.StatusNotAcceptable,
+			expect: noAuth,
+			path:   "1",
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
 		},
 		{
 			name:   "users [no-auth] to DELETE it failure: 4 (id=-1)",
-			expect: auth,
-			path:   -1,
-			// HTTP response status: 406 Not Acceptable
-			status: http.StatusNotAcceptable,
+			expect: noAuth,
+			path:   "-1",
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
 		},
-
-		// TODO: users/delete/error ?
+		{
+			name:   "users [no-auth] to DELETE it failure: 5 (id=error)",
+			expect: noAuth,
+			path:   "error",
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
 	}
 
 	for _, test := range testCases {
