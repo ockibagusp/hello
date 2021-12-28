@@ -15,13 +15,13 @@ import (
  * @route: /users/add
  */
 type UserForm struct {
-	Username        string
-	Email           string
-	Password        string
-	ConfirmPassword string
-	Name            string
-	City            uint
-	Photo           string
+	Username        string `form:"username"`
+	Email           string `form:"email"`
+	Password        string `form:"password"`
+	ConfirmPassword string `form:"confirm_password"`
+	Name            string `form:"name"`
+	City            uint   `form:"city"`
+	Photo           string `form:"photo"`
 }
 
 /*
@@ -33,8 +33,8 @@ type UserForm struct {
  * @route: /login
  */
 type LoginForm struct {
-	Username string
-	Password string
+	Username string `form:"username"`
+	Password string `form:"password"`
 }
 
 // (type PasswordForm) Validate: of a validate username and password
@@ -54,9 +54,9 @@ func (lf LoginForm) Validate() error {
  * @route: /login
  */
 type NewPasswordForm struct {
-	OldPassword        string // nothing
-	NewPassword        string
-	ConfirmNewPassword string
+	OldPassword        string `form:"old_password"`
+	NewPassword        string `form:"new_password"`
+	ConfirmNewPassword string `form:"confirm_new_password"`
 }
 
 /* function PasswordEquals: of password equals confirm password

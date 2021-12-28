@@ -1,176 +1,579 @@
 package test
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"log"
 	"net/http"
-	"net/http/httptest"
-	"strconv"
-	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
-	c "github.com/ockibagusp/hello/controllers"
+	"github.com/gavv/httpexpect/v2"
 	"github.com/ockibagusp/hello/models"
-	"github.com/stretchr/testify/assert"
+	"github.com/ockibagusp/hello/types"
 	"gorm.io/gorm"
 )
 
+// truncate Users
+//
+// parameter: db *gorm.DB or not available:
+// func truncateUsers() {...}, just the same
 func truncateUsers(db *gorm.DB) {
-	// db.Exec("TRUNCATE users")
+	db.Exec("TRUNCATE users")
 }
 
-func setupRouter() (router *echo.Echo) {
-	router = echo.New()
+// TODO: types users error
+// // type: users test cases
+// type usersTestCases []struct {
+// 	name   string
+// 	expect *httpexpect.Expect // auth or no-auth
+// 	method int                // method: 1=GET or 2=POST
+// 	path   int                // id=int. Exemple, id=1
+// 	form   struct{} ?
+// 	status int
+// }
 
-	// controllers init
-	controllers := c.Controller{DB: db}
+func TestUsersController(t *testing.T) {
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
 
-	router.GET("/users", controllers.Users).Name = "users"
-
-	return
-}
-
-const (
-	userJSON  = `{"id":1,"name":"Jon Snow"}`
-	usersJSON = `[{"id":1,"name":"Jon Snow"}]`
-)
-
-func TestEchoHandler(t *testing.T) {
-	assert := assert.New(t)
-
-	e := echo.New()
-
-	// HandlerFunc
-	e.GET("/ok", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
+	t.Run("users [auth] to GET it success", func(t *testing.T) {
+		auth.GET("/users").
+			Expect().
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "/ok", nil)
-	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, req)
-
-	assert.Equal(http.StatusOK, rec.Code)
-	assert.Equal("OK", rec.Body.String())
+	t.Run("users [no auth] to GET it failure", func(t *testing.T) {
+		noAuth.GET("/users").
+			Expect().
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			Status(http.StatusOK)
+	})
 }
 
-func TestUserControllerAPI(t *testing.T) {
-	assert := assert.New(t)
+func TestCreateUserController(t *testing.T) {
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
 
+	// test for db users
 	truncateUsers(db)
 
-	tx := db.Begin()
-
-	defer tx.Rollback()
-
-	if err := tx.Commit(); err != nil {
-		log.Fatal(err)
+	// database: just `users.username` varchar 15
+	userForm := types.UserForm{
+		Username:        "sugriwa",
+		Email:           "sugriwa@wanara.com",
+		Name:            "Sugriwa",
+		Password:        "user123",
+		ConfirmPassword: "user123",
 	}
 
-	assert.True(true)
-}
+	testCases := []struct {
+		name   string
+		expect *httpexpect.Expect // auth or no-auth
+		method int                // method: 1=GET or 2=POST
+		form   types.UserForm
+		status int
+	}{
+		{
+			name:   "users [auth] to GET create it success",
+			expect: auth,
+			method: GET,
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [no auth] to GET create it success",
+			expect: noAuth,
+			method: GET,
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "user [auth] to POST create it success",
+			expect: auth,
+			method: POST,
+			form:   userForm,
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		// Database: " Error 1062: Duplicate entry 'sugriwa@wanara.com' for key 'users.email_UNIQUE' "
+		{
+			name:   "users [no auth] to POST create it failure: Duplicate entry",
+			expect: noAuth,
+			method: POST,
+			form:   userForm,
+			// HTTP response status: 400 Bad Request
+			status: http.StatusBadRequest,
+		},
+	}
 
-func TestUserController(t *testing.T) {
-	assert := assert.New(t)
+	for _, test := range testCases {
+		expect := test.expect // auth or no-auth
 
-	request := httptest.NewRequest(http.MethodGet, "/users", nil)
-	recorder := httptest.NewRecorder()
+		t.Run(test.name, func(t *testing.T) {
+			var result *httpexpect.Response
+			if test.method == GET {
+				result = expect.GET("/users/add").
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else if test.method == POST {
+				result = expect.POST("/users/add").
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else {
+				panic("method: 1=GET or 2=POST")
+			}
 
-	fmt.Println("req -> ", request)
-
-	router := echo.New()
-
-	// controllers init
-	controllers := c.Controller{DB: db}
-	router.GET("/users", controllers.Users)
-	req := httptest.NewRequest(http.MethodGet, "/users", nil)
-	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
-
-	fmt.Println("req -> ", req)
-	fmt.Println("rec -> ", rec)
-
-	assert.Equal(http.StatusOK, rec.Code)
-	assert.Equal("OK", rec.Body.String())
-
-	// ???
-	// req := httptest.NewRequest(method, path, nil)
-	// rec := httptest.NewRecorder()
-	// e.ServeHTTP(rec, req)
-	// return rec.Code, rec.Body.String()
-
-	// u := router.NewContext(request, recorder)
-
-	// h := &handler{mockDB}
-
-	// // Assertions
-	// if assert.NoError(h.getUser(c)) {
-	// 	assert.Equal(http.StatusOK, recorder.Code)
-	// 	assert.Equal(userJSON, recorder.Body.String())
-	// }
-	response := recorder.Result()
-	defer response.Body.Close()
-
-	// err := controllers.Users(u)
-
-	// if assert.NoError(controllers.UsersAPI(u)) {
-	// 	assert.Equal(http.StatusOK, response.StatusCode)
-	// }
-
-	// assert.Equal(200, response.StatusCode)
-
-	// // h := &handler{mockDB}
-
-	// body, _ := io.ReadAll(response.Body)
-	// var responseBody map[string]interface{}
-	// json.Unmarshal(body, &responseBody)
-
-	// //assert.Equal(200, int(responseBody["code"].(float64)))
-	// assert.Equal("OK", responseBody["status"])
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
+		})
+	}
 }
 
 func TestReadUserController(t *testing.T) {
-	assert := assert.New(t)
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
 
-	// // func trucate
-	// db.Exec("TRUNCATE users")
+	// test for db users
+	truncateUsers(db)
+	// database: just `users.username` varchar 15
+	models.User{
+		Username: "sugriwa",
+		Email:    "sugriwa@wanara.com",
+		Name:     "Sugriwa",
+	}.Save(db)
 
-	// f := make(url.Values)
-	// f.Set("name", "Jon Snow")
-	// f.Set("email", "jon@labstack.com")
-	// request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(f.Encode()))
-	// request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	testCases := []struct {
+		name   string
+		expect *httpexpect.Expect // auth or no-auth
+		method int                // method: 1=GET or 2=POST
+		path   int
+		status int
+	}{
+		{
+			name:   "users [auth] to GET read it success",
+			expect: auth,
+			method: GET,
+			path:   1,
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [auth] to GET read it failure: 1 session and no-id",
+			expect: auth,
+			method: GET,
+			path:   -1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [no auth] to GET read it failure: 2 no-session and id",
+			expect: noAuth,
+			method: GET,
+			path:   1,
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [no auth] to GET read it failure: 3 no-session and no-id",
+			expect: noAuth,
+			method: GET,
+			path:   -1,
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+	}
 
-	e := echo.New()
+	for _, test := range testCases {
+		var result *httpexpect.Response
+		expect := test.expect // auth or no-auth
 
-	// user.FindAll()
-	user, _ := models.User{}.FindByID(db, 1)
+		t.Run(test.name, func(t *testing.T) {
+			if test.method == GET {
+				// same:
+				//
+				// expect.GET("/users/read/{id}").
+				//	WithPath("id", test.path).
+				// ...
+				result = expect.GET("/users/read/{id}", test.path).
+					Expect().
+					Status(test.status)
+			} else {
+				panic("method: 1=GET")
+			}
 
-	requestBody := strings.NewReader(`{"name" : "Gadget"}`)
-	request := httptest.NewRequest(http.MethodGet, "/users/read/"+strconv.Itoa(int(user.Model.ID)), requestBody)
-	fmt.Println("request -> ", request)
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
+		})
+	}
+}
 
-	recorder := httptest.NewRecorder()
+func TestUpdateUserController(t *testing.T) {
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
 
-	c := e.NewContext(request, recorder)
-	c.SetPath("/users/read/" + strconv.Itoa(int(user.Model.ID)))
-	fmt.Println("c -> ", c.Path())
-	// c.SetParamNames("email")
-	// c.SetParamValues("jon@labstack.com")
+	// test for db users
+	truncateUsers(db)
+	// database: just `users.username` varchar 15
+	models.User{
+		Username: "subali",
+		Email:    "subali@wanara.com",
+		Name:     "Subali",
+	}.Save(db)
 
-	response := recorder.Result()
+	testCases := []struct {
+		name   string
+		expect *httpexpect.Expect // auth or no-auth
+		method int                // method: 1=GET or 2=POST
+		path   int                // id=int. Exemple, id=1
+		form   types.UserForm
+		status int
+	}{
+		{
+			name:   "users [auth] to GET update it success",
+			expect: auth,
+			method: GET,
+			path:   1,
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [auth] to POST update it success",
+			expect: auth,
+			method: POST,
+			path:   1,
+			form: types.UserForm{
+				Username: "rahwana",
+				Email:    "rahwana@rakshasa.com",
+				Name:     "Rahwana",
+			},
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [auth] to GET update it failure: 1 session and no-id",
+			expect: auth,
+			method: GET,
+			path:   -1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [no auth] to GET update it failure: 2 no-session and id",
+			expect: noAuth,
+			method: GET,
+			path:   1,
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [no auth] to GET update it failure: 3 no-session and no-id",
+			expect: noAuth,
+			method: GET,
+			path:   -1,
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+	}
 
-	assert.Equal(200, response.StatusCode)
+	for _, test := range testCases {
+		expect := test.expect // auth or no-auth
 
-	// h := &handler{mockDB}
+		t.Run(test.name, func(t *testing.T) {
+			var result *httpexpect.Response
+			if test.method == GET {
+				// same:
+				//
+				// expect.GET("/users/view/{id}").
+				//	WithPath("id", test.path).
+				// ...
+				result = expect.GET("/users/view/{id}", test.path).
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else if test.method == POST {
+				result = expect.POST("/users/view/{id}").
+					WithPath("id", test.path).
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else {
+				panic("method: 1=GET or 2=POST")
+			}
 
-	body, _ := io.ReadAll(response.Body)
-	var responseBody map[string]interface{}
-	json.Unmarshal(body, &responseBody)
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
+		})
+	}
+}
 
-	//assert.Equal(200, int(responseBody["code"].(float64)))
-	assert.Equal("OK", responseBody["status"])
+func TestUpdateUserByPasswordUserController(t *testing.T) {
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
 
+	// test for db users
+	truncateUsers(db)
+	// database: just `users.username` varchar 15
+	users := []models.User{
+		{
+			Username: "ockibagusp",
+			Email:    "ocki.bagus.p@gmail.com",
+			Password: "$2a$10$Y3UewQkjw808Ig90OPjuq.zFYIUGgFkWBuYiKzwLK8n3t9S8RYuYa",
+			Name:     "Ocki Bagus Pratama",
+		},
+		{
+			Username: "success",
+			Email:    "success@exemple.com",
+			Name:     "Success",
+		},
+	}
+	// *gorm.DB
+	db.Create(&users)
+
+	testCases := []struct {
+		name   string
+		expect *httpexpect.Expect // auth or no-auth
+		method int                // method: 1=GET or 2=POST
+		path   int                // id=int. Exemple, id=1
+		form   types.NewPasswordForm
+		status int
+	}{
+		{
+			name:   "users [auth] to GET update user by password it success",
+			expect: auth,
+			method: GET,
+			path:   1,
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [auth] to POST update user by password it success",
+			expect: auth,
+			method: POST,
+			path:   1,
+			form: types.NewPasswordForm{
+				OldPassword:        "user123",
+				NewPassword:        "password_success",
+				ConfirmNewPassword: "password_success",
+			},
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name: "users [auth] to GET update user by password it failure: 1" +
+				" GET passwords don't match",
+			expect: auth,
+			method: GET,
+			path:   2,
+			// HTTP response status: 406 Not Acceptabl
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name: "users [auth] to POST update user by password it failure: 2" +
+				" POST passwords don't match",
+			expect: auth,
+			method: POST,
+			path:   1,
+			form: types.NewPasswordForm{
+				OldPassword:        "user123",
+				NewPassword:        "password_success",
+				ConfirmNewPassword: "password_failure",
+			},
+			// HTTP response status: 403 Forbidden
+			status: http.StatusForbidden,
+		},
+		{
+			name: "users [auth] to POST update user by password it failure: 3" +
+				" username don't match",
+			expect: auth,
+			method: POST,
+			path:   2,
+			form: types.NewPasswordForm{
+				OldPassword:        "user123",
+				NewPassword:        "password_failure",
+				ConfirmNewPassword: "password_failure",
+			},
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name: "users [no-auth] to GET update user by password it failure: 4" +
+				" no session",
+			expect: noAuth,
+			method: GET,
+			path:   1,
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name: "users [no-auth] to POST update user by password it failure: 5" +
+				" no session",
+			expect: noAuth,
+			method: POST,
+			path:   1,
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+	}
+
+	// for...{...}, same:
+	//
+	// t.Run("users [auth] to POST update user by password it success", func(t *testing.T) {
+	// 	auth.POST("/users/view/{id}/password").
+	// 		WithPath("id", "1").
+	// 		WithForm(types.NewPasswordForm{
+	// 			...
+	// 		}).
+	// 		Expect().
+	// 		Status(http.StatusOK)
+	// })
+	//
+	// ...
+	//
+	// t.Run("users [no-auth] to POST update user by password it failure: 4"+
+	// 	" no session", func(t *testing.T) {
+	// 	noAuth.POST("/users/view/{id}/password").
+	// 		WithPath("id", "1").
+	// 		Expect().
+	// 		// redirect @route: /login
+	// 		// HTTP response status: 200 OK
+	// 		Status(http.StatusOK)
+	// })
+	for _, test := range testCases {
+		var result *httpexpect.Response
+		expect := test.expect // auth or no-auth
+
+		t.Run(test.name, func(t *testing.T) {
+			if test.method == GET {
+				// same:
+				//
+				// expect.POST("/users/view/{id}/password").
+				//	WithPath("id", test.path).
+				// ...
+				result = expect.GET("/users/view/{id}/password", test.path).
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else if test.method == POST {
+				result = expect.POST("/users/view/{id}/password").
+					WithPath("id", test.path).
+					WithForm(test.form).
+					Expect().
+					Status(test.status)
+			} else {
+				panic("method: 1=GET or 2=POST")
+			}
+
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
+		})
+	}
+}
+
+func TestDeleteUserController(t *testing.T) {
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
+
+	// test for db users
+	truncateUsers(db)
+	// database: just `users.username` varchar 15
+	users := []models.User{
+		{
+			Username: "rahwana",
+			Email:    "rahwana@rakshasa.com",
+		},
+	}
+	// *gorm.DB
+	db.Create(&users)
+
+	testCases := []struct {
+		name   string
+		expect *httpexpect.Expect // auth or no-auth
+		path   int                // id=int. Exemple, id=1
+		status int
+	}{
+		{
+			name:   "users [auth] to DELETE it success",
+			expect: auth,
+			path:   1,
+			// redirect @route: /users
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [auth] to DELETE it failure: 1 (id=1) delete exists",
+			expect: auth,
+			path:   1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [auth] to DELETE it failure: 2 (id=-1)",
+			expect: auth,
+			path:   -1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [no-auth] to DELETE it failure: 3 (id=1)",
+			expect: auth,
+			path:   1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [no-auth] to DELETE it failure: 4 (id=-1)",
+			expect: auth,
+			path:   -1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+
+		// TODO: users/delete/error ?
+	}
+
+	for _, test := range testCases {
+		var result *httpexpect.Response
+		expect := test.expect // auth or no-auth
+
+		t.Run(test.name, func(t *testing.T) {
+			result = expect.GET("/users/delete/{id}", test.path).
+				Expect().
+				Status(test.status)
+
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
+		})
+	}
 }

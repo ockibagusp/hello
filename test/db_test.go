@@ -8,11 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// PROD or DEV
+// test database: DEV
 var db *gorm.DB = dbManager.Init("DEV")
 
 func TestGetConnectionDB(t *testing.T) {
-	assert := assert.New(t)
-
-	assert.NotNil(db)
+	assert.NotNil(t, db)
 }

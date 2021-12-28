@@ -7,9 +7,6 @@ gin-bin
 hello
 hello.exe
 
-# main testing
-main_testing.go
-
 # air
 .air.toml
 tmp

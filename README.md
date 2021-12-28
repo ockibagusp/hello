@@ -63,7 +63,7 @@ $ hello.exe
 
 
 ## TODO List
-- test
+- mock unit test
 - CSRF
 - session.GetUser() to session.GetAuth()
 - session: IsAdmin, IsUser and IsAuth
@@ -71,8 +71,22 @@ $ hello.exe
 - Mutex: BankAccount
 - too much
 
+## Operating System (with me)
+### Linux:
+- Fedora 35 Workstation
 
-Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini agak lupa. Bertahap.
+### Go: 
+- go1.16.11 linux/amd64
+
+### MySQL: 
+- mysql  Ver 8.0.27 for Linux on x86_64 (Source distribution)
+
+
+### Bahasa Indonesia
+Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini sedikit lupa. Lalu pun, itu Bahasa Inggris lupa lagi. Perlahan-lahan dari stroke. Amin.
+
+### English
+Stroke: 03 10 2018-today. Released January 7, 2020. This coding is a little forgotten. Then again, this English forgot again. Little by little from stroke. Amen.
 
 ---
 
