@@ -26,8 +26,8 @@ func GetUser(c echo.Context) (session_gorilla *sessions.Session, err error) {
 }
 
 // SetSession: set session from User
-func SetSession(user models.User, c echo.Context) (session_values *SessionValues, err error) {
-	session_gorilla, err := session.Get("session", c)
+func SetSession(user models.User, c echo.Context) (session_gorilla *sessions.Session, err error) {
+	session_gorilla, err = session.Get("session", c)
 	if err != nil {
 		return
 	}
@@ -43,10 +43,6 @@ func SetSession(user models.User, c echo.Context) (session_values *SessionValues
 	// TODO: user.IsAuthType
 	session_gorilla.Values["is_auth_type"] = 2 // TODO: admin: 1 and user: 2
 	session_gorilla.Save(c.Request(), c.Response())
-
-	if session_values, err = GetSessionValues(session_gorilla.Values); err != nil {
-		return nil, err
-	}
 
 	return
 }
@@ -73,33 +69,5 @@ func ClearSession(c echo.Context) (err error) {
 
 // RefreshSession: refresh session from User
 func RefreshSession(user models.User, c echo.Context) (session_gorilla *sessions.Session, err error) {
-	return
-}
-
-// -------
-
-type SessionValues struct {
-	Username   string
-	IsAuthType int
-}
-
-// GetSessionValues: get session values from User
-func GetSessionValues(session_values_map map[interface{}]interface{}) (
-	session_values *SessionValues, err error) {
-
-	// it's session_values_map["is_auth_type"]
-	if session_values_map["is_auth_type"] == nil {
-		session_values = &SessionValues{
-			Username:   "",
-			IsAuthType: -1,
-		}
-		return
-	}
-
-	session_values = &SessionValues{
-		Username:   session_values_map["username"].(string),
-		IsAuthType: session_values_map["is_auth_type"].(int),
-	}
-
 	return
 }
