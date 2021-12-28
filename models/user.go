@@ -136,11 +136,21 @@ func (user User) UpdateByIDandPassword(db *gorm.DB, id int, password string) (er
 
 // User: Delete
 func (user User) Delete(db *gorm.DB, id int) error {
+	tx := db.Begin()
+	var count int64
+	// if tx.Select("id").First(&user).Error != nil {}
+	if tx.Select("id").First(&user).Count(&count); count != 1 {
+		tx.Rollback()
+		return errors.New("record not found")
+	}
+
 	// if db.Delete(&user, id).Error != nil {}
-	if err := db.Delete(&user, id).Error; err != nil {
+	if err := tx.Delete(&user, id).Error; err != nil {
+		tx.Rollback()
 		// return errors.New("Record Not Found")
 		return err
 	}
+	tx.Commit()
 
 	return nil
 }

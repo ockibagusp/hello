@@ -57,18 +57,13 @@ $ hello.exe
 
 
 ## TODO List
-- test
+- mock unit test
 - CSRF
 - session.GetUser() to session.GetAuth()
 - session: IsAdmin, IsUser and IsAuth
 - list pagination with next, previous, first and last
 - Mutex: BankAccount
 - too much
-
-## Stack Overflow (with me)
-
-- Error Code: 1406. Data too long for column - MySQL
-[link](https://stackoverflow.com/questions/15949038/error-code-1406-data-too-long-for-column-mysql)
 
 ## Operating System (with me)
 ### Linux:
@@ -80,7 +75,12 @@ $ hello.exe
 ### MySQL: 
 - mysql  Ver 8.0.27 for Linux on x86_64 (Source distribution)
 
-Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini agak lupa. Bertahap.
+
+### Bahasa Indonesia
+Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini sedikit lupa. Lalu pun, itu Bahasa Inggris lupa lagi. Perlahan-lahan dari stroke. Amin.
+
+### English
+Stroke: 03 10 2018-today. Released January 7, 2020. This coding is a little forgotten. Then again, this English forgot again. Little by little from stroke. Amen.
 
 ---
 

@@ -200,7 +200,7 @@ func TestReadUserController(t *testing.T) {
 				// same:
 				//
 				// expect.GET("/users/read/{id}").
-				//	WithPath("id", tc.path).
+				//	WithPath("id", test.path).
 				// ...
 				result = expect.GET("/users/read/{id}", test.path).
 					Expect().
@@ -497,5 +497,83 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 }
 
 func TestDeleteUserController(t *testing.T) {
+	noAuth := setupTestServer(t)
+	auth := setupTestServerAuth(noAuth)
 
+	// test for db users
+	truncateUsers(db)
+	// database: just `users.username` varchar 15
+	users := []models.User{
+		{
+			Username: "rahwana",
+			Email:    "rahwana@rakshasa.com",
+		},
+	}
+	// *gorm.DB
+	db.Create(&users)
+
+	testCases := []struct {
+		name   string
+		expect *httpexpect.Expect // auth or no-auth
+		path   int                // id=int. Exemple, id=1
+		status int
+	}{
+		{
+			name:   "users [auth] to DELETE it success",
+			expect: auth,
+			path:   1,
+			// redirect @route: /users
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [auth] to DELETE it failure: 1 (id=1) delete exists",
+			expect: auth,
+			path:   1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [auth] to DELETE it failure: 2 (id=-1)",
+			expect: auth,
+			path:   -1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [no-auth] to DELETE it failure: 3 (id=1)",
+			expect: auth,
+			path:   1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [no-auth] to DELETE it failure: 4 (id=-1)",
+			expect: auth,
+			path:   -1,
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+
+		// TODO: users/delete/error ?
+	}
+
+	for _, test := range testCases {
+		var result *httpexpect.Response
+		expect := test.expect // auth or no-auth
+
+		t.Run(test.name, func(t *testing.T) {
+			result = expect.GET("/users/delete/{id}", test.path).
+				Expect().
+				Status(test.status)
+
+			statusCode := result.Raw().StatusCode
+			if test.status != statusCode {
+				t.Logf(
+					"got: %d but expect %d", test.status, statusCode,
+				)
+				t.Fail()
+			}
+		})
+	}
 }
