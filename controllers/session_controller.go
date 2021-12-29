@@ -52,9 +52,8 @@ func (controller *Controller) Login(c echo.Context) error {
 		}
 
 		if _, err := middleware.SetSession(user, c); err != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": "400 Bad Request: " + err.Error(),
-			})
+			// err: session not found
+			return c.HTML(http.StatusBadRequest, err.Error())
 		}
 
 		return c.Redirect(http.StatusFound, "/")
@@ -74,9 +73,8 @@ func (controller *Controller) Login(c echo.Context) error {
  */
 func (controller *Controller) Logout(c echo.Context) error {
 	if err := middleware.ClearSession(c); err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"message": "400 Bad Request: " + err.Error(),
-		})
+		// err: session not found
+		return c.HTML(http.StatusBadRequest, err.Error())
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/")
