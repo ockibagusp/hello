@@ -186,7 +186,6 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 	})
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to read user without no-session [@route: /login]")
-		log.Warn("END request method GET for read user: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -241,7 +240,6 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 	})
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to update user without no-session [@route: /login]")
-		log.Warn("END request method GET for update user: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -317,9 +315,16 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
  */
 func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
+	})
 	if session.Values["is_auth_type"] == -1 {
+		log.Warn("for GET to update user by password without no-session [@route: /login]")
 		return c.Redirect(http.StatusFound, "/login")
 	}
+
+	log.Info("START request method GET or POST for update user by password")
 
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -332,6 +337,10 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		controller.DB, id, session.Values["username"].(string),
 	)
 	if err != nil {
+		log.Warnf(
+			"for GET to update user by password without models.User{}.FirstByIDAndUsername() errors: `%v`", err,
+		)
+		log.Warn("END request method GET for update user by password: [-]failure")
 		// HTTP response status: 405 Method Not Allowed
 		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
@@ -345,6 +354,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		}
 
 		if !middleware.CheckHashPassword(user.Password, _newPasswordForm.OldPassword) {
+			log.Warnf("for POST to update user by password without !middleware.CheckHashPassword() errors: `%v`", err)
+			log.Warn("END request method POST for update user by password: [-]failure")
 			return c.Render(http.StatusForbidden, "user-view-password.html", echo.Map{
 				"session":      session,
 				"name":         fmt.Sprintf("User: %s", user.Name),
@@ -365,6 +376,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		} why?
 		*/
 		if err != nil {
+			log.Warnf("for POST to update user by password without validation.Errors errors: `%v`", err)
+			log.Warn("END request method POST for update user by password: [-]failure")
 			// return c.JSON(http.StatusBadRequest, echo.Map{
 			// 	"message": "Passwords Don't Match",
 			// })
@@ -379,6 +392,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		// Password Hash
 		hash, err := middleware.PasswordHash(_newPasswordForm.NewPassword)
 		if err != nil {
+			log.Warnf("for POST to update user by password without middleware.PasswordHash() errors: `%v`", err)
+			log.Warn("END request method POST for update user by password: [-]failure")
 			return err
 		}
 
@@ -388,13 +403,18 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 
 		// err := user.UpdateByIDandPassword(...): be able
 		if err := user.UpdateByIDandPassword(controller.DB, id, user.Password); err != nil {
+			log.Warnf("for POST to update user by password without models.User{}.UpdateByIDandPassword() errors: `%v`", err)
+			log.Warn("END request method POST for update user by password: [-]failure")
 			// HTTP response status: 405 Method Not Allowed
 			return c.HTML(http.StatusNotAcceptable, err.Error())
 		}
 
+		log.WithField("user_update_password", user).Info("models.User: [+]success")
+		log.Info("END request method POST for update user by password: [+]success")
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
 
+	log.Info("END request method GET for update user by password: [+]success")
 	/*
 		name (string): "users/user-view-password.html" -> no
 			{..,"status":500,"error":"html/template: \"users/user-view-password.html\" is undefined",..}
@@ -418,17 +438,26 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
  */
 func (controller *Controller) DeleteUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
+	})
 	if session.Values["is_auth_type"] == -1 {
+		log.Warn("for GET to delete user without no-session [@route: /login]")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
+	log.Info("START request method GET for delete user")
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	// (models.User{}) or var user models.User or user := models.User{}
 	if err := (models.User{}).Delete(controller.DB, id); err != nil {
+		log.Warnf("for GET to delete user without models.User{}.Delete() errors: `%v`", err)
+		log.Warn("END request method GET for delete user: [-]failure")
 		// HTTP response status: 405 Method Not Allowed
 		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
+	log.Info("END request method GET for delete user: [+]success")
 	return c.Redirect(http.StatusMovedPermanently, "/users")
 }
