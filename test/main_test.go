@@ -107,3 +107,12 @@ const session = "MTY0MDA4MzU1MnxEdi1CQkFFQ180SUFBUkFCRUFBQVNfLUNBQUlHYzNSeWFXNW"
 func TestServer(t *testing.T) {
 	//
 }
+
+func TestMain(m *testing.M) {
+	// TODO: go test main_test.go ?
+	// ----
+	// cannot find package "." in:
+	// /home/ockibagusp/go/src/github.com/ockibagusp/hello/vendor/main_test.go
+	exit := m.Run()
+	os.Exit(exit)
+}

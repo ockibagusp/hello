@@ -55,6 +55,12 @@ $ ./hello
 $ hello.exe
 ```
 
+#### Test the packages
+
+```
+$ go test github.com/ockibagusp/hello/test 
+```
+
 
 ## TODO List
 - mock unit test
