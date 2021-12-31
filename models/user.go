@@ -44,9 +44,6 @@ func (User) FindAll(db *gorm.DB) ([]User, error) {
 	// Limit: 25 ?
 	err := db.Limit(25).Find(&users).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return []User{}, errors.New("User Not Found")
-		}
 		return []User{}, err
 	}
 
@@ -144,10 +141,9 @@ func (user User) Delete(db *gorm.DB, id int) error {
 		return errors.New("record not found")
 	}
 
-	// if db.Delete(&user, id).Error != nil {}
+	// if tx.Delete(&user, id).Error != nil {}
 	if err := tx.Delete(&user, id).Error; err != nil {
 		tx.Rollback()
-		// return errors.New("Record Not Found")
 		return err
 	}
 	tx.Commit()
