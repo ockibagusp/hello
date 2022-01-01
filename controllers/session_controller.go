@@ -70,6 +70,7 @@ func (controller *Controller) Login(c echo.Context) error {
 
 	log.Info("end GET [@route: /login]")
 	return c.Render(http.StatusOK, "login.html", echo.Map{
+		"csrf":         c.Get("csrf"),
 		"is_html_only": true,
 	})
 }

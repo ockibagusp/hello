@@ -166,6 +166,7 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		"name":    "User Add",
 		"nav":     "user Add", // (?)
 		"session": session,
+		"csrf":    c.Get("csrf"),
 		"cities":  cities,
 		"is_new":  true,
 	})
@@ -301,6 +302,7 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 		"name":    fmt.Sprintf("User: %s", user.Name),
 		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
 		"session": session,
+		"csrf":    c.Get("csrf"),
 		"user":    user,
 		"cities":  cities,
 	})
@@ -423,6 +425,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	*/
 	return c.Render(http.StatusOK, "user-view-password.html", echo.Map{
 		"session":      session,
+		"csrf":         c.Get("csrf"),
 		"name":         fmt.Sprintf("User: %s", user.Name),
 		"user":         user,
 		"is_html_only": true,
