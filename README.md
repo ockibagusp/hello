@@ -61,10 +61,16 @@ $ hello.exe
 $ go test github.com/ockibagusp/hello/test 
 ```
 
+or,
+
+```
+$ go test github.com/ockibagusp/hello/test -v
+```
+
 
 ## TODO List
 - mock unit test
-- CSRF
+- CSRF: no testing
 - session.GetUser() to session.GetAuth()
 - session: IsAdmin, IsUser and IsAuth
 - list pagination with next, previous, first and last
