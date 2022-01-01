@@ -2,6 +2,7 @@
 <!-- &lcud;{ is_new ? 'New Node' : 'Edit Node' }&rcud; -->
 {{if not .is_read}}
 <form action="/users{{if .is_new}}/add{{else}}/view/{{.user.Model.ID}}{{end}}" id="user-form" method="post">
+  <input type="hidden" name="X-CSRF-Token" value="{{.csrf}}"/>
   {{end}}
   <div class="form-row">
     <div class="form-group col-md-12">
