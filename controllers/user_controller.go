@@ -11,6 +11,7 @@ import (
 	"github.com/ockibagusp/hello/middleware"
 	"github.com/ockibagusp/hello/models"
 	"github.com/ockibagusp/hello/types"
+	log "github.com/sirupsen/logrus"
 )
 
 /*
@@ -22,18 +23,28 @@ import (
  */
 func (controller *Controller) Users(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    c.Path(),
+	})
+	log.Info("START request method GET for users")
+
 	if session.Values["is_auth_type"] == -1 {
+		log.Warn("for GET to users without no-session [@route: /login]")
+		log.Warn("END request method GET for users: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
 	// models.User{} or (models.User{}) or var user models.User or user := models.User{}
 	users, err := models.User{}.FindAll(controller.DB)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, echo.Map{
-			"message": "404 Not Found: " + err.Error(),
-		})
+		log.Warnf("for GET to users without models.User{}.FindAll() errors: `%v`", err)
+		log.Warn("END request method GET for users: [-]failure")
+		// HTTP response status: 404 Not Found
+		return c.HTML(http.StatusNotFound, err.Error())
 	}
 
+	log.Info("END request method GET for users: [+]success")
 	return c.Render(http.StatusOK, "users/user-all.html", echo.Map{
 		"name":    "Users",
 		"nav":     "users", // (?)
@@ -50,14 +61,23 @@ func (controller *Controller) Users(c echo.Context) error {
  * @route: /users/add
  */
 func (controller *Controller) CreateUser(c echo.Context) error {
+	session, _ := middleware.GetUser(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    c.Path(),
+	})
+
 	if c.Request().Method == "POST" {
+		log.Info("START request method POST for create user")
+
 		var city uint
 		if c.FormValue("city") != "" {
 			city64, err := strconv.ParseUint(c.FormValue("city"), 10, 32)
 			if err != nil {
-				return c.JSON(http.StatusBadRequest, echo.Map{
-					"message": "400 Bad Request: " + err.Error(),
-				})
+				log.Warnf("for POST to create user without city64 strconv.ParseUint() to error `%v`", err)
+				log.Warn("END request method POST for create user: [-]failure")
+				// HTTP response status: 400 Bad Request
+				return c.HTML(http.StatusBadRequest, err.Error())
 			}
 			// Kota dan Keb. ?
 			city = uint(city64)
@@ -93,14 +113,17 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		} why?
 		*/
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": "400 Bad Request: " + err.Error(),
-			})
+			log.Warnf("for POST to create user without validation.Errors: `%v`", err)
+			log.Warn("END request method POST for create user: [-]failure")
+			/// HTTP response status: 400 Bad Request
+			return c.HTML(http.StatusBadRequest, err.Error())
 		}
 
 		// Password Hash
 		hash, err := middleware.PasswordHash(_userForm.Password)
 		if err != nil {
+			log.Warnf("for POST to create user without middleware.PasswordHash error: `%v`", err)
+			log.Warn("END request method POST for create user: [-]failure")
 			return err
 		}
 
@@ -115,27 +138,35 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 
 		// _, err := user.Save(...): be able
 		if _, err := user.Save(controller.DB); err != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": err.Error(),
-			})
+			log.WithField("user_failure", user).
+				Warn("for POST to create user without models.User: nil")
+			log.Warn("END request method POST for create user: [-]failure")
+			// HTTP response status: 400 Bad Request
+			return c.HTML(http.StatusBadRequest, err.Error())
 		}
 
+		log.WithField("user_success", user).Info("models.User: [+]success")
+		log.Info("END request method POST for create user: [+]success")
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
+
+	log.Info("START request method GET for create user")
 
 	// models.City{} or (models.City{}) or var city models.City or city := models.City{}
 	cities, err := models.City{}.FindAll(controller.DB)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, echo.Map{
-			"message": "405 Method Not Allowed: " + err.Error(),
-		})
+		log.Warnf("for GET to create user without models.City{}.FindAll() errors: `%v`", err)
+		log.Warn("END request method GET for create user: [-]failure")
+		// HTTP response status: 405 Method Not Allowed
+		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
-	session, _ := middleware.GetUser(c)
+	log.Info("END request method GET for create user: [+]success")
 	return c.Render(http.StatusOK, "users/user-add.html", echo.Map{
 		"name":    "User Add",
 		"nav":     "user Add", // (?)
 		"session": session,
+		"csrf":    c.Get("csrf"),
 		"cities":  cities,
 		"is_new":  true,
 	})
@@ -150,9 +181,16 @@ func (controller *Controller) CreateUser(c echo.Context) error {
  */
 func (controller *Controller) ReadUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
+	})
 	if session.Values["is_auth_type"] == -1 {
+		log.Warn("for GET to read user without no-session [@route: /login]")
 		return c.Redirect(http.StatusFound, "/login")
 	}
+
+	log.Info("START request method GET for read user")
 
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -160,19 +198,24 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 	// user, err := user.FirstByID(...): be able
 	user, err := user.FirstByID(controller.DB, id)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, echo.Map{
-			"message": "406 Not Acceptable: " + err.Error(),
-		})
+		log.Warnf(
+			"for GET to read user without models.User{}.FirstByID() errors: `%v`", err,
+		)
+		log.Warn("END request method GET for read user: [-]failure")
+		// HTTP response status: 406 Not Acceptable
+		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
 	// models.City{} or (models.City{}) or var city models.City or city := models.City{}
 	cities, err := models.City{}.FindAll(controller.DB)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, echo.Map{
-			"message": "405 Method Not Allowed: " + err.Error(),
-		})
+		log.Warnf("for GET to read user without models.City{}.FindAll() errors: `%v`", err)
+		log.Warn("END request method GET for read user: [-]failure")
+		// HTTP response status: 406 Not Acceptable
+		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
+	log.Info("END request method GET for read user: [+]success")
 	return c.Render(http.StatusOK, "users/user-read.html", echo.Map{
 		"name":    fmt.Sprintf("User: %s", user.Name),
 		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
@@ -192,7 +235,12 @@ func (controller *Controller) ReadUser(c echo.Context) error {
  */
 func (controller *Controller) UpdateUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
+	})
 	if session.Values["is_auth_type"] == -1 {
+		log.Warn("for GET to update user without no-session [@route: /login]")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -200,43 +248,61 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 	var user models.User
 	if c.Request().Method == "POST" {
+		log.Info("START request method POST for update user")
+
 		// TODO: html flash message
+		// HTTP response status: 400 Bad Request
 		if err := c.Bind(&user); err != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{
-				"message": "400 Bad Request: " + err.Error(),
-			})
+			log.Warnf(
+				"for POST to update user without c.Bind() errors: `%v`", err,
+			)
+			log.Warn("END request method POST for update user: [-]failure")
+			return c.HTML(http.StatusBadRequest, err.Error())
 		}
 
 		// _, err = user.Update(...): be able
 		if _, err := user.Update(controller.DB, id); err != nil {
-			return c.JSON(http.StatusNotAcceptable, echo.Map{
-				"message": "405 Method Not Allowed: " + err.Error(),
-			})
+			log.Warnf(
+				"for POST to update user without models.User{}.Update() errors: `%v`", err,
+			)
+			log.Warn("END request method POST for update user: [-]failure")
+			// HTTP response status: 405 Method Not Allowed
+			return c.HTML(http.StatusNotAcceptable, err.Error())
 		}
 
+		log.WithField("user_update", user).Info("models.User: [+]success")
+		log.Info("END request method POST for update user: [+]success")
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
+
+	log.Info("START request method GET for update user")
 
 	// user, err := user.FirstByID(...): be able
 	user, err := user.FirstByID(controller.DB, id)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, echo.Map{
-			"message": "405 Method Not Allowed: " + err.Error(),
-		})
+		log.Warnf(
+			"for GET to update user without models.User{}.FirstByID() errors: `%v`", err,
+		)
+		log.Warn("END request method GET for update user: [-]failure")
+		// HTTP response status: 405 Method Not Allowed
+		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
 	// models.City{} or (models.City{}) or var city models.City or city := models.City{}
 	cities, err := models.City{}.FindAll(controller.DB)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, echo.Map{
-			"message": "405 Method Not Allowed: " + err.Error(),
-		})
+		log.Warnf("for GET to update user without models.City{}.FindAll() errors: `%v`", err)
+		log.Warn("END request method GET for update user: [-]failure")
+		// HTTP response status: 405 Method Not Allowed
+		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
+	log.Info("END request method GET for update user: [+]success")
 	return c.Render(http.StatusOK, "users/user-view.html", echo.Map{
 		"name":    fmt.Sprintf("User: %s", user.Name),
 		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
 		"session": session,
+		"csrf":    c.Get("csrf"),
 		"user":    user,
 		"cities":  cities,
 	})
@@ -251,9 +317,16 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
  */
 func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
+	})
 	if session.Values["is_auth_type"] == -1 {
+		log.Warn("for GET to update user by password without no-session [@route: /login]")
 		return c.Redirect(http.StatusFound, "/login")
 	}
+
+	log.Info("START request method GET or POST for update user by password")
 
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -266,9 +339,12 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		controller.DB, id, session.Values["username"].(string),
 	)
 	if err != nil {
-		return c.JSON(http.StatusNotAcceptable, echo.Map{
-			"message": "405 Method Not Allowed: " + err.Error(),
-		})
+		log.Warnf(
+			"for GET to update user by password without models.User{}.FirstByIDAndUsername() errors: `%v`", err,
+		)
+		log.Warn("END request method GET for update user by password: [-]failure")
+		// HTTP response status: 405 Method Not Allowed
+		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
 	if c.Request().Method == "POST" {
@@ -280,6 +356,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		}
 
 		if !middleware.CheckHashPassword(user.Password, _newPasswordForm.OldPassword) {
+			log.Warnf("for POST to update user by password without !middleware.CheckHashPassword() errors: `%v`", err)
+			log.Warn("END request method POST for update user by password: [-]failure")
 			return c.Render(http.StatusForbidden, "user-view-password.html", echo.Map{
 				"session":      session,
 				"name":         fmt.Sprintf("User: %s", user.Name),
@@ -300,6 +378,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		} why?
 		*/
 		if err != nil {
+			log.Warnf("for POST to update user by password without validation.Errors errors: `%v`", err)
+			log.Warn("END request method POST for update user by password: [-]failure")
 			// return c.JSON(http.StatusBadRequest, echo.Map{
 			// 	"message": "Passwords Don't Match",
 			// })
@@ -314,6 +394,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		// Password Hash
 		hash, err := middleware.PasswordHash(_newPasswordForm.NewPassword)
 		if err != nil {
+			log.Warnf("for POST to update user by password without middleware.PasswordHash() errors: `%v`", err)
+			log.Warn("END request method POST for update user by password: [-]failure")
 			return err
 		}
 
@@ -323,14 +405,18 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 
 		// err := user.UpdateByIDandPassword(...): be able
 		if err := user.UpdateByIDandPassword(controller.DB, id, user.Password); err != nil {
-			return c.JSON(http.StatusNotAcceptable, echo.Map{
-				"message": "405 Method Not Allowed: " + err.Error(),
-			})
+			log.Warnf("for POST to update user by password without models.User{}.UpdateByIDandPassword() errors: `%v`", err)
+			log.Warn("END request method POST for update user by password: [-]failure")
+			// HTTP response status: 405 Method Not Allowed
+			return c.HTML(http.StatusNotAcceptable, err.Error())
 		}
 
+		log.WithField("user_update_password", user).Info("models.User: [+]success")
+		log.Info("END request method POST for update user by password: [+]success")
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
 
+	log.Info("END request method GET for update user by password: [+]success")
 	/*
 		name (string): "users/user-view-password.html" -> no
 			{..,"status":500,"error":"html/template: \"users/user-view-password.html\" is undefined",..}
@@ -339,6 +425,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	*/
 	return c.Render(http.StatusOK, "user-view-password.html", echo.Map{
 		"session":      session,
+		"csrf":         c.Get("csrf"),
 		"name":         fmt.Sprintf("User: %s", user.Name),
 		"user":         user,
 		"is_html_only": true,
@@ -354,18 +441,26 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
  */
 func (controller *Controller) DeleteUser(c echo.Context) error {
 	session, _ := middleware.GetUser(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
+	})
 	if session.Values["is_auth_type"] == -1 {
+		log.Warn("for GET to delete user without no-session [@route: /login]")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
+	log.Info("START request method GET for delete user")
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	// (models.User{}) or var user models.User or user := models.User{}
 	if err := (models.User{}).Delete(controller.DB, id); err != nil {
-		return c.JSON(http.StatusNotAcceptable, echo.Map{
-			"message": "405 Method Not Allowed: " + err.Error(),
-		})
+		log.Warnf("for GET to delete user without models.User{}.Delete() errors: `%v`", err)
+		log.Warn("END request method GET for delete user: [-]failure")
+		// HTTP response status: 405 Method Not Allowed
+		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
+	log.Info("END request method GET for delete user: [+]success")
 	return c.Redirect(http.StatusMovedPermanently, "/users")
 }

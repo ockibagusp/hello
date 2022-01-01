@@ -61,10 +61,22 @@ $ ./hello
 $ hello.exe
 ```
 
+#### Test the packages
+
+```
+$ go test github.com/ockibagusp/hello/test 
+```
+
+or,
+
+```
+$ go test github.com/ockibagusp/hello/test -v
+```
+
 
 ## TODO List
 - mock unit test
-- CSRF
+- CSRF: no testing
 - session.GetUser() to session.GetAuth()
 - session: IsAdmin, IsUser and IsAuth
 - list pagination with next, previous, first and last
@@ -85,7 +97,7 @@ $ hello.exe
 ### Bahasa Indonesia
 Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini sedikit lupa. Lalu pun, itu Bahasa Inggris lupa lagi. Perlahan-lahan dari stroke. Amin.
 
-### English
+### English (translate[.]google[.]co[.]id)
 Stroke: 03 10 2018-today. Released January 7, 2020. This coding is a little forgotten. Then again, this English forgot again. Little by little from stroke. Amen.
 
 ---
