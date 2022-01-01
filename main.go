@@ -14,7 +14,7 @@ func main() {
 
 	// Echo: router
 	e := router.New(controllers)
-	// TODO: no testing
+	// TODO: CSRF no testing
 	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		// Optional. Default value "header:X-CSRF-Token".
 		// Possible values:
