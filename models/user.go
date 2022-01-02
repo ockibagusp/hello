@@ -29,12 +29,12 @@ type UserCity struct {
  */
 
 // User: Save
-func (user User) Save(db *gorm.DB) (User, error) {
+func (user User) Save(db *gorm.DB) (*User, error) {
 	if err := db.Create(&user).Error; err != nil {
-		return User{}, err
+		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 // User: FindAll
@@ -44,23 +44,23 @@ func (User) FindAll(db *gorm.DB) ([]User, error) {
 	// Limit: 25 ?
 	err := db.Limit(25).Find(&users).Error
 	if err != nil {
-		return []User{}, err
+		return nil, err
 	}
 
 	return users, nil
 }
 
 // User: FirstByID
-func (user User) FirstByID(db *gorm.DB, id int) (User, error) {
+func (user User) FirstByID(db *gorm.DB, id int) (*User, error) {
 	err := db.First(&user, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return User{}, errors.New("User Not Found")
+			return nil, errors.New("User Not Found")
 		}
-		return User{}, err
+		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 // User: FirstByIDAndUsername
@@ -71,7 +71,7 @@ func (user User) FirstByID(db *gorm.DB, id int) (User, error) {
 // or,
 //
 // user, err := models.User{}.FirstByIDAndUsername(controllers.DB, 1, "ockibagusp", true)
-func (user User) FirstByIDAndUsername(db *gorm.DB, id int, username string, too ...bool) (User, error) {
+func (user User) FirstByIDAndUsername(db *gorm.DB, id int, username string, too ...bool) (*User, error) {
 	var err error
 	if len(too) == 0 {
 		err = db.Select("id", "username", "password").
@@ -79,35 +79,35 @@ func (user User) FirstByIDAndUsername(db *gorm.DB, id int, username string, too 
 	} else if len(too) == 1 {
 		err = db.Where("username = ?", username).First(&user, id).Error
 	} else { // too agrs [2,..]=bool
-		return User{}, errors.New("models.User{}.FirstByIDAndUsername: too agrs [0, 1]=bool")
+		return nil, errors.New("models.User{}.FirstByIDAndUsername: too agrs [0, 1]=bool")
 	}
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return User{}, errors.New("User Not Found")
+			return nil, errors.New("User Not Found")
 		}
-		return User{}, err
+		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 // User: FirstByCityID
-func (user User) FirstByCityID(db *gorm.DB, id int) (User, error) {
+func (user User) FirstByCityID(db *gorm.DB, id int) (*User, error) {
 	err := db.Select("users.*, cities.id as city_id, cities.city as city_massage").
 		Joins("left join cities on users.city = cities.id").First(&user, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return User{}, errors.New("User Not Found")
+			return nil, errors.New("User Not Found")
 		}
-		return User{}, err
+		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 // User: Update
-func (user User) Update(db *gorm.DB, id int) (User, error) {
+func (user User) Update(db *gorm.DB, id int) (*User, error) {
 	err := db.Where("id = ?", id).Updates(&User{
 		Username: user.Username,
 		Email:    user.Email,
@@ -116,10 +116,10 @@ func (user User) Update(db *gorm.DB, id int) (User, error) {
 		Photo:    user.Photo,
 	}).Error
 	if err != nil {
-		return User{}, err
+		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 // User: Update By ID and Password
