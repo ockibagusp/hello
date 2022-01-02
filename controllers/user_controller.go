@@ -194,9 +194,10 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	var user models.User
-	// user, err := user.FirstByID(...): be able
-	user, err := user.FirstByID(controller.DB, id)
+	// var user models.User
+	// ...
+	// _user, err := user.FirstByID(...): be able
+	user, err := models.User{}.FirstByID(controller.DB, id)
 	if err != nil {
 		log.Warnf(
 			"for GET to read user without models.User{}.FirstByID() errors: `%v`", err,
@@ -246,10 +247,10 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	var user models.User
 	if c.Request().Method == "POST" {
 		log.Info("START request method POST for update user")
 
+		var user models.User
 		// TODO: html flash message
 		// HTTP response status: 400 Bad Request
 		if err := c.Bind(&user); err != nil {
@@ -277,8 +278,10 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 	log.Info("START request method GET for update user")
 
-	// user, err := user.FirstByID(...): be able
-	user, err := user.FirstByID(controller.DB, id)
+	// var user models.User
+	// ...
+	// _user, err := user.FirstByID(...): be able
+	user, err := models.User{}.FirstByID(controller.DB, id)
 	if err != nil {
 		log.Warnf(
 			"for GET to update user without models.User{}.FirstByID() errors: `%v`", err,
@@ -399,7 +402,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 			return err
 		}
 
-		user = models.User{
+		user = &models.User{
 			Password: hash,
 		}
 
