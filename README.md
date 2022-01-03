@@ -61,7 +61,7 @@ $ hello.exe
 $ go test github.com/ockibagusp/hello/test 
 ```
 
-or,
+or, verbose output (-v) flag:
 
 ```
 $ go test github.com/ockibagusp/hello/test -v
