@@ -21,6 +21,15 @@ func New(controllers *controllers.Controller) (router *echo.Echo) {
 	router.Use(session.Middleware(sessions.NewCookieStore(
 		[]byte("something-very-secret"),
 	)))
+	router.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		// Optional. Default value "header:X-CSRF-Token".
+		// Possible values:
+		// - "header:<name>"
+		// - "form:<name>"
+		// - "query:<name>"
+		TokenLookup: "form:X-CSRF-Token",
+		// CookieMaxAge: 0,
+	}))
 
 	// Instantiate a template registry with an array of template set
 	router.Renderer = template.NewTemplates()

@@ -59,12 +59,24 @@ func setupTestServer(t *testing.T, debug ...bool) (noAuth *httpexpect.Expect) {
 	return
 }
 
+// Setup test sever no authentication and CSRF-Token
+// request with cookie: csrf
+func setupTestServerNoAuthCSRF(e *httpexpect.Expect) (noAuthCSRF *httpexpect.Expect) {
+	noAuthCSRF = e.Builder(func(request *httpexpect.Request) {
+		request.WithCookie("_csrf", csrf)
+	})
+	return
+}
+
 // Setup test sever authentication
-// request with cookie session
+// request with cookie session and csrf
 func setupTestServerAuth(e *httpexpect.Expect) (auth *httpexpect.Expect) {
-	auth = e.Builder(func(req *httpexpect.Request) {
+	auth = e.Builder(func(request *httpexpect.Request) {
 		// TODO: if (isAdmin or isUser: bool) {...}
-		req.WithCookie("session", session)
+		request.WithCookies(map[string]string{
+			"_csrf":   csrf,
+			"session": session,
+		})
 	})
 	return
 }
@@ -103,6 +115,19 @@ const session = "MTY0MDA4MzU1MnxEdi1CQkFFQ180SUFBUkFCRUFBQVNfLUNBQUlHYzNSeWFXNW"
 	"5EQW9BQ0hWelpYSnVZVzFsQm5OMGNtbHVad3dNQUFwdlkydHBZbUZuZFhOd0JuTjBjbWx1Wnd3" +
 	"T0FBeHBjMTloZFhSb1gzUjVjR1VEYVc1MEJBSUFCQT09fIlgmThOxd1Xxc_uh6jeRFkCwwHLW7" +
 	"rA_0tH8qPT9t41"
+
+/*
+	Cross Site Request Forgery (CSRF)
+
+	TODO: CookieMaxAge: 0?
+	......
+	middleware.CSRFConfig{
+		...
+		CookieMaxAge: 0,
+		...
+	}
+*/
+const csrf = "M5CtIigue53Mcesal2vhW26OOfeOdGTq"
 
 func TestServer(t *testing.T) {
 	//
