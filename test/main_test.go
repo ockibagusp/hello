@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -56,25 +57,51 @@ func setupTestServer(t *testing.T, debug ...bool) (noAuth *httpexpect.Expect) {
 	}
 
 	noAuth = httpexpect.WithConfig(newConfig)
+
+	setupTestSetCookieCSRF(noAuth)
+
 	return
 }
 
-// Setup test sever no authentication and CSRF-Token
+// Setup test server to set cookie CSRF-Token
+func setupTestSetCookieCSRF(noAuth *httpexpect.Expect) {
+	setCookie := noAuth.GET("/login").
+		Expect().
+		Status(http.StatusOK).
+		Header("Set-Cookie").Raw()
+
+	// Set-Cookie:
+	// =================================== match[0] ================================
+	// =	 																	   =
+	// _csrf=M5CtIigue53Mcesal2vhW26OOfeOdGTq; Expires=Wed, 05 Jan 2022 10:47:03 GMT
+	//		 --------------------------------	       -----------------------------
+	//					match[1]							     match[2]
+	regex := regexp.MustCompile(`_csrf\=(.*); Expires\=(.*)$`)
+	match := regex.FindStringSubmatch(setCookie)
+
+	csrfToken = match[1]
+	// var expires string
+	// csrfToken, expires = match[1], match[2]
+	// csrfTokenExpires, _ = time.Parse(time.RFC1123, expires)
+
+}
+
+// Setup test server no authentication and CSRF-Token
 // request with cookie: csrf
 func setupTestServerNoAuthCSRF(e *httpexpect.Expect) (noAuthCSRF *httpexpect.Expect) {
 	noAuthCSRF = e.Builder(func(request *httpexpect.Request) {
-		request.WithCookie("_csrf", csrf)
+		request.WithCookie("_csrf", csrfToken)
 	})
 	return
 }
 
-// Setup test sever authentication
+// Setup test server authentication
 // request with cookie session and csrf
 func setupTestServerAuth(e *httpexpect.Expect) (auth *httpexpect.Expect) {
 	auth = e.Builder(func(request *httpexpect.Request) {
 		// TODO: if (isAdmin or isUser: bool) {...}
 		request.WithCookies(map[string]string{
-			"_csrf":   csrf,
+			"_csrf":   csrfToken,
 			"session": session,
 		})
 	})
@@ -119,15 +146,19 @@ const session = "MTY0MDA4MzU1MnxEdi1CQkFFQ180SUFBUkFCRUFBQVNfLUNBQUlHYzNSeWFXNW"
 /*
 	Cross Site Request Forgery (CSRF)
 
-	TODO: CookieMaxAge: 0?
-	......
-	middleware.CSRFConfig{
-		...
-		CookieMaxAge: 0,
-		...
-	}
+	HTTP Req. Headers:
+	Set-Cookie: _csrf=M5CtIigue53Mcesal2vhW26OOfeOdGTq; Expires=Wed, 05 Jan 2022 10:47:03 GMT
 */
-const csrf = "M5CtIigue53Mcesal2vhW26OOfeOdGTq"
+// 					 ________________________________
+// Set-Cookie: _csrf=M5CtIigue53Mcesal2vhW26OOfeOdGTq; ...
+//				  	 --------------------------------
+var csrfToken string
+
+// (?)
+// 		   					_____________________________
+// Set-Cookie: ...; Expires=Wed, 05 Jan 2022 10:47:03 GMT
+// 		   					-----------------------------
+// var csrfTokenExpires time.Time
 
 func TestServer(t *testing.T) {
 	//

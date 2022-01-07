@@ -28,7 +28,6 @@ func New(controllers *controllers.Controller) (router *echo.Echo) {
 		// - "form:<name>"
 		// - "query:<name>"
 		TokenLookup: "form:X-CSRF-Token",
-		// CookieMaxAge: 0,
 	}))
 
 	// Instantiate a template registry with an array of template set

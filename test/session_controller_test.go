@@ -71,7 +71,7 @@ func TestLogin(t *testing.T) {
 			// tc.method == POST
 			noAuthCSRF.POST("/login").
 				WithForm(tc.user).
-				WithFormField("X-CSRF-Token", csrf).
+				WithFormField("X-CSRF-Token", csrfToken).
 				Expect().
 				Status(tc.status)
 		})
