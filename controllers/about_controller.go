@@ -18,7 +18,7 @@ import (
 func (Controller) About(c echo.Context) error {
 	// Please note the the second parameter "about.html" is the template name and should
 	// be equal to one of the keys in the TemplateRegistry array defined in main.go
-	session, _ := middleware.GetUser(c)
+	session, _ := middleware.GetAuth(c)
 	log := log.WithFields(log.Fields{
 		"username": session.Values["username"],
 		"route":    c.Path(),

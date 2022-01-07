@@ -99,7 +99,6 @@ $ go test github.com/ockibagusp/hello/test -v
 
 ## TODO List
 - mock unit test
-- session.GetUser() to session.GetAuth()
 - session: IsAdmin, IsUser and IsAuth
 - list pagination with next, previous, first and last
 - Mutex: BankAccount
