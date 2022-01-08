@@ -122,10 +122,10 @@ $ go test github.com/ockibagusp/hello/test -v
 
 
 ### Bahasa Indonesia
-Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini sedikit lupa. Lalu pun, itu Bahasa Inggris lupa lagi. Perlahan-lahan dari stroke. Amin.
+Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini sedikit lupa. Pun, itu Bahasa Inggris lupa lagi. Perlahan-lahan dari stroke. Amin.
 
 ### English (translate[.]google[.]co[.]id)
-Stroke: 03 10 2018-today. Released January 7, 2020. This coding is a little forgotten. Then again, this English forgot again. Little by little from stroke. Amen.
+Stroke: 03 10 2018-today. Released January 7, 2020. This coding is a little forgotten. This English forgot again. Little by little from stroke. Amen.
 
 ---
 
