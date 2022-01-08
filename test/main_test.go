@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -56,15 +57,53 @@ func setupTestServer(t *testing.T, debug ...bool) (noAuth *httpexpect.Expect) {
 	}
 
 	noAuth = httpexpect.WithConfig(newConfig)
+
+	setupTestSetCookieCSRF(noAuth)
+
 	return
 }
 
-// Setup test sever authentication
-// request with cookie session
+// Setup test server to set cookie CSRF-Token
+func setupTestSetCookieCSRF(noAuth *httpexpect.Expect) {
+	setCookie := noAuth.GET("/login").
+		Expect().
+		Status(http.StatusOK).
+		Header("Set-Cookie").Raw()
+
+	// Set-Cookie:
+	// =================================== match[0] ================================
+	// =	 																	   =
+	// _csrf=M5CtIigue53Mcesal2vhW26OOfeOdGTq; Expires=Wed, 05 Jan 2022 10:47:03 GMT
+	//		 --------------------------------	       -----------------------------
+	//					match[1]							     match[2]
+	regex := regexp.MustCompile(`_csrf\=(.*); Expires\=(.*)$`)
+	match := regex.FindStringSubmatch(setCookie)
+
+	csrfToken = match[1]
+	// var expires string
+	// csrfToken, expires = match[1], match[2]
+	// csrfTokenExpires, _ = time.Parse(time.RFC1123, expires)
+
+}
+
+// Setup test server no authentication and CSRF-Token
+// request with cookie: csrf
+func setupTestServerNoAuthCSRF(e *httpexpect.Expect) (noAuthCSRF *httpexpect.Expect) {
+	noAuthCSRF = e.Builder(func(request *httpexpect.Request) {
+		request.WithCookie("_csrf", csrfToken)
+	})
+	return
+}
+
+// Setup test server authentication
+// request with cookie session and csrf
 func setupTestServerAuth(e *httpexpect.Expect) (auth *httpexpect.Expect) {
-	auth = e.Builder(func(req *httpexpect.Request) {
+	auth = e.Builder(func(request *httpexpect.Request) {
 		// TODO: if (isAdmin or isUser: bool) {...}
-		req.WithCookie("session", session)
+		request.WithCookies(map[string]string{
+			"_csrf":   csrfToken,
+			"session": session,
+		})
 	})
 	return
 }
@@ -103,6 +142,23 @@ const session = "MTY0MDA4MzU1MnxEdi1CQkFFQ180SUFBUkFCRUFBQVNfLUNBQUlHYzNSeWFXNW"
 	"5EQW9BQ0hWelpYSnVZVzFsQm5OMGNtbHVad3dNQUFwdlkydHBZbUZuZFhOd0JuTjBjbWx1Wnd3" +
 	"T0FBeHBjMTloZFhSb1gzUjVjR1VEYVc1MEJBSUFCQT09fIlgmThOxd1Xxc_uh6jeRFkCwwHLW7" +
 	"rA_0tH8qPT9t41"
+
+/*
+	Cross Site Request Forgery (CSRF)
+
+	HTTP Req. Headers:
+	Set-Cookie: _csrf=M5CtIigue53Mcesal2vhW26OOfeOdGTq; Expires=Wed, 05 Jan 2022 10:47:03 GMT
+*/
+// 					 ________________________________
+// Set-Cookie: _csrf=M5CtIigue53Mcesal2vhW26OOfeOdGTq; ...
+//				  	 --------------------------------
+var csrfToken string
+
+// (?)
+// 		   					_____________________________
+// Set-Cookie: ...; Expires=Wed, 05 Jan 2022 10:47:03 GMT
+// 		   					-----------------------------
+// var csrfTokenExpires time.Time
 
 func TestServer(t *testing.T) {
 	//

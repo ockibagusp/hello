@@ -33,6 +33,35 @@ file: hello.sql -> new database: hello_test
 ## Router
 This using [router](https://github.com/ockibagusp/hello/blob/master/router/router.go).
 
+## httpexpect: Test for Debug
+This using [debug](https://github.com/ockibagusp/hello/blob/master/test/main_test.go).
+
+Optional. Default value @debug: {true} or {1}.
+
+1. function debug (bool)
+
+    @function debug: {true} or {false}
+
+2. os.Setenv("debug", ...)
+
+    - @debug: {true} or {1}
+
+        ```
+        os.Setenv("debug", "true") 
+        ```
+        or,
+        ```
+        os.Setenv("debug", "1")
+        ```
+
+    - @debug: {false} or {0}
+        ```
+        os.Setenv("debug", "false") 
+        ```
+        or,
+        ```
+        os.Setenv("debug", "0")
+        ```
 
 ### Running app
 
@@ -51,15 +80,15 @@ $ go build
 
 - On Linux or Mac:
 
-```
-$ ./hello
-```
+    ```
+    $ ./hello
+    ```
 
 - On  Windows:
 
-```
-$ hello.exe
-```
+    ```
+    $ hello.exe
+    ```
 
 #### Test the packages
 
@@ -67,7 +96,7 @@ $ hello.exe
 $ go test github.com/ockibagusp/hello/test 
 ```
 
-or,
+or, verbose output (-v) flag:
 
 ```
 $ go test github.com/ockibagusp/hello/test -v
@@ -76,8 +105,6 @@ $ go test github.com/ockibagusp/hello/test -v
 
 ## TODO List
 - mock unit test
-- CSRF: no testing
-- session.GetUser() to session.GetAuth()
 - session: IsAdmin, IsUser and IsAuth
 - list pagination with next, previous, first and last
 - Mutex: BankAccount
