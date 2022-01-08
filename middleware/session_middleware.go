@@ -9,8 +9,8 @@ import (
 
 // base.html -> {{if eq ((index .session.Values "is_auth_type") | tostring) -1 }}ok{{end}}
 
-// GetUser: get session from User
-func GetUser(c echo.Context) (session_gorilla *sessions.Session, err error) {
+// GetAuth: get session from User
+func GetAuth(c echo.Context) (session_gorilla *sessions.Session, err error) {
 	if session_gorilla, err = session.Get("session", c); err != nil {
 		return
 	}

@@ -118,6 +118,7 @@ func TestCreateUserController(t *testing.T) {
 			} else if test.method == POST {
 				result = expect.POST("/users/add").
 					WithForm(test.form).
+					WithFormField("X-CSRF-Token", csrfToken).
 					Expect().
 					Status(test.status)
 			} else {
@@ -309,6 +310,7 @@ func TestUpdateUserController(t *testing.T) {
 				result = expect.POST("/users/view/{id}").
 					WithPath("id", test.path).
 					WithForm(test.form).
+					WithFormField("X-CSRF-Token", csrfToken).
 					Expect().
 					Status(test.status)
 			} else {
@@ -479,6 +481,7 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 				result = expect.POST("/users/view/{id}/password").
 					WithPath("id", test.path).
 					WithForm(test.form).
+					WithFormField("X-CSRF-Token", csrfToken).
 					Expect().
 					Status(test.status)
 			} else {

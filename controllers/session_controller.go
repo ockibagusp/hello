@@ -19,7 +19,7 @@ import (
  */
 func (controller *Controller) Login(c echo.Context) error {
 	log.Info("start GET [@route: /login]")
-	session, err := middleware.GetUser(c)
+	session, err := middleware.GetAuth(c)
 	if session.Values["is_auth_type"] != -1 && err == nil {
 		log.Warn("to [@route: /] session")
 		return c.Redirect(http.StatusFound, "/")

@@ -22,7 +22,7 @@ import (
  * @route: /users
  */
 func (controller *Controller) Users(c echo.Context) error {
-	session, _ := middleware.GetUser(c)
+	session, _ := middleware.GetAuth(c)
 	log := log.WithFields(log.Fields{
 		"username": session.Values["username"],
 		"route":    c.Path(),
@@ -61,7 +61,7 @@ func (controller *Controller) Users(c echo.Context) error {
  * @route: /users/add
  */
 func (controller *Controller) CreateUser(c echo.Context) error {
-	session, _ := middleware.GetUser(c)
+	session, _ := middleware.GetAuth(c)
 	log := log.WithFields(log.Fields{
 		"username": session.Values["username"],
 		"route":    c.Path(),
@@ -180,7 +180,7 @@ func (controller *Controller) CreateUser(c echo.Context) error {
  * @route: /users/read/:id
  */
 func (controller *Controller) ReadUser(c echo.Context) error {
-	session, _ := middleware.GetUser(c)
+	session, _ := middleware.GetAuth(c)
 	log := log.WithFields(log.Fields{
 		"username": session.Values["username"],
 		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
@@ -235,7 +235,7 @@ func (controller *Controller) ReadUser(c echo.Context) error {
  * @route: /users/view/:id
  */
 func (controller *Controller) UpdateUser(c echo.Context) error {
-	session, _ := middleware.GetUser(c)
+	session, _ := middleware.GetAuth(c)
 	log := log.WithFields(log.Fields{
 		"username": session.Values["username"],
 		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
@@ -319,7 +319,7 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
  * @route: /users/view/:id/password
  */
 func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
-	session, _ := middleware.GetUser(c)
+	session, _ := middleware.GetAuth(c)
 	log := log.WithFields(log.Fields{
 		"username": session.Values["username"],
 		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
@@ -443,7 +443,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
  * @route: /users/delete/:id
  */
 func (controller *Controller) DeleteUser(c echo.Context) error {
-	session, _ := middleware.GetUser(c)
+	session, _ := middleware.GetAuth(c)
 	log := log.WithFields(log.Fields{
 		"username": session.Values["username"],
 		"route":    fmt.Sprintf("%v -> id:%v", c.Path(), c.Param("id")),
