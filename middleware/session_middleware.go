@@ -9,7 +9,7 @@ import (
 
 // base.html -> {{if eq ((index .session.Values "is_auth_type") | tostring) -1 }}ok{{end}}
 
-// GetAuth: get session from User
+// GetAuth: get session from authentication
 func GetAuth(c echo.Context) (session_gorilla *sessions.Session, err error) {
 	if session_gorilla, err = session.Get("session", c); err != nil {
 		return
