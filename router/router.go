@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -21,6 +23,14 @@ func New(controllers *controllers.Controller) (router *echo.Echo) {
 	router.Use(session.Middleware(sessions.NewCookieStore(
 		[]byte("something-very-secret"),
 	)))
+	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		// default
+		Skipper:      middleware.DefaultSkipper,
+		AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
+		// with me
+		AllowOrigins: []string{"https://example.com"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 	router.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		// Optional. Default value "header:X-CSRF-Token".
 		// Possible values:
