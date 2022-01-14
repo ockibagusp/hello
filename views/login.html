@@ -21,6 +21,13 @@
       <input type="hidden" name="X-CSRF-Token" value="{{.csrf}}"/>
       <img class="mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
       <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+      {{ if index .flash_error }}
+        <div>
+        {{ range $index, $value := .flash_error }}
+          <p class="text-danger">*{{ $value }}</p>
+        {{ end }}
+        </div>
+      {{ end }}
       <label for="username" class="sr-only">Usernane</label>
       <input type="username" name="username" class="form-control" placeholder="Usernane" value="ockibagusp" required autofocus>
       <label for="password" class="sr-only">Password</label>
