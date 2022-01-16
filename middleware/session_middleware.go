@@ -67,25 +67,40 @@ func ClearSession(c echo.Context) (err error) {
 	return
 }
 
-// SetFlash: set session to flash message
+// RefreshSession: refresh session from User
+func RefreshSession(user models.User, c echo.Context) (session_gorilla *sessions.Session, err error) {
+	return
+}
+
+/////
+//	session for flash message.
+////
+
+const sessionFlash = "flash"
+
+// cookieStoreFlash: new cookie store session for flash
+func cookieStoreFlash() *sessions.CookieStore {
+	return sessions.NewCookieStore(
+		[]byte("secret-session-key"),
+	)
+}
+
+// SetFlash: set session for flash message
 func SetFlash(c echo.Context, name, value string) {
-	_session := sessions.NewCookieStore([]byte("test-session-key"))
-	session, _ := _session.Get(c.Request(), "flash")
+	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash)
 
 	session.AddFlash(value, name)
 	session.Save(c.Request(), c.Response())
 }
 
-// GetFlashes: get session to flash messages
-func GetFlashes(c echo.Context, name string) []string {
-	_session := sessions.NewCookieStore([]byte("test-session-key"))
-	session, _ := _session.Get(c.Request(), "flash")
+// GetFlash: get session for flash messages
+func GetFlash(c echo.Context, name string) (flashes []string) {
+	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash)
 
-	_flashes := session.Flashes(name)
-	if len(_flashes) > 0 {
+	fls := session.Flashes(name)
+	if len(fls) > 0 {
 		session.Save(c.Request(), c.Response())
-		var flashes []string
-		for _, fl := range _flashes {
+		for _, fl := range fls {
 			flashes = append(flashes, fl.(string))
 		}
 
@@ -94,25 +109,23 @@ func GetFlashes(c echo.Context, name string) []string {
 	return nil
 }
 
-// SetFlashMessage: set session to flash message: message
+// SetFlashMessage: set session for flash message: message
 func SetFlashMessage(c echo.Context, message string) {
-	_session := sessions.NewCookieStore([]byte("test-session-key"))
-	session, _ := _session.Get(c.Request(), "flash-message")
+	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash+"-message")
 
 	session.AddFlash(message, "message")
 	session.Save(c.Request(), c.Response())
 }
 
-// GetFlashMessage: get session to flash messages: []message
+// GetFlashMessage: get session for flash messages: []message
 func GetFlashMessage(c echo.Context) []string {
-	_session := sessions.NewCookieStore([]byte("test-session-key"))
-	session, _ := _session.Get(c.Request(), "flash-message")
+	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash+"-message")
 
-	_flashes := session.Flashes("message")
-	if len(_flashes) > 0 {
+	fls := session.Flashes("message")
+	if len(fls) > 0 {
 		session.Save(c.Request(), c.Response())
 		var flashes []string
-		for _, fl := range _flashes {
+		for _, fl := range fls {
 			flashes = append(flashes, fl.(string))
 		}
 
@@ -121,34 +134,27 @@ func GetFlashMessage(c echo.Context) []string {
 	return nil
 }
 
-// SetFlashError: get session to flash message: error
+// SetFlashError: get session for flash message: error
 func SetFlashError(c echo.Context, error string) {
-	_session := sessions.NewCookieStore([]byte("test-session-key"))
-	session, _ := _session.Get(c.Request(), "flash-error")
+	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash+"-error")
 
 	session.AddFlash(error, "error")
 	session.Save(c.Request(), c.Response())
 }
 
-// GetFlashError: get session to flash message: []error
+// GetFlashError: get session for flash message: []error
 func GetFlashError(c echo.Context) []string {
-	_session := sessions.NewCookieStore([]byte("test-session-key"))
-	session, _ := _session.Get(c.Request(), "flash-error")
+	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash+"-error")
 
-	_flashes := session.Flashes("error")
-	if len(_flashes) > 0 {
+	fls := session.Flashes("error")
+	if len(fls) > 0 {
 		session.Save(c.Request(), c.Response())
 		var flashes []string
-		for _, fl := range _flashes {
+		for _, fl := range fls {
 			flashes = append(flashes, fl.(string))
 		}
 
 		return flashes
 	}
 	return nil
-}
-
-// RefreshSession: refresh session from User
-func RefreshSession(user models.User, c echo.Context) (session_gorilla *sessions.Session, err error) {
-	return
 }

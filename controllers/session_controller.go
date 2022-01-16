@@ -34,34 +34,57 @@ func (controller *Controller) Login(c echo.Context) error {
 
 		err := passwordForm.Validate()
 		if err != nil {
-			// TODO: login -> wrong user and password
+			middleware.SetFlashError(c, err.Error())
+
 			log.Warn("for passwordForm.Validate() not nil [@route: /login]")
-			return err
+			return c.Render(http.StatusOK, "login.html", echo.Map{
+				"csrf":         c.Get("csrf"),
+				"flash_error":  middleware.GetFlashError(c),
+				"is_html_only": true,
+			})
 		}
 
 		var user models.User
-		// err := controller.DB.Select(...).Where(...).Find(...).Error
+		// err := controller.DB.Select(...).Where(...).First(...).Error
 		if err := controller.DB.Select("username", "password").Where(
 			"username = ?", passwordForm.Username,
 		).First(&user).Error; err != nil {
+			middleware.SetFlashError(c, err.Error())
+
 			log.Warn("for database `username` or `password` not nil [@route: /login]")
-			return err
+			return c.Render(http.StatusOK, "login.html", echo.Map{
+				"csrf":         c.Get("csrf"),
+				"flash_error":  middleware.GetFlashError(c),
+				"is_html_only": true,
+			})
 		}
 
 		// check hash password:
 		// match = true
 		// match = false
 		if !middleware.CheckHashPassword(user.Password, passwordForm.Password) {
+			// or, middleware.SetFlashError(c, "username or password not match")
+			middleware.SetFlash(c, "error", "username or password not match")
+
 			log.Warn("to check wrong hashed password [@route: /login]")
 			return c.Render(http.StatusForbidden, "login.html", echo.Map{
+				"csrf": c.Get("csrf"),
+				// or, middleware.GetFlashError(c)
+				"flash_error":  middleware.GetFlash(c, "error"),
 				"is_html_only": true,
 			})
 		}
 
 		if _, err := middleware.SetSession(user, c); err != nil {
+			middleware.SetFlashError(c, err.Error())
+
 			log.Warn("to middleware.SetSession session not found [@route: /login]")
 			// err: session not found
-			return c.HTML(http.StatusBadRequest, err.Error())
+			return c.Render(http.StatusForbidden, "login.html", echo.Map{
+				"csrf":         c.Get("csrf"),
+				"flash_error":  middleware.GetFlashError(c),
+				"is_html_only": true,
+			})
 		}
 
 		log.Info("end POST [@route: /]")
@@ -71,6 +94,7 @@ func (controller *Controller) Login(c echo.Context) error {
 	log.Info("end GET [@route: /login]")
 	return c.Render(http.StatusOK, "login.html", echo.Map{
 		"csrf":         c.Get("csrf"),
+		"flash_error":  "",
 		"is_html_only": true,
 	})
 }

@@ -2,10 +2,12 @@ package test
 
 import (
 	"net/http"
+	"regexp"
 	"testing"
 
 	"github.com/ockibagusp/hello/models"
 	"github.com/ockibagusp/hello/types"
+	"github.com/stretchr/testify/assert"
 )
 
 const GET int = 1
@@ -27,10 +29,11 @@ func TestLogin(t *testing.T) {
 	}.Save(db)
 
 	testCases := []struct {
-		method int
-		name   string
-		user   types.LoginForm
-		status int
+		method       int
+		name         string
+		user         types.LoginForm
+		flashMessage bool
+		status       int
 	}{
 		{
 			method: GET,
@@ -55,6 +58,7 @@ func TestLogin(t *testing.T) {
 				Username: "ockibagusp",
 				Password: "<bad password>",
 			},
+			flashMessage: true,
 			// HTTP response status: 403 Forbidden
 			status: http.StatusForbidden,
 		},
@@ -69,11 +73,20 @@ func TestLogin(t *testing.T) {
 				return
 			}
 			// tc.method == POST
-			noAuthCSRF.POST("/login").
+			flashError := noAuthCSRF.POST("/login").
 				WithForm(tc.user).
 				WithFormField("X-CSRF-Token", csrfToken).
 				Expect().
-				Status(tc.status)
+				Status(tc.status).
+				Body().Raw()
+
+			regex := regexp.MustCompile(`<p class\="text-danger">\*(.*)</p>`)
+			match := regex.FindStringSubmatch(flashError)
+
+			// flash message: "username or password not match"
+			if tc.flashMessage {
+				assert.NotNil(t, match)
+			}
 		})
 	}
 }
