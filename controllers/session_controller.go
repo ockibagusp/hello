@@ -18,15 +18,20 @@ import (
  * @route: /login
  */
 func (controller *Controller) Login(c echo.Context) error {
-	log.Info("start GET [@route: /login]")
 	session, err := middleware.GetAuth(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    c.Path(),
+	})
 	if session.Values["is_auth_type"] != -1 && err == nil {
+		log.Info("START request method GET for login")
 		log.Warn("to [@route: /] session")
+		log.Warn("END request method GET for login: [-]failure")
 		return c.Redirect(http.StatusFound, "/")
 	}
 
 	if c.Request().Method == "POST" {
-		log.Info("request method POST [@route: /login]")
+		log.Info("START request method POST for login")
 		passwordForm := &types.LoginForm{
 			Username: c.FormValue("username"),
 			Password: c.FormValue("password"),
@@ -36,7 +41,8 @@ func (controller *Controller) Login(c echo.Context) error {
 		if err != nil {
 			middleware.SetFlashError(c, err.Error())
 
-			log.Warn("for passwordForm.Validate() not nil [@route: /login]")
+			log.Warn("for passwordForm.Validate() not nil for login")
+			log.Warn("END request method POST for login: [-]failure")
 			return c.Render(http.StatusOK, "login.html", echo.Map{
 				"csrf":         c.Get("csrf"),
 				"flash_error":  middleware.GetFlashError(c),
@@ -51,7 +57,8 @@ func (controller *Controller) Login(c echo.Context) error {
 		).First(&user).Error; err != nil {
 			middleware.SetFlashError(c, err.Error())
 
-			log.Warn("for database `username` or `password` not nil [@route: /login]")
+			log.Warn("for database `username` or `password` not nil for login")
+			log.Warn("END request method POST for login: [-]failure")
 			return c.Render(http.StatusOK, "login.html", echo.Map{
 				"csrf":         c.Get("csrf"),
 				"flash_error":  middleware.GetFlashError(c),
@@ -66,10 +73,10 @@ func (controller *Controller) Login(c echo.Context) error {
 			// or, middleware.SetFlashError(c, "username or password not match")
 			middleware.SetFlash(c, "error", "username or password not match")
 
-			log.Warn("to check wrong hashed password [@route: /login]")
+			log.Warn("to check wrong hashed password for login")
+			log.Warn("END request method POST for login: [-]failure")
 			return c.Render(http.StatusForbidden, "login.html", echo.Map{
-				"csrf": c.Get("csrf"),
-				// or, middleware.GetFlashError(c)
+				"csrf":         c.Get("csrf"),
 				"flash_error":  middleware.GetFlash(c, "error"),
 				"is_html_only": true,
 			})
@@ -78,20 +85,19 @@ func (controller *Controller) Login(c echo.Context) error {
 		if _, err := middleware.SetSession(user, c); err != nil {
 			middleware.SetFlashError(c, err.Error())
 
-			log.Warn("to middleware.SetSession session not found [@route: /login]")
+			log.Warn("to middleware.SetSession session not found for login")
+			log.Warn("END request method POST for login: [-]failure")
 			// err: session not found
-			return c.Render(http.StatusForbidden, "login.html", echo.Map{
-				"csrf":         c.Get("csrf"),
-				"flash_error":  middleware.GetFlashError(c),
-				"is_html_only": true,
-			})
+			return c.HTML(http.StatusForbidden, err.Error())
+
 		}
 
-		log.Info("end POST [@route: /]")
+		log.Info("END request method POST [@route: /]")
 		return c.Redirect(http.StatusFound, "/")
 	}
 
-	log.Info("end GET [@route: /login]")
+	log.Info("START request method GET for login")
+	log.Info("END request method GET for login")
 	return c.Render(http.StatusOK, "login.html", echo.Map{
 		"csrf":         c.Get("csrf"),
 		"flash_error":  "",
@@ -107,13 +113,19 @@ func (controller *Controller) Login(c echo.Context) error {
  * @route: /logout
  */
 func (controller *Controller) Logout(c echo.Context) error {
-	log.Info("start GET [@route: /logout]")
+	session, _ := middleware.GetAuth(c)
+	log := log.WithFields(log.Fields{
+		"username": session.Values["username"],
+		"route":    c.Path(),
+	})
+	log.Info("START request method GET for logout")
+
 	if err := middleware.ClearSession(c); err != nil {
-		log.Warn("to middleware.ClearSession session not found [@route: /logout]")
+		log.Warn("to middleware.ClearSession session not found")
 		// err: session not found
 		return c.HTML(http.StatusBadRequest, err.Error())
 	}
 
-	log.Info("end redirect [@route: /]")
+	log.Info("END request method GET for logout")
 	return c.Redirect(http.StatusSeeOther, "/")
 }
