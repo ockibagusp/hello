@@ -87,7 +87,14 @@ func cookieStoreFlash() *sessions.CookieStore {
 
 // SetFlash: set session for flash message
 func SetFlash(c echo.Context, name, value string) {
-	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash)
+	txSessionFlash := sessionFlash
+	if name == "message" {
+		txSessionFlash += "-message"
+	} else if name == "error" {
+		txSessionFlash += "-error"
+	}
+
+	session, _ := cookieStoreFlash().Get(c.Request(), txSessionFlash)
 
 	session.AddFlash(value, name)
 	session.Save(c.Request(), c.Response())
@@ -95,7 +102,14 @@ func SetFlash(c echo.Context, name, value string) {
 
 // GetFlash: get session for flash messages
 func GetFlash(c echo.Context, name string) (flashes []string) {
-	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash)
+	txSessionFlash := sessionFlash
+	if name == "message" {
+		txSessionFlash += "-message"
+	} else if name == "error" {
+		txSessionFlash += "-error"
+	}
+
+	session, _ := cookieStoreFlash().Get(c.Request(), txSessionFlash)
 
 	fls := session.Flashes(name)
 	if len(fls) > 0 {
@@ -111,50 +125,20 @@ func GetFlash(c echo.Context, name string) (flashes []string) {
 
 // SetFlashMessage: set session for flash message: message
 func SetFlashMessage(c echo.Context, message string) {
-	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash+"-message")
-
-	session.AddFlash(message, "message")
-	session.Save(c.Request(), c.Response())
+	SetFlash(c, "message", message)
 }
 
 // GetFlashMessage: get session for flash messages: []message
 func GetFlashMessage(c echo.Context) []string {
-	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash+"-message")
-
-	fls := session.Flashes("message")
-	if len(fls) > 0 {
-		session.Save(c.Request(), c.Response())
-		var flashes []string
-		for _, fl := range fls {
-			flashes = append(flashes, fl.(string))
-		}
-
-		return flashes
-	}
-	return nil
+	return GetFlash(c, "message")
 }
 
 // SetFlashError: get session for flash message: error
 func SetFlashError(c echo.Context, error string) {
-	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash+"-error")
-
-	session.AddFlash(error, "error")
-	session.Save(c.Request(), c.Response())
+	SetFlash(c, "error", error)
 }
 
 // GetFlashError: get session for flash message: []error
 func GetFlashError(c echo.Context) []string {
-	session, _ := cookieStoreFlash().Get(c.Request(), sessionFlash+"-error")
-
-	fls := session.Flashes("error")
-	if len(fls) > 0 {
-		session.Save(c.Request(), c.Response())
-		var flashes []string
-		for _, fl := range fls {
-			flashes = append(flashes, fl.(string))
-		}
-
-		return flashes
-	}
-	return nil
+	return GetFlash(c, "error")
 }
