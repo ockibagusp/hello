@@ -100,7 +100,7 @@ func (controller *Controller) Login(c echo.Context) error {
 	log.Info("END request method GET for login")
 	return c.Render(http.StatusOK, "login.html", echo.Map{
 		"csrf":         c.Get("csrf"),
-		"flash_error":  "",
+		"flash_error":  middleware.GetFlashError(c),
 		"is_html_only": true,
 	})
 }
