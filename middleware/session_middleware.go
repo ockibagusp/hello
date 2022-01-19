@@ -123,14 +123,14 @@ func GetFlash(c echo.Context, name string) (flashes []string) {
 	return nil
 }
 
-// SetFlashMessage: set session for flash message: message
-func SetFlashMessage(c echo.Context, message string) {
-	SetFlash(c, "message", message)
+// SetFlashSuccess: set session for flash message: success
+func SetFlashSuccess(c echo.Context, success string) {
+	SetFlash(c, "success", success)
 }
 
-// GetFlashMessage: get session for flash messages: []message
-func GetFlashMessage(c echo.Context) []string {
-	return GetFlash(c, "message")
+// GetFlashSuccess: get session for flash messages: []success
+func GetFlashSuccess(c echo.Context) []string {
+	return GetFlash(c, "success")
 }
 
 // SetFlashError: get session for flash message: error
