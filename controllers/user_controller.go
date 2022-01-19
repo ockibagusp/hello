@@ -225,6 +225,8 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 	})
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to read user without no-session [@route: /login]")
+		middleware.SetFlashError(c, "login!")
+		log.Warn("END request method GET for read user: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
