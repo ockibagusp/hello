@@ -2,11 +2,13 @@ package test
 
 import (
 	"net/http"
+	"regexp"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/ockibagusp/hello/models"
 	"github.com/ockibagusp/hello/types"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
@@ -41,11 +43,18 @@ func TestUsersController(t *testing.T) {
 	})
 
 	t.Run("users [no auth] to GET it failure", func(t *testing.T) {
-		noAuth.GET("/users").
+		flashError := noAuth.GET("/users").
 			Expect().
 			// redirect @route: /login
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
+			Status(http.StatusOK).
+			Body().Raw()
+
+		regex := regexp.MustCompile(`<p class\="text-danger">\*(.*)</p>`)
+		match := regex.FindString(flashError)
+
+		// flash message: "login!"
+		assert.NotNil(t, match)
 	})
 }
 
@@ -71,6 +80,10 @@ func TestCreateUserController(t *testing.T) {
 		method int                // method: 1=GET or 2=POST
 		form   types.UserForm
 		status int
+
+		// flash message
+		flashSuccess bool
+		flashError   bool
 	}{
 		{
 			name:   "users [auth] to GET create it success",
@@ -93,6 +106,8 @@ func TestCreateUserController(t *testing.T) {
 			form:   userForm,
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
+			// flash message success
+			flashSuccess: true,
 		},
 		// Database: " Error 1062: Duplicate entry 'sugriwa@wanara.com' for key 'users.email_UNIQUE' "
 		{
@@ -102,6 +117,8 @@ func TestCreateUserController(t *testing.T) {
 			form:   userForm,
 			// HTTP response status: 400 Bad Request
 			status: http.StatusBadRequest,
+			// flash message error
+			flashError: true,
 		},
 	}
 
@@ -115,12 +132,31 @@ func TestCreateUserController(t *testing.T) {
 					WithForm(test.form).
 					Expect().
 					Status(test.status)
+
+				if test.flashSuccess {
+					successMessage := result.Body().Raw()
+
+					regex := regexp.MustCompile(`[<strong>message:</strong> (.*)]`)
+					match := regex.FindString(successMessage)
+
+					assert.NotNil(t, match)
+				}
 			} else if test.method == POST {
 				result = expect.POST("/users/add").
 					WithForm(test.form).
 					WithFormField("X-CSRF-Token", csrfToken).
 					Expect().
 					Status(test.status)
+
+				if test.flashError {
+					errorMessage := result.Body().Raw()
+
+					expected := "<strong>error:</strong> Error 1062: Duplicate entry"
+					regex := regexp.MustCompile(expected)
+					match := regex.FindString(errorMessage)
+
+					assert.Equal(t, expected, match)
+				}
 			} else {
 				panic("method: 1=GET or 2=POST")
 			}

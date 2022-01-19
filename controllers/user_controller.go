@@ -31,6 +31,7 @@ func (controller *Controller) Users(c echo.Context) error {
 
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to users without no-session [@route: /login]")
+		middleware.SetFlashError(c, "login!")
 		log.Warn("END request method GET for users: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
@@ -49,7 +50,20 @@ func (controller *Controller) Users(c echo.Context) error {
 		"name":    "Users",
 		"nav":     "users", // (?)
 		"session": session,
-		"users":   users,
+		/*
+			"flash": echo.Map{"message": ..., "flash": ...}
+
+			or,
+
+			"flash_message": ....
+			"flash_error": ....
+		*/
+
+		"flash": echo.Map{
+			"message": middleware.GetFlashSuccess(c),
+			"error":   middleware.GetFlashError(c),
+		},
+		"users": users,
 	})
 }
 
@@ -79,7 +93,7 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 				// HTTP response status: 400 Bad Request
 				return c.HTML(http.StatusBadRequest, err.Error())
 			}
-			// Kota dan Keb. ?
+			// City and District ?
 			city = uint(city64)
 		}
 
@@ -114,9 +128,20 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		*/
 		if err != nil {
 			log.Warnf("for POST to create user without validation.Errors: `%v`", err)
+			middleware.SetFlashError(c, err.Error())
+
+			cities, _ := models.City{}.FindAll(controller.DB)
 			log.Warn("END request method POST for create user: [-]failure")
-			/// HTTP response status: 400 Bad Request
-			return c.HTML(http.StatusBadRequest, err.Error())
+			// HTTP response status: 400 Bad Request
+			return c.Render(http.StatusBadRequest, "users/user-add.html", echo.Map{
+				"name":        "User Add",
+				"nav":         "user Add", // (?)
+				"session":     session,
+				"flash_error": middleware.GetFlashError(c),
+				"csrf":        c.Get("csrf"),
+				"cities":      cities,
+				"is_new":      true,
+			})
 		}
 
 		// Password Hash
@@ -140,12 +165,24 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		if _, err := user.Save(controller.DB); err != nil {
 			log.WithField("user_failure", user).
 				Warn("for POST to create user without models.User: nil")
+			middleware.SetFlashError(c, err.Error())
+
+			cities, _ := models.City{}.FindAll(controller.DB)
 			log.Warn("END request method POST for create user: [-]failure")
 			// HTTP response status: 400 Bad Request
-			return c.HTML(http.StatusBadRequest, err.Error())
+			return c.Render(http.StatusBadRequest, "users/user-add.html", echo.Map{
+				"name":        "User Add",
+				"nav":         "user Add", // (?)
+				"session":     session,
+				"csrf":        c.Get("csrf"),
+				"flash_error": middleware.GetFlashError(c),
+				"cities":      cities,
+				"is_new":      true,
+			})
 		}
 
 		log.WithField("user_success", user).Info("models.User: [+]success")
+		middleware.SetFlashSuccess(c, fmt.Sprintf("success new user: %s!", user.Username))
 		log.Info("END request method POST for create user: [+]success")
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
@@ -163,12 +200,13 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 
 	log.Info("END request method GET for create user: [+]success")
 	return c.Render(http.StatusOK, "users/user-add.html", echo.Map{
-		"name":    "User Add",
-		"nav":     "user Add", // (?)
-		"session": session,
-		"csrf":    c.Get("csrf"),
-		"cities":  cities,
-		"is_new":  true,
+		"name":        "User Add",
+		"nav":         "user Add", // (?)
+		"session":     session,
+		"csrf":        c.Get("csrf"),
+		"flash_error": middleware.GetFlashError(c),
+		"cities":      cities,
+		"is_new":      true,
 	})
 }
 
