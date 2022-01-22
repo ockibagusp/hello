@@ -1,12 +1,15 @@
 package test
 
 import (
+	"fmt"
 	"net/http"
+	"regexp"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/ockibagusp/hello/models"
 	"github.com/ockibagusp/hello/types"
+	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
@@ -41,11 +44,18 @@ func TestUsersController(t *testing.T) {
 	})
 
 	t.Run("users [no auth] to GET it failure", func(t *testing.T) {
-		noAuth.GET("/users").
+		flashError := noAuth.GET("/users").
 			Expect().
 			// redirect @route: /login
 			// HTTP response status: 200 OK
-			Status(http.StatusOK)
+			Status(http.StatusOK).
+			Body().Raw()
+
+		regex := regexp.MustCompile(`<p class\="text-danger">\*(.*)</p>`)
+		match := regex.FindString(flashError)
+
+		// flash message: "login!"
+		assert.NotNil(t, match)
 	})
 }
 
@@ -241,6 +251,10 @@ func TestUpdateUserController(t *testing.T) {
 		path   string             // id=string. Exemple, id="1"
 		form   types.UserForm
 		status int
+
+		// flash message
+		flashSuccess bool
+		flashError   bool
 	}{
 		{
 			name:   "users [auth] to GET update it success",
@@ -260,35 +274,38 @@ func TestUpdateUserController(t *testing.T) {
 				Email:    "rahwana@rakshasa.com",
 				Name:     "Rahwana",
 			},
+			// redirect @route: /users
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
+			// flash message success
+			flashSuccess: true,
 		},
-		{
-			name:   "users [auth] to GET update it failure: 1 session and no-id",
-			expect: auth,
-			method: GET,
-			path:   "-1",
-			// HTTP response status: 406 Not Acceptable
-			status: http.StatusNotAcceptable,
-		},
-		{
-			name:   "users [no auth] to GET update it failure: 2 no-session and id",
-			expect: noAuth,
-			method: GET,
-			path:   "1",
-			// redirect @route: /login
-			// HTTP response status: 200 OK
-			status: http.StatusOK,
-		},
-		{
-			name:   "users [no auth] to GET update it failure: 3 no-session and no-id",
-			expect: noAuth,
-			method: GET,
-			path:   "-1",
-			// redirect @route: /login
-			// HTTP response status: 200 OK
-			status: http.StatusOK,
-		},
+		// {
+		// 	name:   "users [auth] to GET update it failure: 1 session and no-id",
+		// 	expect: auth,
+		// 	method: GET,
+		// 	path:   "-1",
+		// 	// HTTP response status: 406 Not Acceptable
+		// 	status: http.StatusNotAcceptable,
+		// },
+		// {
+		// 	name:   "users [no auth] to GET update it failure: 2 no-session and id",
+		// 	expect: noAuth,
+		// 	method: GET,
+		// 	path:   "1",
+		// 	// redirect @route: /login
+		// 	// HTTP response status: 200 OK
+		// 	status: http.StatusOK,
+		// },
+		// {
+		// 	name:   "users [no auth] to GET update it failure: 3 no-session and no-id",
+		// 	expect: noAuth,
+		// 	method: GET,
+		// 	path:   "-1",
+		// 	// redirect @route: /login
+		// 	// HTTP response status: 200 OK
+		// 	status: http.StatusOK,
+		// },
 	}
 
 	for _, test := range testCases {
@@ -313,6 +330,26 @@ func TestUpdateUserController(t *testing.T) {
 					WithFormField("X-CSRF-Token", csrfToken).
 					Expect().
 					Status(test.status)
+
+				if test.flashSuccess {
+					successMessage := result.Body().Raw()
+					// <strong>message:</strong> success update user: rahwana!
+					regex := regexp.MustCompile(`[<strong>message:</strong> (.*)]`)
+					match := regex.FindString(successMessage)
+
+					fmt.Println(match)
+					assert.NotNil(t, match)
+				}
+
+				// if test.flashError {
+				// 	errorMessage := result.Body().Raw()
+
+				// 	expected := "<strong>error:</strong> Error 1062: Duplicate entry"
+				// 	regex := regexp.MustCompile(expected)
+				// 	match := regex.FindString(errorMessage)
+
+				// 	assert.Equal(t, expected, match)
+				// }
 			} else {
 				panic("method: 1=GET or 2=POST")
 			}
