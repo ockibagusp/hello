@@ -280,32 +280,32 @@ func TestUpdateUserController(t *testing.T) {
 			// flash message success
 			flashSuccess: true,
 		},
-		// {
-		// 	name:   "users [auth] to GET update it failure: 1 session and no-id",
-		// 	expect: auth,
-		// 	method: GET,
-		// 	path:   "-1",
-		// 	// HTTP response status: 406 Not Acceptable
-		// 	status: http.StatusNotAcceptable,
-		// },
-		// {
-		// 	name:   "users [no auth] to GET update it failure: 2 no-session and id",
-		// 	expect: noAuth,
-		// 	method: GET,
-		// 	path:   "1",
-		// 	// redirect @route: /login
-		// 	// HTTP response status: 200 OK
-		// 	status: http.StatusOK,
-		// },
-		// {
-		// 	name:   "users [no auth] to GET update it failure: 3 no-session and no-id",
-		// 	expect: noAuth,
-		// 	method: GET,
-		// 	path:   "-1",
-		// 	// redirect @route: /login
-		// 	// HTTP response status: 200 OK
-		// 	status: http.StatusOK,
-		// },
+		{
+			name:   "users [auth] to GET update it failure: 1 session and no-id",
+			expect: auth,
+			method: GET,
+			path:   "-1",
+			// HTTP response status: 406 Not Acceptable
+			status: http.StatusNotAcceptable,
+		},
+		{
+			name:   "users [no auth] to GET update it failure: 2 no-session and id",
+			expect: noAuth,
+			method: GET,
+			path:   "1",
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
+		{
+			name:   "users [no auth] to GET update it failure: 3 no-session and no-id",
+			expect: noAuth,
+			method: GET,
+			path:   "-1",
+			// redirect @route: /login
+			// HTTP response status: 200 OK
+			status: http.StatusOK,
+		},
 	}
 
 	for _, test := range testCases {
