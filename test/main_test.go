@@ -63,6 +63,11 @@ func setupTestServer(t *testing.T, debug ...bool) (noAuth *httpexpect.Expect) {
 	return
 }
 
+// Setup test server to set cookie
+func setupTestSetCookie(noAuth *httpexpect.Expect) {
+	// TODO: set cookie to user and CSRF
+}
+
 // Setup test server to set cookie CSRF-Token
 func setupTestSetCookieCSRF(noAuth *httpexpect.Expect) {
 	setCookie := noAuth.GET("/login").
@@ -138,10 +143,11 @@ func setupTestServerAuth(e *httpexpect.Expect) (auth *httpexpect.Expect) {
 	"username" = "ockibagusp"
 	"is_auth_type" = 2
 */
-const session = "MTY0MDA4MzU1MnxEdi1CQkFFQ180SUFBUkFCRUFBQVNfLUNBQUlHYzNSeWFXNW" +
-	"5EQW9BQ0hWelpYSnVZVzFsQm5OMGNtbHVad3dNQUFwdlkydHBZbUZuZFhOd0JuTjBjbWx1Wnd3" +
-	"T0FBeHBjMTloZFhSb1gzUjVjR1VEYVc1MEJBSUFCQT09fIlgmThOxd1Xxc_uh6jeRFkCwwHLW7" +
-	"rA_0tH8qPT9t41"
+// session: 23 Jan 2022
+const session = "MTY0MjkzNDIwNnxEdi1CQkFFQ180SUFBUkFCRUFBQVNfLUNBQUlHYzNSeWFXNW5EQ" +
+	"W9BQ0hWelpYSnVZVzFsQm5OMGNtbHVad3dNQUFwdlkydHBZbUZuZFhOd0JuTjBjbWx1Wnd3T0FBeH" +
+	"BjMTloZFhSb1gzUjVjR1VEYVc1MEJBSUFCQT09fDoaOeOnXeVm_zXJUWYidClXXXB3KevfkiI4v2O" +
+	"33QQ-"
 
 /*
 	Cross Site Request Forgery (CSRF)
