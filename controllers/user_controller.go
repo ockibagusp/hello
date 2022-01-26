@@ -388,6 +388,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	})
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to update user by password without no-session [@route: /login]")
+		middleware.SetFlashError(c, "login!")
+		log.Warn("END request method GET for read user: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -422,10 +424,12 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 
 		if !middleware.CheckHashPassword(user.Password, _newPasswordForm.OldPassword) {
 			log.Warnf("for POST to update user by password without !middleware.CheckHashPassword() errors: `%v`", err)
+			middleware.SetFlashError(c, err.Error())
 			log.Warn("END request method POST for update user by password: [-]failure")
 			return c.Render(http.StatusForbidden, "user-view-password.html", echo.Map{
-				"session":      session,
 				"name":         fmt.Sprintf("User: %s", user.Name),
+				"session":      session,
+				"flash_error":  middleware.GetFlashError(c),
 				"user":         user,
 				"is_html_only": true,
 			})
@@ -444,13 +448,15 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		*/
 		if err != nil {
 			log.Warnf("for POST to update user by password without validation.Errors errors: `%v`", err)
+			middleware.SetFlashError(c, err.Error())
 			log.Warn("END request method POST for update user by password: [-]failure")
 			// return c.JSON(http.StatusBadRequest, echo.Map{
 			// 	"message": "Passwords Don't Match",
 			// })
 			return c.Render(http.StatusForbidden, "user-view-password.html", echo.Map{
-				"session":      session,
 				"name":         fmt.Sprintf("User: %s", user.Name),
+				"session":      session,
+				"flash_error":  middleware.GetFlashError(c),
 				"user":         user,
 				"is_html_only": true,
 			})
@@ -477,6 +483,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		}
 
 		log.WithField("user_update_password", user).Info("models.User: [+]success")
+		middleware.SetFlashSuccess(c, fmt.Sprintf("success update user by password: %s!", user.Username))
 		log.Info("END request method POST for update user by password: [+]success")
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}

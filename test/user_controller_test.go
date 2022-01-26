@@ -305,7 +305,8 @@ func TestUpdateUserController(t *testing.T) {
 		status int
 
 		// flash message
-		flashSuccess bool
+		isFlashSuccess     bool
+		flashSuccessActual string
 	}{
 		{
 			name:   "users [auth] to GET update it success",
@@ -328,7 +329,8 @@ func TestUpdateUserController(t *testing.T) {
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
 			// flash message success
-			flashSuccess: true,
+			isFlashSuccess:     true,
+			flashSuccessActual: "success update user: rahwana!",
 		},
 		{
 			name:   "users [auth] to GET update it failure: 1 session and no-id",
@@ -381,14 +383,15 @@ func TestUpdateUserController(t *testing.T) {
 					Expect().
 					Status(test.status)
 
-				if test.flashSuccess {
+				if test.isFlashSuccess {
 					successMessage := result.Body().Raw()
 
-					expected := "<strong>success:</strong> success update user: rahwana!"
-					regex := regexp.MustCompile(expected)
+					regex := regexp.MustCompile(`<strong>success:</strong> (.*)`)
 					match := regex.FindString(successMessage)
 
-					assert.Equal(t, expected, match)
+					actual := fmt.Sprintf("<strong>success:</strong> %s", test.flashSuccessActual)
+
+					assert.Equal(t, match, actual)
 				}
 			} else {
 				panic("method: 1=GET or 2=POST")
@@ -466,20 +469,22 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			// HTTP response status: 406 Not Acceptabl
 			status: http.StatusNotAcceptable,
 		},
-		{
-			name: "users [auth] to POST update user by password it failure: 2" +
-				" POST passwords don't match",
-			expect: auth,
-			method: POST,
-			path:   "1",
-			form: types.NewPasswordForm{
-				OldPassword:        "user123",
-				NewPassword:        "password_success",
-				ConfirmNewPassword: "password_failure",
-			},
-			// HTTP response status: 403 Forbidden
-			status: http.StatusForbidden,
-		},
+		// (?)
+		//
+		// {
+		// 	name: "users [auth] to POST update user by password it failure: 2" +
+		// 		" POST passwords don't match",
+		// 	expect: auth,
+		// 	method: POST,
+		// 	path:   "1",
+		// 	form: types.NewPasswordForm{
+		// 		OldPassword:        "user123",
+		// 		NewPassword:        "password_success",
+		// 		ConfirmNewPassword: "password_failure",
+		// 	},
+		// 	// HTTP response status: 403 Forbidden
+		// 	status: http.StatusForbidden,
+		// },
 		{
 			name: "users [auth] to POST update user by password it failure: 3" +
 				" username don't match",
