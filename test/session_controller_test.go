@@ -34,9 +34,9 @@ func TestLogin(t *testing.T) {
 		name         string
 		user         types.LoginForm
 		flashMessage bool
-		// TODO: string to flash error
-		stringToFlashError string
-		status             int
+		// TODO: flash error for string
+		flashErrorForString string
+		status              int
 	}{
 		{
 			method: GET,
@@ -61,8 +61,8 @@ func TestLogin(t *testing.T) {
 				Username: "ockibagusp",
 				Password: "<bad password>",
 			},
-			flashMessage:       true,
-			stringToFlashError: "username or password not match",
+			flashMessage:        true,
+			flashErrorForString: "username or password not match",
 			// HTTP response status: 403 Forbidden
 			status: http.StatusForbidden,
 		},
@@ -84,7 +84,7 @@ func TestLogin(t *testing.T) {
 				Status(tc.status).
 				Body().Raw()
 
-			actual := fmt.Sprintf(`<p class="text-danger">*%s</p>`, tc.stringToFlashError)
+			actual := fmt.Sprintf(`<p class="text-danger">*%s</p>`, tc.flashErrorForString)
 
 			regex := regexp.MustCompile(`<p class\="text-danger">\*(.*)</p>`)
 			match := regex.FindString(flashError)
