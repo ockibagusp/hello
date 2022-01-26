@@ -10,10 +10,10 @@
         <h2 class="mt-4">Users</h2>
 
         <!-- TODO: flash.html -->
-        {{ if gt (len .flash.message) 0 }}
-          {{ range $index, $value := .flash.message }}
+        {{ if gt (len .flash.success) 0 }}
+          {{ range $index, $value := .flash.success }}
           <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>message:</strong> {{ $value }}!.
+            <strong>success:</strong> {{ $value }}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -24,7 +24,7 @@
         {{ if gt (len .flash.error) 0 }}
           {{ range $index, $value := .flash.error }}
           <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>error:</strong> {{ $value }}!.
+            <strong>error:</strong> {{ $value }}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
