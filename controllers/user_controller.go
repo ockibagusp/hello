@@ -51,16 +51,16 @@ func (controller *Controller) Users(c echo.Context) error {
 		"nav":     "users", // (?)
 		"session": session,
 		/*
-			"flash": echo.Map{"message": ..., "flash": ...}
+			"flash": echo.Map{"success": ..., "error": ...}
 
 			or,
 
-			"flash_message": ....
+			"flash_success": ....
 			"flash_error": ....
 		*/
 
 		"flash": echo.Map{
-			"message": middleware.GetFlashSuccess(c),
+			"success": middleware.GetFlashSuccess(c),
 			"error":   middleware.GetFlashError(c),
 		},
 		"users": users,
@@ -282,6 +282,8 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 	})
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to update user without no-session [@route: /login]")
+		middleware.SetFlashError(c, "login!")
+		log.Warn("END request method GET for read user: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -291,14 +293,24 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 		log.Info("START request method POST for update user")
 
 		var user models.User
-		// TODO: html flash message
+		cities, _ := models.City{}.FindAll(controller.DB)
+
 		// HTTP response status: 400 Bad Request
 		if err := c.Bind(&user); err != nil {
 			log.Warnf(
 				"for POST to update user without c.Bind() errors: `%v`", err,
 			)
+			middleware.SetFlashError(c, err.Error())
 			log.Warn("END request method POST for update user: [-]failure")
-			return c.HTML(http.StatusBadRequest, err.Error())
+			return c.Render(http.StatusBadRequest, "users/user-view.html", echo.Map{
+				"name":        fmt.Sprintf("User: %s", user.Name),
+				"nav":         fmt.Sprintf("User: %s", user.Name), // (?)
+				"session":     session,
+				"flash_error": middleware.GetFlashError(c),
+				"csrf":        c.Get("csrf"),
+				"user":        user,
+				"cities":      cities,
+			})
 		}
 
 		// _, err = user.Update(...): be able
@@ -306,12 +318,22 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 			log.Warnf(
 				"for POST to update user without models.User{}.Update() errors: `%v`", err,
 			)
+			middleware.SetFlashError(c, err.Error())
 			log.Warn("END request method POST for update user: [-]failure")
 			// HTTP response status: 405 Method Not Allowed
-			return c.HTML(http.StatusNotAcceptable, err.Error())
+			return c.Render(http.StatusNotAcceptable, "users/user-view.html", echo.Map{
+				"name":        fmt.Sprintf("User: %s", user.Name),
+				"nav":         fmt.Sprintf("User: %s", user.Name), // (?)
+				"session":     session,
+				"flash_error": middleware.GetFlashError(c),
+				"csrf":        c.Get("csrf"),
+				"user":        user,
+				"cities":      cities,
+			})
 		}
 
 		log.WithField("user_update", user).Info("models.User: [+]success")
+		middleware.SetFlashSuccess(c, fmt.Sprintf("success update user: %s!", user.Username))
 		log.Info("END request method POST for update user: [+]success")
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
