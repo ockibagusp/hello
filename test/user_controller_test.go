@@ -438,6 +438,10 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 		path   string             // id=string. Exemple, id="1"
 		form   types.NewPasswordForm
 		status int
+
+		// flash message
+		isFlashSuccess     bool
+		flashSuccessActual string
 	}{
 		{
 			name:   "users [auth] to GET update user by password it success",
@@ -459,6 +463,9 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			},
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
+			// flash message success
+			isFlashSuccess:     true,
+			flashSuccessActual: "success update user by password: ockibagusp!",
 		},
 		{
 			name: "users [auth] to GET update user by password it failure: 1" +
@@ -469,22 +476,20 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			// HTTP response status: 406 Not Acceptabl
 			status: http.StatusNotAcceptable,
 		},
-		// (?)
-		//
-		// {
-		// 	name: "users [auth] to POST update user by password it failure: 2" +
-		// 		" POST passwords don't match",
-		// 	expect: auth,
-		// 	method: POST,
-		// 	path:   "1",
-		// 	form: types.NewPasswordForm{
-		// 		OldPassword:        "user123",
-		// 		NewPassword:        "password_success",
-		// 		ConfirmNewPassword: "password_failure",
-		// 	},
-		// 	// HTTP response status: 403 Forbidden
-		// 	status: http.StatusForbidden,
-		// },
+		{
+			name: "users [auth] to POST update user by password it failure: 2" +
+				" POST passwords don't match",
+			expect: auth,
+			method: POST,
+			path:   "1",
+			form: types.NewPasswordForm{
+				OldPassword:        "user123",
+				NewPassword:        "password_success",
+				ConfirmNewPassword: "password_failure",
+			},
+			// HTTP response status: 403 Forbidden
+			status: http.StatusForbidden,
+		},
 		{
 			name: "users [auth] to POST update user by password it failure: 3" +
 				" username don't match",
@@ -566,6 +571,17 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 					WithFormField("X-CSRF-Token", csrfToken).
 					Expect().
 					Status(test.status)
+
+				if test.isFlashSuccess {
+					successMessage := result.Body().Raw()
+
+					regex := regexp.MustCompile(`<strong>success:</strong> (.*)`)
+					match := regex.FindString(successMessage)
+
+					actual := fmt.Sprintf("<strong>success:</strong> %s", test.flashSuccessActual)
+
+					assert.Equal(t, match, actual)
+				}
 			} else {
 				panic("method: 1=GET or 2=POST")
 			}

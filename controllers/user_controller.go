@@ -424,7 +424,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 
 		if !middleware.CheckHashPassword(user.Password, _newPasswordForm.OldPassword) {
 			log.Warnf("for POST to update user by password without !middleware.CheckHashPassword() errors: `%v`", err)
-			middleware.SetFlashError(c, err.Error())
+			middleware.SetFlashError(c, "check hash password is wrong!")
 			log.Warn("END request method POST for update user by password: [-]failure")
 			return c.Render(http.StatusForbidden, "user-view-password.html", echo.Map{
 				"name":         fmt.Sprintf("User: %s", user.Name),
@@ -471,6 +471,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		}
 
 		user = &models.User{
+			Username: session.Values["username"].(string),
 			Password: hash,
 		}
 
