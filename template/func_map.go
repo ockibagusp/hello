@@ -19,7 +19,7 @@ var FuncMapMore = func() template.FuncMap {
 // TODO
 //
 // Code: session_gorilla.Values["s_auth_type"]
-// HTML: {{index $.session_gorilla.Values "is_auth_type" | tostring}} ?
+// HTML: {{index $.session_gorilla.Values "is_auth_type" | toString}} ?
 func ToString(value interface{}) string {
 	switch v := value.(type) {
 	case string:

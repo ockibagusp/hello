@@ -8,6 +8,30 @@
     <div class="content body">
       <div class="col-md-12">
         <h2 class="mt-4">Users</h2>
+
+        <!-- TODO: flash.html -->
+        {{ if gt (len .flash.success) 0 }}
+          {{ range $index, $value := .flash.success }}
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>success:</strong> {{ $value }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          {{ end }}
+        {{ end }}
+        
+        {{ if gt (len .flash.error) 0 }}
+          {{ range $index, $value := .flash.error }}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>error:</strong> {{ $value }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          {{ end }}
+        {{ end }}
+
         <div class="row justify-content-end">
           <div class="col-2">
             <a href="/users/add" class="btn btn-info btn-sm btn-flat"
