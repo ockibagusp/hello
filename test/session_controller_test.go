@@ -1,11 +1,14 @@
 package test
 
 import (
+	"fmt"
 	"net/http"
+	"regexp"
 	"testing"
 
 	"github.com/ockibagusp/hello/models"
 	"github.com/ockibagusp/hello/types"
+	"github.com/stretchr/testify/assert"
 )
 
 const GET int = 1
@@ -27,10 +30,13 @@ func TestLogin(t *testing.T) {
 	}.Save(db)
 
 	testCases := []struct {
-		method int
-		name   string
-		user   types.LoginForm
-		status int
+		method       int
+		name         string
+		user         types.LoginForm
+		flashMessage bool
+		// TODO: flash error for string
+		flashErrorForString string
+		status              int
 	}{
 		{
 			method: GET,
@@ -55,6 +61,8 @@ func TestLogin(t *testing.T) {
 				Username: "ockibagusp",
 				Password: "<bad password>",
 			},
+			flashMessage:        true,
+			flashErrorForString: "username or password not match",
 			// HTTP response status: 403 Forbidden
 			status: http.StatusForbidden,
 		},
@@ -69,11 +77,22 @@ func TestLogin(t *testing.T) {
 				return
 			}
 			// tc.method == POST
-			noAuthCSRF.POST("/login").
+			flashError := noAuthCSRF.POST("/login").
 				WithForm(tc.user).
 				WithFormField("X-CSRF-Token", csrfToken).
 				Expect().
-				Status(tc.status)
+				Status(tc.status).
+				Body().Raw()
+
+			actual := fmt.Sprintf(`<p class="text-danger">*%s</p>`, tc.flashErrorForString)
+
+			regex := regexp.MustCompile(`<p class\="text-danger">\*(.*)</p>`)
+			match := regex.FindString(flashError)
+
+			// flash message: "username or password not match"
+			if tc.flashMessage {
+				assert.Equal(t, match, actual)
+			}
 		})
 	}
 }

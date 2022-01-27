@@ -43,7 +43,7 @@ func TestUsersController(t *testing.T) {
 			Status(http.StatusOK)
 	})
 
-	t.Run("users [no auth] to GET it failure", func(t *testing.T) {
+	t.Run("users [no auth] to GET it failure: login", func(t *testing.T) {
 		flashError := noAuth.GET("/users").
 			Expect().
 			// redirect @route: /login
@@ -54,8 +54,10 @@ func TestUsersController(t *testing.T) {
 		regex := regexp.MustCompile(`<p class\="text-danger">\*(.*)</p>`)
 		match := regex.FindString(flashError)
 
+		actual := `<p class="text-danger">*login!</p>`
+
 		// flash message: "login!"
-		assert.NotNil(t, match)
+		assert.Equal(t, match, actual)
 	})
 }
 
@@ -81,6 +83,20 @@ func TestCreateUserController(t *testing.T) {
 		method int                // method: 1=GET or 2=POST
 		form   types.UserForm
 		status int
+
+		// flash message
+		isFlashSuccess     bool
+		flashSuccessActual string
+
+		isFlashError     bool
+		flashErrorActual string
+
+		// or,
+		//
+		// flash struct {
+		// 	success string
+		// 	error   string
+		// }
 	}{
 		{
 			name:   "users [auth] to GET create it success",
@@ -103,6 +119,9 @@ func TestCreateUserController(t *testing.T) {
 			form:   userForm,
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
+			// flash message success
+			isFlashSuccess:     true,
+			flashSuccessActual: "success new user: sugriwa",
 		},
 		// Database: " Error 1062: Duplicate entry 'sugriwa@wanara.com' for key 'users.email_UNIQUE' "
 		{
@@ -112,6 +131,18 @@ func TestCreateUserController(t *testing.T) {
 			form:   userForm,
 			// HTTP response status: 400 Bad Request
 			status: http.StatusBadRequest,
+			// flash message error
+			isFlashError:     true,
+			flashErrorActual: "Error 1062: Duplicate entry",
+
+			// or,
+			//
+			// flash: struct {
+			// 	success string
+			// 	error   string
+			// }{
+			// 	error: "Error 1062: Duplicate entry",
+			// },
 		},
 	}
 
@@ -131,6 +162,27 @@ func TestCreateUserController(t *testing.T) {
 					WithFormField("X-CSRF-Token", csrfToken).
 					Expect().
 					Status(test.status)
+
+				if test.isFlashSuccess {
+					successMessage := result.Body().Raw()
+
+					regex := regexp.MustCompile(`<strong>success:</strong> (.*)`)
+					match := regex.FindString(successMessage)
+
+					actual := fmt.Sprintf("<strong>success:</strong> %s!", test.flashSuccessActual)
+
+					assert.Equal(t, match, actual)
+				}
+
+				if test.isFlashError {
+					errorMessage := result.Body().Raw()
+
+					actual := fmt.Sprintf("<strong>error:</strong> %s", test.flashErrorActual)
+					regex := regexp.MustCompile(actual)
+					match := regex.FindString(errorMessage)
+
+					assert.Equal(t, match, actual)
+				}
 			} else {
 				panic("method: 1=GET or 2=POST")
 			}
@@ -253,8 +305,8 @@ func TestUpdateUserController(t *testing.T) {
 		status int
 
 		// flash message
-		flashSuccess bool
-		flashError   bool
+		isFlashSuccess     bool
+		flashSuccessActual string
 	}{
 		{
 			name:   "users [auth] to GET update it success",
@@ -278,7 +330,8 @@ func TestUpdateUserController(t *testing.T) {
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
 			// flash message success
-			flashSuccess: true,
+			isFlashSuccess:     true,
+			flashSuccessActual: "success update user: rahwana!",
 		},
 		{
 			name:   "users [auth] to GET update it failure: 1 session and no-id",
@@ -331,25 +384,16 @@ func TestUpdateUserController(t *testing.T) {
 					Expect().
 					Status(test.status)
 
-				if test.flashSuccess {
+				if test.isFlashSuccess {
 					successMessage := result.Body().Raw()
-					// <strong>message:</strong> success update user: rahwana!
-					regex := regexp.MustCompile(`[<strong>message:</strong> (.*)]`)
+
+					regex := regexp.MustCompile(`<strong>success:</strong> (.*)`)
 					match := regex.FindString(successMessage)
 
-					fmt.Println(match)
-					assert.NotNil(t, match)
+					actual := fmt.Sprintf("<strong>success:</strong> %s", test.flashSuccessActual)
+
+					assert.Equal(t, match, actual)
 				}
-
-				// if test.flashError {
-				// 	errorMessage := result.Body().Raw()
-
-				// 	expected := "<strong>error:</strong> Error 1062: Duplicate entry"
-				// 	regex := regexp.MustCompile(expected)
-				// 	match := regex.FindString(errorMessage)
-
-				// 	assert.Equal(t, expected, match)
-				// }
 			} else {
 				panic("method: 1=GET or 2=POST")
 			}
@@ -395,6 +439,10 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 		path   string             // id=string. Exemple, id="1"
 		form   types.NewPasswordForm
 		status int
+
+		// flash message
+		isFlashSuccess     bool
+		flashSuccessActual string
 	}{
 		{
 			name:   "users [auth] to GET update user by password it success",
@@ -416,6 +464,9 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 			},
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
+			// flash message success
+			isFlashSuccess:     true,
+			flashSuccessActual: "success update user by password: ockibagusp!",
 		},
 		{
 			name: "users [auth] to GET update user by password it failure: 1" +
@@ -521,6 +572,17 @@ func TestUpdateUserByPasswordUserController(t *testing.T) {
 					WithFormField("X-CSRF-Token", csrfToken).
 					Expect().
 					Status(test.status)
+
+				if test.isFlashSuccess {
+					successMessage := result.Body().Raw()
+
+					regex := regexp.MustCompile(`<strong>success:</strong> (.*)`)
+					match := regex.FindString(successMessage)
+
+					actual := fmt.Sprintf("<strong>success:</strong> %s", test.flashSuccessActual)
+
+					assert.Equal(t, match, actual)
+				}
 			} else {
 				panic("method: 1=GET or 2=POST")
 			}

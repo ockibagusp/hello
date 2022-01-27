@@ -31,6 +31,7 @@ func (controller *Controller) Users(c echo.Context) error {
 
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to users without no-session [@route: /login]")
+		middleware.SetFlashError(c, "login!")
 		log.Warn("END request method GET for users: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
@@ -49,7 +50,20 @@ func (controller *Controller) Users(c echo.Context) error {
 		"name":    "Users",
 		"nav":     "users", // (?)
 		"session": session,
-		"users":   users,
+		/*
+			"flash": echo.Map{"success": ..., "error": ...}
+
+			or,
+
+			"flash_success": ....
+			"flash_error": ....
+		*/
+
+		"flash": echo.Map{
+			"success": middleware.GetFlashSuccess(c),
+			"error":   middleware.GetFlashError(c),
+		},
+		"users": users,
 	})
 }
 
@@ -79,7 +93,7 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 				// HTTP response status: 400 Bad Request
 				return c.HTML(http.StatusBadRequest, err.Error())
 			}
-			// Kota dan Keb. ?
+			// City and District ?
 			city = uint(city64)
 		}
 
@@ -114,9 +128,20 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		*/
 		if err != nil {
 			log.Warnf("for POST to create user without validation.Errors: `%v`", err)
+			middleware.SetFlashError(c, err.Error())
+
+			cities, _ := models.City{}.FindAll(controller.DB)
 			log.Warn("END request method POST for create user: [-]failure")
-			/// HTTP response status: 400 Bad Request
-			return c.HTML(http.StatusBadRequest, err.Error())
+			// HTTP response status: 400 Bad Request
+			return c.Render(http.StatusBadRequest, "users/user-add.html", echo.Map{
+				"name":        "User Add",
+				"nav":         "user Add", // (?)
+				"session":     session,
+				"flash_error": middleware.GetFlashError(c),
+				"csrf":        c.Get("csrf"),
+				"cities":      cities,
+				"is_new":      true,
+			})
 		}
 
 		// Password Hash
@@ -140,12 +165,24 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 		if _, err := user.Save(controller.DB); err != nil {
 			log.WithField("user_failure", user).
 				Warn("for POST to create user without models.User: nil")
+			middleware.SetFlashError(c, err.Error())
+
+			cities, _ := models.City{}.FindAll(controller.DB)
 			log.Warn("END request method POST for create user: [-]failure")
 			// HTTP response status: 400 Bad Request
-			return c.HTML(http.StatusBadRequest, err.Error())
+			return c.Render(http.StatusBadRequest, "users/user-add.html", echo.Map{
+				"name":        "User Add",
+				"nav":         "user Add", // (?)
+				"session":     session,
+				"csrf":        c.Get("csrf"),
+				"flash_error": middleware.GetFlashError(c),
+				"cities":      cities,
+				"is_new":      true,
+			})
 		}
 
 		log.WithField("user_success", user).Info("models.User: [+]success")
+		middleware.SetFlashSuccess(c, fmt.Sprintf("success new user: %s!", user.Username))
 		log.Info("END request method POST for create user: [+]success")
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
@@ -163,12 +200,13 @@ func (controller *Controller) CreateUser(c echo.Context) error {
 
 	log.Info("END request method GET for create user: [+]success")
 	return c.Render(http.StatusOK, "users/user-add.html", echo.Map{
-		"name":    "User Add",
-		"nav":     "user Add", // (?)
-		"session": session,
-		"csrf":    c.Get("csrf"),
-		"cities":  cities,
-		"is_new":  true,
+		"name":        "User Add",
+		"nav":         "user Add", // (?)
+		"session":     session,
+		"csrf":        c.Get("csrf"),
+		"flash_error": middleware.GetFlashError(c),
+		"cities":      cities,
+		"is_new":      true,
 	})
 }
 
@@ -187,6 +225,8 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 	})
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to read user without no-session [@route: /login]")
+		middleware.SetFlashError(c, "login!")
+		log.Warn("END request method GET for read user: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -253,23 +293,21 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 		log.Info("START request method POST for update user")
 
 		var user models.User
-		// TODO: html flash message
+		cities, _ := models.City{}.FindAll(controller.DB)
+
 		// HTTP response status: 400 Bad Request
 		if err := c.Bind(&user); err != nil {
 			log.Warnf(
 				"for POST to update user without c.Bind() errors: `%v`", err,
 			)
 			middleware.SetFlashError(c, err.Error())
-
-			cities, _ := models.City{}.FindAll(controller.DB)
 			log.Warn("END request method POST for update user: [-]failure")
-			// HTTP response status: 405 Method Not Allowed
-			return c.Render(http.StatusNotAcceptable, "users/user-view.html", echo.Map{
+			return c.Render(http.StatusBadRequest, "users/user-view.html", echo.Map{
 				"name":        fmt.Sprintf("User: %s", user.Name),
 				"nav":         fmt.Sprintf("User: %s", user.Name), // (?)
 				"session":     session,
-				"csrf":        c.Get("csrf"),
 				"flash_error": middleware.GetFlashError(c),
+				"csrf":        c.Get("csrf"),
 				"user":        user,
 				"cities":      cities,
 			})
@@ -281,16 +319,14 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 				"for POST to update user without models.User{}.Update() errors: `%v`", err,
 			)
 			middleware.SetFlashError(c, err.Error())
-
-			cities, _ := models.City{}.FindAll(controller.DB)
 			log.Warn("END request method POST for update user: [-]failure")
 			// HTTP response status: 405 Method Not Allowed
 			return c.Render(http.StatusNotAcceptable, "users/user-view.html", echo.Map{
 				"name":        fmt.Sprintf("User: %s", user.Name),
 				"nav":         fmt.Sprintf("User: %s", user.Name), // (?)
 				"session":     session,
-				"csrf":        c.Get("csrf"),
 				"flash_error": middleware.GetFlashError(c),
+				"csrf":        c.Get("csrf"),
 				"user":        user,
 				"cities":      cities,
 			})
@@ -353,6 +389,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	})
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to update user by password without no-session [@route: /login]")
+		middleware.SetFlashError(c, "login!")
+		log.Warn("END request method GET for read user: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -387,10 +425,12 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 
 		if !middleware.CheckHashPassword(user.Password, _newPasswordForm.OldPassword) {
 			log.Warnf("for POST to update user by password without !middleware.CheckHashPassword() errors: `%v`", err)
+			middleware.SetFlashError(c, "check hash password is wrong!")
 			log.Warn("END request method POST for update user by password: [-]failure")
 			return c.Render(http.StatusForbidden, "user-view-password.html", echo.Map{
-				"session":      session,
 				"name":         fmt.Sprintf("User: %s", user.Name),
+				"session":      session,
+				"flash_error":  middleware.GetFlashError(c),
 				"user":         user,
 				"is_html_only": true,
 			})
@@ -409,13 +449,15 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		*/
 		if err != nil {
 			log.Warnf("for POST to update user by password without validation.Errors errors: `%v`", err)
+			middleware.SetFlashError(c, err.Error())
 			log.Warn("END request method POST for update user by password: [-]failure")
 			// return c.JSON(http.StatusBadRequest, echo.Map{
 			// 	"message": "Passwords Don't Match",
 			// })
 			return c.Render(http.StatusForbidden, "user-view-password.html", echo.Map{
-				"session":      session,
 				"name":         fmt.Sprintf("User: %s", user.Name),
+				"session":      session,
+				"flash_error":  middleware.GetFlashError(c),
 				"user":         user,
 				"is_html_only": true,
 			})
@@ -430,6 +472,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		}
 
 		user = &models.User{
+			Username: session.Values["username"].(string),
 			Password: hash,
 		}
 
@@ -442,6 +485,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 		}
 
 		log.WithField("user_update_password", user).Info("models.User: [+]success")
+		middleware.SetFlashSuccess(c, fmt.Sprintf("success update user by password: %s!", user.Username))
 		log.Info("END request method POST for update user by password: [+]success")
 		return c.Redirect(http.StatusMovedPermanently, "/users")
 	}
