@@ -326,6 +326,7 @@ func TestUpdateUserController(t *testing.T) {
 				Email:    "rahwana@rakshasa.com",
 				Name:     "Rahwana",
 			},
+			// redirect @route: /users
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
 			// flash message success

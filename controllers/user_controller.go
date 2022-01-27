@@ -283,7 +283,7 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 	if session.Values["is_auth_type"] == -1 {
 		log.Warn("for GET to update user without no-session [@route: /login]")
 		middleware.SetFlashError(c, "login!")
-		log.Warn("END request method GET for read user: [-]failure")
+		log.Warn("END request method GET for update user: [-]failure")
 		return c.Redirect(http.StatusFound, "/login")
 	}
 
@@ -364,12 +364,13 @@ func (controller *Controller) UpdateUser(c echo.Context) error {
 
 	log.Info("END request method GET for update user: [+]success")
 	return c.Render(http.StatusOK, "users/user-view.html", echo.Map{
-		"name":    fmt.Sprintf("User: %s", user.Name),
-		"nav":     fmt.Sprintf("User: %s", user.Name), // (?)
-		"session": session,
-		"csrf":    c.Get("csrf"),
-		"user":    user,
-		"cities":  cities,
+		"name":        fmt.Sprintf("User: %s", user.Name),
+		"nav":         fmt.Sprintf("User: %s", user.Name), // (?)
+		"session":     session,
+		"flash_error": middleware.GetFlashError(c),
+		"csrf":        c.Get("csrf"),
+		"user":        user,
+		"cities":      cities,
 	})
 }
 
