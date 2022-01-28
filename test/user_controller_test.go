@@ -619,6 +619,10 @@ func TestDeleteUserController(t *testing.T) {
 		expect *httpexpect.Expect // auth or no-auth
 		path   string             // id=string. Exemple, id="1"
 		status int
+
+		// flash message
+		isFlashSuccess     bool
+		flashSuccessActual string
 	}{
 		{
 			name:   "users [auth] to DELETE it success",
@@ -627,6 +631,9 @@ func TestDeleteUserController(t *testing.T) {
 			// redirect @route: /users
 			// HTTP response status: 200 OK
 			status: http.StatusOK,
+			// flash message success
+			isFlashSuccess:     true,
+			flashSuccessActual: "success delete user: rahwana!",
 		},
 		{
 			name:   "users [auth] to DELETE it failure: 1 (id=1) delete exists",
@@ -676,6 +683,17 @@ func TestDeleteUserController(t *testing.T) {
 			result = expect.GET("/users/delete/{id}", test.path).
 				Expect().
 				Status(test.status)
+
+			if test.isFlashSuccess {
+				successMessage := result.Body().Raw()
+
+				regex := regexp.MustCompile(`<strong>success:</strong> (.*)`)
+				match := regex.FindString(successMessage)
+
+				actual := fmt.Sprintf("<strong>success:</strong> %s", test.flashSuccessActual)
+
+				assert.Equal(t, match, actual)
+			}
 
 			statusCode := result.Raw().StatusCode
 			if test.status != statusCode {
