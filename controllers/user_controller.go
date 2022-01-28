@@ -243,7 +243,7 @@ func (controller *Controller) ReadUser(c echo.Context) error {
 			"for GET to read user without models.User{}.FirstByID() errors: `%v`", err,
 		)
 		log.Warn("END request method GET for read user: [-]failure")
-		// HTTP response status: 406 Not Acceptable
+		// HTTP response status: 405 Method Not Allowed
 		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
@@ -399,6 +399,7 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	/*
+		TODO:
 		for example:
 		username ockibagusp update by password 'ockibagusp': ok
 		username ockibagusp update by password 'sugriwa': no
@@ -471,13 +472,8 @@ func (controller *Controller) UpdateUserByPassword(c echo.Context) error {
 			return err
 		}
 
-		user = &models.User{
-			Username: session.Values["username"].(string),
-			Password: hash,
-		}
-
 		// err := user.UpdateByIDandPassword(...): be able
-		if err := user.UpdateByIDandPassword(controller.DB, id, user.Password); err != nil {
+		if err := user.UpdateByIDandPassword(controller.DB, id, hash); err != nil {
 			log.Warnf("for POST to update user by password without models.User{}.UpdateByIDandPassword() errors: `%v`", err)
 			log.Warn("END request method POST for update user by password: [-]failure")
 			// HTTP response status: 405 Method Not Allowed
@@ -527,6 +523,14 @@ func (controller *Controller) DeleteUser(c echo.Context) error {
 	log.Info("START request method GET for delete user")
 	id, _ := strconv.Atoi(c.Param("id"))
 
+	user, err := (models.User{}).FirstByID(controller.DB, id)
+	if err != nil {
+		log.Warnf("for GET to delete user without models.User{}.FirstByID() errors: `%v`", err)
+		log.Warn("END request method GET for delete user: [-]failure")
+		// HTTP response status: 405 Method Not Allowed
+		return c.HTML(http.StatusNotAcceptable, err.Error())
+	}
+
 	// (models.User{}) or var user models.User or user := models.User{}
 	if err := (models.User{}).Delete(controller.DB, id); err != nil {
 		log.Warnf("for GET to delete user without models.User{}.Delete() errors: `%v`", err)
@@ -535,6 +539,7 @@ func (controller *Controller) DeleteUser(c echo.Context) error {
 		return c.HTML(http.StatusNotAcceptable, err.Error())
 	}
 
+	middleware.SetFlashSuccess(c, fmt.Sprintf("success delete user: %s!", user.Username))
 	log.Info("END request method GET for delete user: [+]success")
 	return c.Redirect(http.StatusMovedPermanently, "/users")
 }
