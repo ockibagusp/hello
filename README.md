@@ -118,10 +118,14 @@ $ go test github.com/ockibagusp/hello/test -v
 
 
 ### Bahasa Indonesia
-Der Schlaganfall 03.10.2018-heute. Dirilis 7 Januari 2020. Coding ini sedikit lupa. Pun, ini Bahasa Inggris lupa lagi. Perlahan-lahan dari stroke. Aamiin.
+Saya sendang berjuang sembuh dari Stroke pada 03 Oktober 2018-hari ini. Coding ini dirilis 7 Januari 2020, ternyata coding sedikit lupa. Kata-katanya dari Bahasa Indonesia sedikit lupa dan Bahasa Inggris kayaknya sulit. Insya Allah, perlahan-lahan sembuh. Aamiin.
+
+Allah itu baik. 🙂
 
 ### English (translate[.]google[.]co[.]id)
-Stroke: 03 10 2018-today. Released January 7, 2020. This coding is a little forgotten. This is English forgot again. Little by little from stroke. Aamiin.
+I'm struggling to recover from a stroke on October 03, 2018-today. This coding was released January 7, 2020, apparently the coding was a little forgotten. The words from Indonesian are a little forgotten and English seems difficult. Insya Allah, slowly recover. Aamiin.
+
+Allah is good. 🙂
 
 ---
 
