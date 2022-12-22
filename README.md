@@ -104,10 +104,6 @@ $ go test github.com/ockibagusp/hello/test -v
 
 
 ## TODO List
-- mock unit test
-- session: IsAdmin, IsUser and IsAuth
-- list pagination with next, previous, first and last
-- Mutex: BankAccount
 - too much
 
 ## Operating System (with me)
